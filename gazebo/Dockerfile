@@ -17,10 +17,9 @@ RUN apt-get update && apt-get install -y \
     python3-rosdep \
     python3-vcstool \
     ros-jazzy-desktop \
-    ros-jazzy-gazebo-ros \
-    ros-jazzy-gazebo-ros-pkgs \
-    ros-jazzy-gazebo-plugins \
-    ros-jazzy-gazebo-ros2-control \
+    ros-jazzy-ros-gz \
+    ros-jazzy-ros-gz-sim \
+    ros-jazzy-ros-gz-bridge \
     ros-jazzy-controller-manager \
     ros-jazzy-diff-drive-controller \
     ros-jazzy-position-controllers \
@@ -30,7 +29,6 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-xacro \
     ros-jazzy-rqt-robot-steering \
     ros-jazzy-rmw-fastrtps-cpp \
-    librealsense2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp

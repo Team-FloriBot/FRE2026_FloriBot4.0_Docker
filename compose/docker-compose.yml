@@ -1,1 +1,76 @@
+services:
+  floribot-sensors:
+    profiles: ["core", "robot", "sensors"]
+    build:
+      context: ..
+      dockerfile: sensors/Dockerfile
+    container_name: floribot-sensors
+    network_mode: host
+    ipc: host
+    pid: host
+    privileged: true
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+    volumes:
+      - /dev:/dev
+      - /dev/bus/usb:/dev/bus/usb
+      - /run/udev:/run/udev:ro
+    restart: unless-stopped
 
+  floribot-base:
+    profiles: ["core", "robot", "base"]
+    build:
+      context: ..
+      dockerfile: base/Dockerfile
+    container_name: floribot-base
+    network_mode: host
+    ipc: host
+    pid: host
+    privileged: true
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+    volumes:
+      - /dev:/dev
+    restart: unless-stopped
+
+  floribot-gazebo:
+    profiles: ["sim", "gazebo"]
+    build:
+      context: ..
+      dockerfile: gazebo/Dockerfile
+    container_name: floribot-gazebo
+    network_mode: host
+    ipc: host
+    pid: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    restart: unless-stopped
+
+  floribot-stage:
+    profiles: ["sim", "stage"]
+    build:
+      context: ..
+      dockerfile: stage/Dockerfile
+    container_name: floribot-stage
+    network_mode: host
+    ipc: host
+    pid: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    restart: unless-stopped

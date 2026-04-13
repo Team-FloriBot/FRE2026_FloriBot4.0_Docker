@@ -3,12 +3,8 @@ FROM ros:jazzy
 ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 
-ARG FLORIBOT_BASE_REPO=https://github.com/Team-FloriBot/FloriBot4.0-ROS2_old
+ARG FLORIBOT_BASE_REPO=https://github.com/Team-FloriBot/FloriBot4.0-ROS2_old.git
 ARG FLORIBOT_BASE_REF=main
-ARG SICK_SCAN_REPO=https://github.com/SICKAG/sick_scan_xd.git
-ARG SICK_SCAN_REF=develop
-ARG REALSENSE_ROS_REPO=https://github.com/realsenseai/realsense-ros.git
-ARG REALSENSE_ROS_REF=ros2-master
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -33,31 +29,22 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /tmp
 
-RUN git clone --branch ${FLORIBOT_BASE_REF} --depth 1 ${FLORIBOT_BASE_REPO} floribot_base && \
-    git clone --branch ${SICK_SCAN_REF} --depth 1 ${SICK_SCAN_REPO} sick_scan_xd && \
-    git clone --branch ${REALSENSE_ROS_REF} --depth 1 ${REALSENSE_ROS_REPO} realsense-ros
+RUN git clone --branch ${FLORIBOT_BASE_REF} --depth 1 ${FLORIBOT_BASE_REPO} floribot_base
 
 WORKDIR /ws
+
 RUN mkdir -p /ws/src && \
     cp -r /tmp/floribot_base/ros2_ws/src/floribot_simulation /ws/src/ && \
-    cp -r /tmp/floribot_base/ros2_ws/src/base2gazebo /ws/src/ && \
-    cp -r /tmp/sick_scan_xd /ws/src/ && \
-    cp -r /tmp/realsense-ros/realsense2_camera /ws/src/ && \
-    cp -r /tmp/realsense-ros/realsense2_camera_msgs /ws/src/ && \
-    cp -r /tmp/realsense-ros/realsense2_description /ws/src/
+    cp -r /tmp/floribot_base/ros2_ws/src/base2gazebo /ws/src/
 
 RUN rosdep init 2>/dev/null || true && rosdep update || true
 
 RUN source /opt/ros/jazzy/setup.bash && \
-    rosdep install -i --from-paths /ws/src --rosdistro jazzy --skip-keys=librealsense2 -r -y || true
+    rosdep install -i --from-paths /ws/src --rosdistro jazzy --ignore-src -r -y || true
 
 RUN source /opt/ros/jazzy/setup.bash && \
     cd /ws && \
-    colcon build --packages-select \
-      floribot_simulation \
-      base2gazebo \
-      sick_scan_xd \
-      realsense2_description
+    colcon build
 
 COPY gazebo/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

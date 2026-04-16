@@ -1,18 +1,15 @@
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from virtual_maize_field import get_spawner_launch_file
 
 
 def generate_launch_description():
     spawn_robot = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource("/root/.ros/virtual_maize_field/robot_spawner.launch.py"),
+        PythonLaunchDescriptionSource([get_spawner_launch_file()]),
         launch_arguments={
-            "world": "virtual_maize_field",
-            "file": "/ws/src/floribot_gz_description/models/floribot_test.sdf",
-            "entity_name": "floribot4",
+            "robot_name": "floribot4",
         }.items(),
     )
 
-    return LaunchDescription([
-        spawn_robot,
-    ])
+    return LaunchDescription([spawn_robot])

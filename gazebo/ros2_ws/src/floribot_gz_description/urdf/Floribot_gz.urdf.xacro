@@ -1,25 +1,309 @@
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="FloribotTest">
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="Floribot">
+
+  <xacro:property name="height_wagon" value="0.363" />
+  <xacro:property name="width_wagon" value="0.213" />
+  <xacro:property name="length_wagon_front" value="0.635" />
+  <xacro:property name="length_wagon_rear" value="0.605" />
+
+  <xacro:property name="ghost_size" value="0.01" />
+  <xacro:property name="base_2_front_wagon" value="0.04" />
+  <xacro:property name="axesRear_2_rear_wagon" value="0.025" />
+
+  <xacro:property name="wheel_radius" value="0.140" />
+  <xacro:property name="wheel_thickness" value="0.09" />
+  <xacro:property name="x_joint_wheel_front" value="0" />
+  <xacro:property name="y_joint_wheel_front" value="0.167" />
+  <xacro:property name="x_joint_wheel_back" value="0" />
+  <xacro:property name="y_joint_wheel_back" value="0.167" />
+
+  <xacro:property name="radius" value="0.008" />
+  <xacro:property name="vertical_length" value="0.06" />
+  <xacro:property name="horizontal_length" value="0.055" />
+  <xacro:property name="wheel_joint_2_mid_joint" value="0.383" />
+
   <link name="base_link">
     <visual>
-      <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      <origin xyz="0 0 ${wheel_radius + ghost_size}" rpy="0 0 0"/>
       <geometry>
-        <box size="1.0 0.5 0.5"/>
+        <box size="${ghost_size} ${ghost_size} ${ghost_size}"/>
       </geometry>
-      <material name="red">
-        <color rgba="1 0 0 1"/>
+      <material name="base_mat">
+        <color rgba="0.0 0.8 0.8 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+  <link name="axesFront"/>
+  <joint name="base_link_2_axesFront" type="fixed">
+    <parent link="base_link"/>
+    <child link="axesFront"/>
+    <origin xyz="0 0 0"/>
+  </joint>
+
+  <joint name="j_base_2_front_wagon" type="fixed">
+    <parent link="base_link"/>
+    <child link="front_wagon"/>
+    <origin xyz="${-base_2_front_wagon} 0 0"/>
+  </joint>
+
+  <link name="front_wagon">
+    <visual>
+      <origin xyz="-${length_wagon_front/2+0.0255} 0 -${wheel_radius}" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://floribot_gz_description/meshes/Vorderwagen.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="front_wagon_mat">
+        <color rgba="0.4 0.4 0.4 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
       <geometry>
-        <box size="1.0 0.5 0.5"/>
+        <box size="${length_wagon_front} ${width_wagon} ${height_wagon}"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0 0 0.5" rpy="0 0 0"/>
-      <mass value="10.0"/>
-      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+      <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+      <mass value="31"/>
+      <inertia ixx="0.3853" ixy="0.0001197" ixz="-0.0128" iyy="1.0" iyz="0.0000149" izz="0.8678"/>
     </inertial>
   </link>
+
+  <link name="jointFront">
+    <visual>
+      <geometry>
+        <cylinder length="${vertical_length}" radius="${radius}"/>
+      </geometry>
+      <material name="joint_mat">
+        <color rgba="0.2 0.2 0.2 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="${vertical_length}" radius="${radius}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.000004" ixy="0.0" ixz="0.0" iyy="0.000004" iyz="0.0" izz="0.000004"/>
+    </inertial>
+  </link>
+
+  <joint name="body_angle" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="1.0" lower="-1.57" upper="1.57" velocity="0.5"/>
+    <parent link="axesFront"/>
+    <child link="jointFront"/>
+    <origin xyz="${-wheel_joint_2_mid_joint} 0 0"/>
+  </joint>
+
+  <link name="jointRear">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.57 0"/>
+      <geometry>
+        <cylinder length="${horizontal_length}" radius="${radius}"/>
+      </geometry>
+      <material name="joint_rear_mat">
+        <color rgba="0.2 0.2 0.2 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 1.57 0"/>
+      <geometry>
+        <cylinder length="${horizontal_length}" radius="${radius}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.000004" ixy="0.0" ixz="0.0" iyy="0.000004" iyz="0.0" izz="0.000004"/>
+    </inertial>
+  </link>
+
+  <joint name="j_revolute_front_rear" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="1.0" lower="-1.57" upper="1.57" velocity="0.5"/>
+    <parent link="jointFront"/>
+    <child link="jointRear"/>
+    <origin xyz="0 0 0"/>
+  </joint>
+
+  <link name="axesRear">
+    <visual>
+      <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${ghost_size} ${ghost_size} ${ghost_size}"/>
+      </geometry>
+      <material name="rear_axis_mat">
+        <color rgba="0 0 0.8 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${ghost_size} ${ghost_size} ${ghost_size}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+      <mass value="0.001"/>
+      <inertia ixx="1.369982" ixy="0.0" ixz="0.0" iyy="0.487502" iyz="0.0" izz="1.132200"/>
+    </inertial>
+  </link>
+
+  <joint name="j_jointRear_rear_wagon" type="fixed">
+    <parent link="jointRear"/>
+    <child link="axesRear"/>
+    <origin xyz="${-wheel_joint_2_mid_joint + vertical_length/2} 0 0"/>
+  </joint>
+
+  <joint name="j_axesRear_2_rear_wagon" type="fixed">
+    <parent link="axesRear"/>
+    <child link="rear_wagon"/>
+    <origin xyz="${axesRear_2_rear_wagon} 0 0"/>
+  </joint>
+
+  <link name="rear_wagon">
+    <visual>
+      <origin xyz="${length_wagon_rear/2+0.056} 0 -${wheel_radius}" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://floribot_gz_description/meshes/Hinterwagen.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="rear_wagon_mat">
+        <color rgba="0.4 0.4 0.4 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${length_wagon_rear} ${width_wagon} ${height_wagon}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+      <mass value="33"/>
+      <inertia ixx="0.4137" ixy="0.00027" ixz="0.007359" iyy="1.047" iyz="0.0001775" izz="0.9021"/>
+    </inertial>
+  </link>
+
+  <link name="frontLeft">
+    <visual>
+      <origin xyz="0 -${wheel_thickness/2-0.0095} 0" rpy="1.57 0 0"/>
+      <geometry>
+        <mesh filename="package://floribot_gz_description/meshes/Reifen.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="wheel_mat">
+        <color rgba="0.05 0.05 0.05 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+      <geometry>
+        <cylinder length="${wheel_thickness}" radius="${wheel_radius}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="2.4"/>
+      <inertia ixx="0.014" ixy="0.0" ixz="0.0" iyy="0.026" iyz="0.0" izz="0.014"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_frontLeft" type="continuous">
+    <parent link="axesFront"/>
+    <child link="frontLeft"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="${x_joint_wheel_front} ${y_joint_wheel_front} 0"/>
+    <limit effort="100.0" velocity="14.2857"/>
+  </joint>
+
+  <link name="frontRight">
+    <visual>
+      <origin xyz="0 -${wheel_thickness/2 - 0.0105} 0" rpy="1.57 0 0"/>
+      <geometry>
+        <mesh filename="package://floribot_gz_description/meshes/Reifen.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="wheel_mat_r">
+        <color rgba="0.05 0.05 0.05 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+      <geometry>
+        <cylinder length="${wheel_thickness}" radius="${wheel_radius}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="2.4"/>
+      <inertia ixx="0.014" ixy="0.0" ixz="0.0" iyy="0.026" iyz="0.0" izz="0.014"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_frontRight" type="continuous">
+    <parent link="axesFront"/>
+    <child link="frontRight"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="${x_joint_wheel_front} -${y_joint_wheel_front} 0"/>
+    <limit effort="100.0" velocity="14.2857"/>
+  </joint>
+
+  <link name="rearRight">
+    <visual>
+      <origin xyz="0 -${wheel_thickness/2 - 0.0105} 0" rpy="1.57 0 0"/>
+      <geometry>
+        <mesh filename="package://floribot_gz_description/meshes/Reifen.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="wheel_mat_rr">
+        <color rgba="0.05 0.05 0.05 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+      <geometry>
+        <cylinder length="${wheel_thickness}" radius="${wheel_radius}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="2.4"/>
+      <inertia ixx="0.014" ixy="0.0" ixz="0.0" iyy="0.026" iyz="0.0" izz="0.014"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_rearRight" type="continuous">
+    <parent link="axesRear"/>
+    <child link="rearRight"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="${x_joint_wheel_back} -${y_joint_wheel_back} 0"/>
+    <limit effort="100.0" velocity="14.2857"/>
+  </joint>
+
+  <link name="rearLeft">
+    <visual>
+      <origin xyz="0 -${wheel_thickness/2-0.0095} 0" rpy="1.57 0 0"/>
+      <geometry>
+        <mesh filename="package://floribot_gz_description/meshes/Reifen.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="wheel_mat_rl">
+        <color rgba="0.05 0.05 0.05 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+      <geometry>
+        <cylinder length="${wheel_thickness}" radius="${wheel_radius}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="2.4"/>
+      <inertia ixx="0.014" ixy="0.0" ixz="0.0" iyy="0.026" iyz="0.0" izz="0.014"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_rearLeft" type="continuous">
+    <parent link="axesRear"/>
+    <child link="rearLeft"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="${x_joint_wheel_back} ${y_joint_wheel_back} 0"/>
+    <limit effort="100.0" velocity="14.2857"/>
+  </joint>
+
 </robot>

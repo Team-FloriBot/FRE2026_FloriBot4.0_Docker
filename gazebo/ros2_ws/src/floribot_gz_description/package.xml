@@ -4,7 +4,7 @@
   <version>0.0.1</version>
   <description>Gazebo Sim description package for FloriBot 4.0</description>
 
-  <maintainer email="tzimmermanstud.hs-heilbronn.de">Timo Zimmermann</maintainer>
+  <maintainer email="tzimmerman@stud.hs-heilbronn.de">Timo Zimmermann</maintainer>
   <license>Proprietary</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

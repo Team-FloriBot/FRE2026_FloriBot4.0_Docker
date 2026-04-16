@@ -42,15 +42,15 @@
   </joint>
 
   <link name="front_wagon">
-    <visual>
-      <origin xyz="-${length_wagon_front/2+0.0255} 0 -${wheel_radius}" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://floribot_gz_description/meshes/Vorderwagen.stl" scale="0.001 0.001 0.001"/>
-      </geometry>
-      <material name="front_wagon_mat">
-        <color rgba="0.4 0.4 0.4 1.0"/>
-      </material>
-    </visual>
+   <visual>
+  <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+  <geometry>
+    <box size="${length_wagon_front} ${width_wagon} ${height_wagon}"/>
+  </geometry>
+  <material name="front_box">
+    <color rgba="1 0 0 1"/>
+  </material>
+</visual>
     <collision>
       <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
       <geometry>

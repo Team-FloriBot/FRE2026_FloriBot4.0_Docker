@@ -1,5 +1,6 @@
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, IncludeLaunchDescription, TimerAction
+from launch.actions import ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler, TimerAction
+from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -7,11 +8,7 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    xacro_file = PathJoinSubstitution([
-        FindPackageShare("floribot_gz_description"),
-        "urdf",
-        "Floribot_gz.urdf.xacro",
-    ])
+    xacro_file = "/ws/src/floribot_gz_description/urdf/Floribot_gz.urdf.xacro"
 
     world_launch = PathJoinSubstitution([
         FindPackageShare("virtual_maize_field"),
@@ -52,14 +49,24 @@ def generate_launch_description():
         output="screen",
     )
 
+    start_world = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(world_launch)
+    )
+
     return LaunchDescription([
         generate_world,
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(world_launch),
-        ),
-        state_publisher,
-        TimerAction(
-            period=5.0,
-            actions=[spawn_robot],
+
+        RegisterEventHandler(
+            OnProcessExit(
+                target_action=generate_world,
+                on_exit=[
+                    start_world,
+                    state_publisher,
+                    TimerAction(
+                        period=8.0,
+                        actions=[spawn_robot],
+                    ),
+                ],
+            )
         ),
     ])

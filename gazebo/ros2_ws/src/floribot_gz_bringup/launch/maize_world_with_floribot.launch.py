@@ -36,15 +36,11 @@ def generate_launch_description():
         output="screen",
     )
 
-    spawn_robot = Node(
-        package="ros_gz_sim",
-        executable="create",
-        arguments=[
-            "-name", "floribot4",
-            "-topic", "robot_description",
-            "-x", "0.0",
-            "-y", "0.0",
-            "-z", "0.3",
+    spawn_robot = ExecuteProcess(
+        cmd=[
+            "bash", "-lc",
+            "source /ws/install/setup.bash && "
+            "ros2 launch /root/.ros/virtual_maize_field/robot_spawner.launch.py"
         ],
         output="screen",
     )

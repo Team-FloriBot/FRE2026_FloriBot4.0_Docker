@@ -91,6 +91,7 @@ services:
       RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
       DISPLAY: ${DISPLAY}
       QT_X11_NO_MITSHM: 1
+      GZ_SIM_RESOURCE_PATH: /ws/src/floribot_gz_description:/ws/src/floribot_gz_description/meshes
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     restart: unless-stopped

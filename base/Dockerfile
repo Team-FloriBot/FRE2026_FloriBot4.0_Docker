@@ -39,8 +39,10 @@ RUN mkdir -p /ws/src && \
 
 RUN rosdep init 2>/dev/null || true && rosdep update || true
 
-RUN source /opt/ros/jazzy/setup.bash && \
-    rosdep install --from-paths /ws/src --ignore-src -r -y
+RUN apt-get update && \
+    source /opt/ros/jazzy/setup.bash && \
+    rosdep install --from-paths /ws/src --ignore-src -r -y && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN source /opt/ros/jazzy/setup.bash && \
     cd /ws && \

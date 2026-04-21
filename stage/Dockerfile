@@ -26,6 +26,8 @@ WORKDIR /ws/src
 RUN git clone --depth 1 --branch ros2 https://github.com/tuw-robotics/Stage.git && \
     git clone --depth 1 --branch jazzy https://github.com/tuw-robotics/stage_ros2.git
 
+COPY stage/maize_world/ /ws/src/stage_ros2/world/
+
 WORKDIR /ws
 
 RUN rosdep init || true
@@ -41,4 +43,4 @@ COPY stage/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["ros2", "launch", "stage_ros2", "demo.launch.py", "world:=cave"]
+CMD ["ros2", "launch", "stage_ros2", "demo.launch.py", "world:=maize_field"]

@@ -6,18 +6,23 @@ SHELL ["/bin/bash", "-c"]
 ARG WEBTELEOP_REPO=https://github.com/Team-FloriBot/Webteleop_ROS2_Jazzy_V1.git
 ARG WEBTELEOP_REF=main
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     python3-colcon-common-extensions \
     python3-pip \
     ros-jazzy-rmw-fastrtps-cpp \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 WORKDIR /ws/src
 RUN git clone --branch ${WEBTELEOP_REF} --depth 1 ${WEBTELEOP_REPO} webteleop
 
 WORKDIR /ws
-RUN python3 -m pip install --no-cache-dir --break-system-packages fastapi uvicorn
+RUN python3 -m pip install --no-cache-dir --break-system-packages \
+    fastapi \
+    "uvicorn[standard]"
 
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build

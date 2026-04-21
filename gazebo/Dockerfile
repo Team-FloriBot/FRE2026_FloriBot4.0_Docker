@@ -47,6 +47,10 @@ RUN git clone --branch ${VIRTUAL_MAIZE_FIELD_REF} --depth 1 ${VIRTUAL_MAIZE_FIEL
 
 COPY gazebo/ros2_ws/src/floribot_gz_description /ws/src/floribot_gz_description
 COPY gazebo/ros2_ws/src/floribot_gz_bringup /ws/src/floribot_gz_bringup
+COPY gazebo/ros2_ws/src/sim_backend /ws/src/sim_backend
+
+# base-Paket für die Message-Typen verfügbar machen
+COPY base/ros2_ws/src/base /ws/src/base
 
 WORKDIR /ws
 

@@ -24,7 +24,7 @@ services:
         ros2 launch plc_connection plc_connection_launch.py &
         exec ros2 launch base base_node.launch.py
     restart: unless-stopped
-    
+
   floribot-sensors:
     profiles: ["core", "robot", "sensors"]
     build:
@@ -51,6 +51,7 @@ services:
       context: ..
       dockerfile: webteleop/Dockerfile
     container_name: floribot-webteleop
+    network_mode: host
     ipc: host
     pid: host
     depends_on:
@@ -59,8 +60,6 @@ services:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
-    ports:
-      - "8000:8000"
     restart: unless-stopped
 
   floribot-stage:

@@ -42,7 +42,7 @@ floorplan
   name "cave"
   size [12 12 0.600]
   pose [0 0 0 0]
-  bitmap "maze_world.png"
+  bitmap "maize_world.png"
   gui_move 0
 )
 

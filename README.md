@@ -96,7 +96,7 @@ Oder über Script:
 
 ## Docker Compose Profile
 
-### Core / Robot
+### Robot
 
 **Profile:**
 

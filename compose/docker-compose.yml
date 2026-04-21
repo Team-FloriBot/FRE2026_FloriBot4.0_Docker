@@ -25,6 +25,27 @@ services:
         exec ros2 launch base base_node.launch.py
     restart: unless-stopped
 
+  floribot-base-sim:
+    profiles: ["sim", "gazebo"]
+    build:
+      context: ..
+      dockerfile: base/Dockerfile
+    container_name: floribot-base-sim
+    network_mode: host
+    ipc: host
+    pid: host
+    privileged: true
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+    command:
+      - bash
+      - -lc
+      - |
+        exec ros2 launch base base_node.launch.py
+    restart: unless-stopped
+
   floribot-sensors:
     profiles: ["core", "robot", "sensors"]
     build:
@@ -46,7 +67,7 @@ services:
     restart: unless-stopped
 
   floribot-webteleop:
-    profiles: ["core", "ui"]
+    profiles: ["core", "ui", "robot"]
     build:
       context: ..
       dockerfile: webteleop/Dockerfile
@@ -56,6 +77,23 @@ services:
     pid: host
     depends_on:
       - floribot-base
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+    restart: unless-stopped
+
+  floribot-webteleop-sim:
+    profiles: ["sim", "gazebo", "ui"]
+    build:
+      context: ..
+      dockerfile: webteleop/Dockerfile
+    container_name: floribot-webteleop-sim
+    network_mode: host
+    ipc: host
+    pid: host
+    depends_on:
+      - floribot-base-sim
     environment:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
@@ -82,7 +120,7 @@ services:
     restart: unless-stopped
 
   floribot-gazebo:
-    profiles: ["gazebo"]
+    profiles: ["sim", "gazebo"]
     build:
       context: ..
       dockerfile: gazebo/Dockerfile
@@ -99,4 +137,33 @@ services:
       GZ_SIM_RESOURCE_PATH: /ws/src/floribot_gz_description:/ws/src/floribot_gz_description/meshes
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    restart: unless-stopped
+
+  floribot-sim-backend:
+    profiles: ["sim", "gazebo"]
+    build:
+      context: ..
+      dockerfile: gazebo/Dockerfile
+    container_name: floribot-sim-backend
+    network_mode: host
+    ipc: host
+    pid: host
+    depends_on:
+      - floribot-base-sim
+      - floribot-gazebo
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
+      GZ_SIM_RESOURCE_PATH: /ws/src/floribot_gz_description:/ws/src/floribot_gz_description/meshes
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command:
+      - bash
+      - -lc
+      - |
+        source /ws/install/setup.bash
+        exec ros2 run sim_backend sim_backend_node
     restart: unless-stopped

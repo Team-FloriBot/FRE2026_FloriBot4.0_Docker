@@ -100,7 +100,6 @@ Oder über Script:
 
 **Profile:**
 
-* `core`
 * `robot`
 
 **Startet:**

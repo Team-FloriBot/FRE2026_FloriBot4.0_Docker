@@ -303,4 +303,30 @@
     <axis xyz="0 1 0"/>
     <origin xyz="${x_joint_wheel_back} -${y_joint_wheel_back} 0"/>
   </joint>
+  <!-- Joint velocity controllers for 4 driven wheels -->
+  <gazebo>
+    <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+      <joint_name>joint_frontLeft</joint_name>
+      <topic>/sim/joint_frontLeft/cmd_vel</topic>
+      <use_force_commands>false</use_force_commands>
+    </plugin>
+
+    <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+      <joint_name>joint_frontRight</joint_name>
+      <topic>/sim/joint_frontRight/cmd_vel</topic>
+      <use_force_commands>false</use_force_commands>
+    </plugin>
+
+    <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+      <joint_name>joint_rearLeft</joint_name>
+      <topic>/sim/joint_rearLeft/cmd_vel</topic>
+      <use_force_commands>false</use_force_commands>
+    </plugin>
+
+    <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+      <joint_name>joint_rearRight</joint_name>
+      <topic>/sim/joint_rearRight/cmd_vel</topic>
+      <use_force_commands>false</use_force_commands>
+    </plugin>
+  </gazebo>
 </robot>

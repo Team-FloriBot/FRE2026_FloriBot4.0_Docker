@@ -161,9 +161,15 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     command:
-      - bash
+     - bash
       - -lc
       - |
         source /ws/install/setup.bash
+
+        ros2 run ros_gz_bridge parameter_bridge \
+          /sim/joint_frontLeft/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
+          /sim/joint_frontRight/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
+          /sim/joint_rearLeft/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
+          /sim/joint_rearRight/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double &
+
         exec ros2 run sim_backend sim_backend_node
-    restart: unless-stopped

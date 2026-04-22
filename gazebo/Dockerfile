@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
+    
+RUN echo "source /pfad/zu/deinem/workspace/install/setup.bash" >> /root/.bashrc
 
 RUN sed -i 's|http://archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources && \
     sed -i 's|http://security.ubuntu.com/ubuntu|https://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources

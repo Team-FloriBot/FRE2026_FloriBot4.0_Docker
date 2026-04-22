@@ -7,7 +7,7 @@ ARG SICK_SCAN_REPO=https://github.com/SICKAG/sick_scan_xd.git
 ARG SICK_SCAN_REF=develop
 ARG REALSENSE_ROS_REPO=https://github.com/realsenseai/realsense-ros.git
 ARG REALSENSE_ROS_REF=ros2-master
-ARG LIBREALSENSE_REPO=https://github.com/realsenseai/librealsense.git
+ARG LIBREALSENSE_REPO=https://github.com/IntelRealSense/librealsense.git
 ARG LIBREALSENSE_REF=v2.57.7
 
 RUN apt-get update && apt-get install -y \
@@ -28,6 +28,9 @@ RUN apt-get update && apt-get install -y \
     libudev-dev \
     libx11-dev \
     libglfw3-dev \
+    libopencv-dev \
+    ros-jazzy-cv-bridge \
+    ros-jazzy-image-transport \
     ros-jazzy-rclcpp \
     ros-jazzy-rclpy \
     ros-jazzy-std-msgs \
@@ -45,7 +48,13 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-rmw-fastrtps-cpp \
     && rm -rf /var/lib/apt/lists/*
 
-RUN echo "source /pfad/zu/deinem/workspace/install/setup.bash" >> /root/.bashrc
+ENV CMAKE_PREFIX_PATH=/usr/local:${CMAKE_PREFIX_PATH}
+ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}
+ENV LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
+
+# ROS-Umgebung beim interaktiven Start automatisch laden
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
+    echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /root/.bashrc
 
 # librealsense aus Source bauen
 WORKDIR /opt
@@ -62,23 +71,33 @@ RUN git clone --branch ${LIBREALSENSE_REF} --depth 1 ${LIBREALSENSE_REPO} librea
     make install && \
     ldconfig
 
+# ROS2-Workspace vorbereiten
 WORKDIR /ws/src
 RUN git clone --branch ${SICK_SCAN_REF} --depth 1 ${SICK_SCAN_REPO} sick_scan_xd && \
     git clone --branch ${REALSENSE_ROS_REF} --depth 1 ${REALSENSE_ROS_REPO} realsense-ros
 
 WORKDIR /ws
 
-RUN rosdep init 2>/dev/null || true && rosdep update || true
+# rosdep initialisieren und Abhängigkeiten auflösen
+RUN rosdep init 2>/dev/null || true && \
+    rosdep update
 
 RUN source /opt/ros/jazzy/setup.bash && \
-    rosdep install -i --from-paths /ws/src --rosdistro jazzy --skip-keys=librealsense2 -r -y || true
+    rosdep install -i \
+      --from-paths /ws/src \
+      --rosdistro jazzy \
+      --skip-keys "librealsense2" \
+      -r -y
 
+# Sensorpakete bauen
 RUN source /opt/ros/jazzy/setup.bash && \
-    colcon build --packages-select \
-      sick_scan_xd \
-      realsense2_camera \
-      realsense2_camera_msgs \
-      realsense2_description
+    colcon build \
+      --packages-select \
+        sick_scan_xd \
+        realsense2_camera \
+        realsense2_camera_msgs \
+        realsense2_description \
+      --symlink-install
 
 COPY sensors/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

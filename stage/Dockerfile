@@ -33,6 +33,8 @@ WORKDIR /ws
 RUN rosdep init || true
 RUN rosdep update
 
+RUN echo "source /pfad/zu/deinem/workspace/install/setup.bash" >> /root/.bashrc
+
 RUN apt-get update && rosdep install --from-paths /ws/src --ignore-src -r -y \
     --skip-keys="stage ament_cmake_clang_format ament_cmake_pycodestyle"
 

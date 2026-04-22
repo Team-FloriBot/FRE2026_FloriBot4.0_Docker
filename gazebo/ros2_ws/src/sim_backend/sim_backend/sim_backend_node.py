@@ -10,6 +10,7 @@ from rclpy.node import Node
 from base.msg import Angle, Wheels
 from std_msgs.msg import Float64
 
+
 @dataclass
 class WheelState:
     front_left: float = 0.0
@@ -61,12 +62,33 @@ class SimBackendNode(Node):
             10,
         )
 
+        self.front_left_cmd_pub = self.create_publisher(
+            Float64,
+            "/sim/joint_frontLeft/cmd_vel",
+            10,
+        )
+        self.front_right_cmd_pub = self.create_publisher(
+            Float64,
+            "/sim/joint_frontRight/cmd_vel",
+            10,
+        )
+        self.rear_left_cmd_pub = self.create_publisher(
+            Float64,
+            "/sim/joint_rearLeft/cmd_vel",
+            10,
+        )
+        self.rear_right_cmd_pub = self.create_publisher(
+            Float64,
+            "/sim/joint_rearRight/cmd_vel",
+            10,
+        )
+
         period = 1.0 / publish_rate_hz
         self.timer = self.create_timer(period, self.on_timer)
 
         self.get_logger().info("sim_backend started")
         self.get_logger().info(
-            f"Publishing engine/actualSpeed and /sensors/bodyAngle at {publish_rate_hz:.1f} Hz"
+            f"Publishing engine/actualSpeed, /sensors/bodyAngle and /sim/joint_* at {publish_rate_hz:.1f} Hz"
         )
 
     def target_speed_callback(self, msg: Wheels) -> None:
@@ -128,7 +150,8 @@ class SimBackendNode(Node):
         angle_msg.header.stamp = now
         angle_msg.angle = self.estimate_body_angle()
         self.body_angle_pub.publish(angle_msg)
-                fl = Float64()
+
+        fl = Float64()
         fr = Float64()
         rl = Float64()
         rr = Float64()

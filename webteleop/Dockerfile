@@ -23,6 +23,8 @@ WORKDIR /ws
 RUN python3 -m pip install --no-cache-dir --break-system-packages \
     fastapi \
     "uvicorn[standard]"
+    
+RUN echo "source /pfad/zu/deinem/workspace/install/setup.bash" >> /root/.bashrc
 
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build

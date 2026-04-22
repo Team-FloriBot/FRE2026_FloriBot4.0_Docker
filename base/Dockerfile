@@ -6,6 +6,8 @@ SHELL ["/bin/bash", "-c"]
 ARG FLORIBOT_BASE_REPO=https://github.com/Team-FloriBot/FloriBot4.0_ROS2_Jazzy_Base.git
 ARG FLORIBOT_BASE_REF=main
 
+RUN echo "source /pfad/zu/deinem/workspace/install/setup.bash" >> /root/.bashrc
+
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \

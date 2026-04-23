@@ -92,7 +92,6 @@ cp compose/.env.example compose/.env
 | `floribot-sensors`       | Sensorintegration für das reale System            |
 | `floribot-webteleop`     | Webbasierte Steuerung für das reale System        |
 | `floribot-base-sim`      | Basis-Stack für die Simulation                    |
-| `floribot-webteleop-sim` | Webteleop für die Simulationsumgebung             |
 | `floribot-stage`         | 2D-Simulation mit Stage                           |
 | `floribot-gazebo`        | 3D-Simulation mit Gazebo                          |
 | `floribot-sim-backend`   | Simulations-Backend inkl. ROS–Gazebo-Bridge       |

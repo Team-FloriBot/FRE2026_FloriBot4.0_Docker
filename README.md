@@ -29,6 +29,7 @@ FRE2026_FloriBot4.0_Docker/<br/>
 ├── webteleop/<br/>
 ├── stage/<br/>
 ├── gazebo/<br/>
+├── tasks/<br/>
 ├── compose/<br/>
 ├── scripts/<br/>
 └── README.md<br/>
@@ -53,12 +54,29 @@ newgrp docker
 ```
 
 ### 3. X11-Freigabe für GUI (Gazebo)
-Damit grafische Anwendungen aus dem Container angezeigt werden:
+Damit grafische Anwendungen aus dem Container angezeigt werden können
+(z. B. Gazebo oder Stage), muss der lokale X-Server für Docker freigegeben werden:
 ```bash
 xhost +local:docker
 ```
 ### 4. Konfiguration
-
+Die Datei compose/.env enthält aktuell folgende Konfigurationsparameter:
+```bash
+ROS_DOMAIN_ID=42
+```
+ROS-2-Domain-ID zur Trennung von Kommunikationsdomänen
+```bash
+ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
+```
+Discovery-Bereich für ROS-2-Teilnehmer im Netzwerk
+```bash
+RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+```
+Verwendete ROS-2-Middleware
+```bash
+DISPLAY=:0
+```
+X11-Display für GUI-Anwendungen wie Gazebo oder Stage
 ```bash
 cp compose/.env.example compose/.env
 ```
@@ -119,5 +137,5 @@ docker exec -it <container-name> bash
 
 #### Stoppen von Containern:
 ```bash
-docker compose down <Service>
+docker compose down
 ```

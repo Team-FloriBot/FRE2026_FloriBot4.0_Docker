@@ -27,6 +27,7 @@ RUN git clone --depth 1 --branch ros2 https://github.com/tuw-robotics/Stage.git 
     git clone --depth 1 --branch jazzy https://github.com/tuw-robotics/stage_ros2.git
 
 COPY stage/maize_world/ /ws/src/stage_ros2/world/
+COPY stage/rviz/ /ws/src/stage_rviz/
 
 WORKDIR /ws
 
@@ -47,4 +48,4 @@ COPY stage/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["ros2", "launch", "stage_ros2", "demo.launch.py", "world:=maize_field"]
+CMD ["bash", "-lc", "source /opt/ros/jazzy/setup.bash && source /ws/install/setup.bash && ros2 launch stage_ros2 demo.launch.py world:=maize_field & sleep 2 && exec rviz2 -d /ws/src/stage_rviz/floribot_stage.rviz"]

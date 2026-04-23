@@ -6,8 +6,6 @@ SHELL ["/bin/bash", "-c"]
 ARG FLORIBOT_BASE_REPO=https://github.com/Team-FloriBot/FloriBot4.0_ROS2_Jazzy_Base.git
 ARG FLORIBOT_BASE_REF=main
 
-RUN echo "source /pfad/zu/deinem/workspace/install/setup.bash" >> /root/.bashrc
-
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \
@@ -39,7 +37,8 @@ RUN mkdir -p /ws/src && \
     cp -r /tmp/floribot_base/src/base /ws/src/ && \
     cp -r /tmp/floribot_base/src/plc_connection /ws/src/
 
-RUN rosdep init 2>/dev/null || true && rosdep update || true
+RUN rosdep init 2>/dev/null || true
+RUN rosdep update || true
 
 RUN apt-get update && \
     source /opt/ros/jazzy/setup.bash && \
@@ -49,6 +48,9 @@ RUN apt-get update && \
 RUN source /opt/ros/jazzy/setup.bash && \
     cd /ws && \
     colcon build --packages-select base plc_connection
+
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
+    echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /root/.bashrc
 
 COPY base/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

@@ -14,8 +14,6 @@ RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
-    
-RUN echo "source /pfad/zu/deinem/workspace/install/setup.bash" >> /root/.bashrc
 
 RUN sed -i 's|http://archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources && \
     sed -i 's|http://security.ubuntu.com/ubuntu|https://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
@@ -33,7 +31,6 @@ RUN apt-get update && apt-get install -y \
     python3-shapely \
     python3-packaging \
     python3-yaml \
-    ros-jazzy-ros-base \
     ros-jazzy-xacro \
     ros-jazzy-robot-state-publisher \
     ros-jazzy-joint-state-publisher \
@@ -48,7 +45,7 @@ ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 WORKDIR /ws/src
 
-RUN git clone --branch ${VIRTUAL_MAIZE_FIELD_REF} --depth 1 ${VIRTUAL_MAIZE_FIELD_REPO} virtual_maize_field
+RUN git clone --branch ${VIRTUAL_MAIZE_FIELD_REF} --depth 1 ${VIRTUAL_MAIZE_FIELD_REPO} /ws/src/virtual_maize_field
 
 COPY gazebo/ros2_ws/src/floribot_gz_description /ws/src/floribot_gz_description
 COPY gazebo/ros2_ws/src/floribot_gz_bringup /ws/src/floribot_gz_bringup
@@ -56,21 +53,27 @@ COPY gazebo/ros2_ws/src/sim_backend /ws/src/sim_backend
 
 RUN git clone --branch ${FLORIBOT_BASE_REF} --depth 1 ${FLORIBOT_BASE_REPO} /tmp/floribot_base_repo && \
     cp -r /tmp/floribot_base_repo/src/base /ws/src/ && \
-    cp -r /tmp/floribot_base_repo/src/plc_connection /ws/src/
+    cp -r /tmp/floribot_base_repo/src/plc_connection /ws/src/ && \
+    rm -rf /tmp/floribot_base_repo
 
 WORKDIR /ws
 
-RUN rosdep init 2>/dev/null || true && rosdep update || true
+RUN rosdep init 2>/dev/null || true
+RUN rosdep update || true
+
+RUN apt-get update && \
+    source /opt/ros/jazzy/setup.bash && \
+    rosdep install --from-paths /ws/src --ignore-src -r -y && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN source /opt/ros/jazzy/setup.bash && \
-    rosdep install --from-paths /ws/src --ignore-src -r -y || true
-
-RUN source /opt/ros/jazzy/setup.bash && \
-    cd /ws && \
     colcon build
+
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
+    echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /root/.bashrc
 
 COPY gazebo/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["bash", "-lc", "source /ws/install/setup.bash && ros2 launch floribot_gz_bringup maize_world_with_floribot.launch.py"]
+CMD ["ros2", "launch", "floribot_gz_bringup", "maize_world_with_floribot.launch.py"]

@@ -52,15 +52,13 @@ ENV CMAKE_PREFIX_PATH=/usr/local:${CMAKE_PREFIX_PATH}
 ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}
 ENV LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
 
-# ROS-Umgebung beim interaktiven Start automatisch laden
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
     echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /root/.bashrc
 
-# librealsense aus Source bauen
 WORKDIR /opt
 RUN git clone --branch ${LIBREALSENSE_REF} --depth 1 ${LIBREALSENSE_REPO} librealsense && \
     cd librealsense && \
-    mkdir build && cd build && \
+    mkdir -p build && cd build && \
     cmake .. \
       -DCMAKE_BUILD_TYPE=Release \
       -DBUILD_EXAMPLES=false \
@@ -69,27 +67,27 @@ RUN git clone --branch ${LIBREALSENSE_REF} --depth 1 ${LIBREALSENSE_REPO} librea
       -DFORCE_RSUSB_BACKEND=true && \
     make -j"$(nproc)" && \
     make install && \
-    ldconfig
+    ldconfig && \
+    cd / && rm -rf /opt/librealsense
 
-# ROS2-Workspace vorbereiten
 WORKDIR /ws/src
 RUN git clone --branch ${SICK_SCAN_REF} --depth 1 ${SICK_SCAN_REPO} sick_scan_xd && \
     git clone --branch ${REALSENSE_ROS_REF} --depth 1 ${REALSENSE_ROS_REPO} realsense-ros
 
 WORKDIR /ws
 
-# rosdep initialisieren und Abhängigkeiten auflösen
-RUN rosdep init 2>/dev/null || true && \
-    rosdep update
+RUN rosdep init 2>/dev/null || true
+RUN rosdep update || true
 
-RUN source /opt/ros/jazzy/setup.bash && \
+RUN apt-get update && \
+    source /opt/ros/jazzy/setup.bash && \
     rosdep install -i \
       --from-paths /ws/src \
       --rosdistro jazzy \
       --skip-keys "librealsense2" \
-      -r -y
+      -r -y && \
+    rm -rf /var/lib/apt/lists/*
 
-# Sensorpakete bauen
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build \
       --packages-select \

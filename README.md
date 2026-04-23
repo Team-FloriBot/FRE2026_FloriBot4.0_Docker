@@ -93,7 +93,7 @@ cp compose/.env.example compose/.env
 | `floribot-gazebo`        | 3D-Simulation mit Gazebo                          |
 | `floribot-sim-backend`   | Simulations-Backend inkl. ROS–Gazebo-Bridge       |
 
-#### Services bauen
+#### Services bauen:
 ```bash
 cd compose
 docker compose build <Service>
@@ -103,7 +103,7 @@ Alternativ:
 cd compose
 docker compose build <Service1> <Service2> <Service3>
 ```
-#### Services starten
+#### Services starten:
 ```bash
 cd compose
 docker compose up <Service>

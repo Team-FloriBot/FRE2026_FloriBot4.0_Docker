@@ -61,33 +61,37 @@ xhost +local:docker
 ```
 ### 4. Konfiguration
 Die Datei compose/.env enthält aktuell folgende Konfigurationsparameter:
+
 ```bash
-ROS_DOMAIN_ID=42
+ROS_DOMAIN_ID=42 # ROS-2-Domain-ID zur Trennung von Kommunikationsdomänen
 ```
-ROS-2-Domain-ID zur Trennung von Kommunikationsdomänen
+
 ```bash
-ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
+ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET # Discovery-Bereich für ROS-2-Teilnehmer im Netzwerk
 ```
-Discovery-Bereich für ROS-2-Teilnehmer im Netzwerk
+
 ```bash
-RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+RMW_IMPLEMENTATION=rmw_fastrtps_cpp # Verwendete ROS-2-Middleware
 ```
-Verwendete ROS-2-Middleware
+
 ```bash
-DISPLAY=:0
+DISPLAY=:0 # X11-Display für GUI-Anwendungen wie Gazebo oder Stage
 ```
-X11-Display für GUI-Anwendungen wie Gazebo oder Stage
+Konfigurationsdatei kopieren und eigene .env‑Datei erstellen:
 ```bash
 cp compose/.env.example compose/.env
 ```
 ### 5. Services bauen und starten
-| Service              | Beschreibung             |
-| -------------------- | ------------------------ |
-| `floribot-base`      | Robotik-Kern + Kinematik |
-| `floribot-sensors`   | Sensorintegration        |
-| `floribot-webteleop` | Webbasierte Steuerung    |
-| `floribot-stage`     | 2D-Simulation (Stage)    |
-| `floribot-gazebo`    | 3D-Simulation (Gazebo)   |
+| Service                  | Beschreibung                                      |
+| ------------------------ | ------------------------------------------------- |
+| `floribot-base`          | Robotik-Kern + Kinematik für den realen Roboter   |
+| `floribot-sensors`       | Sensorintegration für das reale System            |
+| `floribot-webteleop`     | Webbasierte Steuerung für das reale System        |
+| `floribot-base-sim`      | Basis-Stack für die Simulation                    |
+| `floribot-webteleop-sim` | Webteleop für die Simulationsumgebung             |
+| `floribot-stage`         | 2D-Simulation mit Stage                           |
+| `floribot-gazebo`        | 3D-Simulation mit Gazebo                          |
+| `floribot-sim-backend`   | Simulations-Backend inkl. ROS–Gazebo-Bridge       |
 
 #### Services bauen
 ```bash
@@ -110,13 +114,13 @@ cd compose
 docker compose up <Service1> <Service2> <Service3>
 ```
 ### 6. Profile starten
-| Profil    | Startet Services         | Beschreibung              |
-| --------- | ------------------------ | ------------------------- |
-| `robot`   | base, sensors, webteleop | Komplettes Robotik-System |
-| `base`    | base                     | Nur Robotik-Kern          |
-| `sensors` | sensors                  | Nur Sensorintegration     |
-| `stage`   | stage                    | 2D-Simulation             |
-| `sim`     | gazebo                   | 3D-Simulation (Gazebo)    |
+| Profil    | Startet Services                                                        | Beschreibung                              |
+| --------- | ----------------------------------------------------------------------- | ----------------------------------------- |
+| `robot`   | `floribot-base`, `floribot-sensors`, `floribot-webteleop`               | Komplettes Robotik-System                 |
+| `base`    | `floribot-base`                                                         | Nur Robotik-Kern                          |
+| `sensors` | `floribot-sensors`                                                      | Nur Sensorintegration                     |
+| `stage`   | `floribot-stage`                                                        | 2D-Simulation                             |
+| `sim`     | `floribot-base-sim`, `floribot-webteleop-sim`, `floribot-gazebo`, `floribot-sim-backend` | 3D-Simulationsumgebung mit Backend |
 
 #### Einzelne Profile starten:
 ```bash

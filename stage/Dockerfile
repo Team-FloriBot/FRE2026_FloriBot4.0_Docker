@@ -32,7 +32,7 @@ COPY stage/rviz/ /ws/src/stage_rviz/
 WORKDIR /ws
 
 RUN rosdep init || true
-RUN rosdep update
+RUN rosdep update || true
 
 RUN apt-get update && rosdep install --from-paths /ws/src --ignore-src -r -y \
     --skip-keys="stage ament_cmake_clang_format ament_cmake_pycodestyle" && \

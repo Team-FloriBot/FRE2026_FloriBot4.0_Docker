@@ -20,14 +20,16 @@ WORKDIR /ws/src
 RUN git clone --branch ${WEBTELEOP_REF} --depth 1 ${WEBTELEOP_REPO} webteleop
 
 WORKDIR /ws
+
 RUN python3 -m pip install --no-cache-dir --break-system-packages \
     fastapi \
     "uvicorn[standard]"
-    
-RUN echo "source /pfad/zu/deinem/workspace/install/setup.bash" >> /root/.bashrc
 
 RUN source /opt/ros/jazzy/setup.bash && \
-    colcon build
+    colcon build --symlink-install
+
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
+    echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /root/.bashrc
 
 COPY webteleop/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

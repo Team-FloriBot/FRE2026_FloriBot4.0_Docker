@@ -136,7 +136,7 @@ docker compose --profile robot up -d
 ```
 #### Container-Konsole:
 ```bash
-docker exec -it <container-name> bash
+docker exec -it <Service> bash
 ```
 
 #### Stoppen von Containern:

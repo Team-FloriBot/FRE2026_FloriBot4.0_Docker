@@ -147,10 +147,13 @@ services:
       - |
           source /ws/install/setup.bash
 
-          ros2 run ros_gz_bridge parameter_bridge \
-            /sim/joint_frontLeft/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
-            /sim/joint_frontRight/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
-            /sim/joint_rearLeft/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
-            /sim/joint_rearRight/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double &
-
+         ros2 run ros_gz_bridge parameter_bridge \
+          /sim/joint_frontLeft/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
+          /sim/joint_frontRight/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
+          /sim/joint_rearLeft/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
+          /sim/joint_rearRight/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
+          /sensors/scanFront@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan \
+          /sensors/scanRear@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan \
+          /sensors/front_camera/image@sensor_msgs/msg/Image[gz.msgs.Image \
+          /sensors/rear_camera/image@sensor_msgs/msg/Image[gz.msgs.Image &
           exec ros2 run sim_backend sim_backend_node

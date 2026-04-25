@@ -345,6 +345,7 @@
     <sensor name="front_laser" type="gpu_lidar">
       <pose>0 0 0 0 0 0</pose>
       <topic>/sensors/scanFront</topic>
+      <gz_frame_id>front_laser_link</gz_frame_id>
       <update_rate>10</update_rate>
       <always_on>true</always_on>
       <visualize>true</visualize>
@@ -403,6 +404,7 @@
     <sensor name="rear_laser" type="gpu_lidar">
       <pose>0 0 0 0 0 0</pose>
       <topic>/sensors/scanRear</topic>
+      <gz_frame_id>rear_laser_link</gz_frame_id>
       <update_rate>10</update_rate>
       <always_on>true</always_on>
       <visualize>true</visualize>
@@ -461,6 +463,7 @@
     <sensor name="front_camera" type="camera">
       <pose>0 0 0 0 0 0</pose>
       <topic>/sensors/front_camera/image</topic>
+      <gz_frame_id>front_camera_link</gz_frame_id>
       <update_rate>30</update_rate>
       <always_on>true</always_on>
       <visualize>true</visualize>
@@ -516,6 +519,7 @@
     <sensor name="rear_camera" type="camera">
       <pose>0 0 0 0 0 0</pose>
       <topic>/sensors/rear_camera/image</topic>
+      <gz_frame_id>rear_camera_link</gz_frame_id>
       <update_rate>30</update_rate>
       <always_on>true</always_on>
       <visualize>true</visualize>

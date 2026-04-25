@@ -13,55 +13,57 @@ def generate_launch_description():
         "simulation.launch.py",
     ])
 
-generate_world = ExecuteProcess(
-    cmd=[
-        "bash", "-lc",
-        r"""
-        source /ws/install/setup.bash && \
-        ros2 run virtual_maize_field generate_world fre22_task_navigation_mini && \
-        python3 - <<'PY'
+    generate_world = ExecuteProcess(
+        cmd=[
+            "bash",
+            "-lc",
+            """
+            source /ws/install/setup.bash && \
+            ros2 run virtual_maize_field generate_world fre22_task_navigation_mini && \
+            python3 -c '
 from pathlib import Path
 import re
 
-plugin = '''
-    <plugin filename="gz-sim-sensors-system"
-            name="gz::sim::systems::Sensors">
+plugin = \"\"\"
+    <plugin filename=\\"gz-sim-sensors-system\\"
+            name=\\"gz::sim::systems::Sensors\\">
       <render_engine>ogre2</render_engine>
     </plugin>
-'''
+\"\"\"
 
-search_roots = [
-    Path("/ws/src/virtual_maize_field"),
-    Path("/ws/install/virtual_maize_field/share/virtual_maize_field"),
+roots = [
+    Path(\\"/ws/src/virtual_maize_field\\"),
+    Path(\\"/ws/install/virtual_maize_field/share/virtual_maize_field\\"),
 ]
 
-for root in search_roots:
+for root in roots:
     if not root.exists():
         continue
 
-    for file in list(root.rglob("*.sdf")) + list(root.rglob("*.world")):
+    for file in list(root.rglob(\\"*.sdf\\")) + list(root.rglob(\\"*.world\\")):
         text = file.read_text()
 
-        if "gz-sim-sensors-system" in text:
+        if \\"gz-sim-sensors-system\\" in text:
             continue
 
-        if "<world" not in text:
+        if \\"<world\\" not in text:
             continue
 
-        text_new = re.sub(
-            r"(<world[^>]*>)",
-            r"\1\n" + plugin,
+        text = re.sub(
+            r\\"(<world[^>]*>)\\",
+            r\\"\\\\1\\\\n\\" + plugin,
             text,
             count=1,
         )
 
-        file.write_text(text_new)
-        print(f"Patched Gazebo sensors plugin into: {file}")
-PY
-        """
-    ],
-    output="screen",
-)
+        file.write_text(text)
+        print(f\\"Patched Gazebo sensors plugin into: {file}\\")
+'
+            """
+        ],
+        output="screen",
+    )
+
     start_world = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(world_launch)
     )

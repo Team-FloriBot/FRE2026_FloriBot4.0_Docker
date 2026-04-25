@@ -39,9 +39,14 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-ros-gz-bridge \
     ros-jazzy-ros-gz-interfaces \
     ros-jazzy-rmw-cyclonedds-cpp \
+    ros-jazzy-rviz2 \
     && rm -rf /var/lib/apt/lists/*
 
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+# GUI / X11 Settings (für Gazebo + RViz)
+ENV DISPLAY=:0
+ENV QT_X11_NO_MITSHM=1
 
 WORKDIR /ws/src
 

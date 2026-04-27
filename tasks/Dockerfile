@@ -3,7 +3,7 @@ FROM ros:jazzy
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
-    python3-pip \
+    python3-numpy \
     python3-colcon-common-extensions \
     ros-jazzy-rclpy \
     ros-jazzy-geometry-msgs \
@@ -13,8 +13,6 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /ros2_ws
 
 COPY . /ros2_ws/src/FRE2026_Tasks
-
-RUN pip3 install --no-cache-dir numpy
 
 RUN . /opt/ros/jazzy/setup.sh && \
     colcon build

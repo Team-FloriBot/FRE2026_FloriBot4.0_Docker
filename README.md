@@ -95,6 +95,7 @@ cp compose/.env.example compose/.env
 | `floribot-stage`         | 2D-Simulation mit Stage                           |
 | `floribot-gazebo`        | 3D-Simulation mit Gazebo                          |
 | `floribot-sim-backend`   | Simulations-Backend inkl. ROS–Gazebo-Bridge       |
+| `floribot-tasks`         | Task-Node fürs FRE2026                            |
 
 #### Services bauen:
 ```bash

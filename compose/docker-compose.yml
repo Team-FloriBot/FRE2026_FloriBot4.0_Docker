@@ -161,7 +161,7 @@ services:
     restart: unless-stopped
     
   floribot-tasks:
-    profiles: ["robot", "sim", "tasks"]
+    profiles: ["robot", "sim", "stage", "tasks"]
     build:
       context: ..
       dockerfile: tasks/Dockerfile

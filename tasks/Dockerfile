@@ -10,9 +10,9 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-sensor-msgs \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /ros2_ws
+WORKDIR /ws
 
-COPY . /ros2_ws/src/FRE2026_Tasks
+COPY FRE2026_Tasks-main/src /ws/src
 
 RUN . /opt/ros/jazzy/setup.sh && \
     colcon build

@@ -21,16 +21,14 @@ ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
   hostname:="${SICK_FRONT_IP}" \
   scanner_name:=sick_front \
   frame_id:="${SICK_FRONT_FRAME}" \
-  --ros-args \
-    -r /scan:=/sensors/scan_front &
+  scan:=/sensors/scan_front &
 pids+=($!)
 
 ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
   hostname:="${SICK_REAR_IP}" \
   scanner_name:=sick_rear \
   frame_id:="${SICK_REAR_FRAME}" \
-  --ros-args \
-    -r /scan:=/sensors/scan_rear &
+  scan:=/sensors/scan_rear &
 pids+=($!)
 
 if [ -n "${RS_FRONT_SERIAL}" ]; then

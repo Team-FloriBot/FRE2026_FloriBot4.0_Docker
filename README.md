@@ -96,7 +96,7 @@ cp compose/.env.example compose/.env
 | `floribot-stage`         | 2D-Simulation mit Stage                           |
 | `floribot-gazebo`        | 3D-Simulation mit Gazebo                          |
 | `floribot-sim-backend`   | Simulations-Backend inkl. ROS–Gazebo-Bridge       |
-| `floribot-tasks`         | Nur Tasks fürs FRE 2026                               |
+| `floribot-tasks`         | Tasks fürs FRE 2026                               |
 
 #### Services bauen:
 ```bash
@@ -126,7 +126,7 @@ docker compose up <Service1> <Service2> <Service3>
 | `sensors` | `floribot-sensors`                                                                                         | Nur Sensorintegration                     |
 | `stage`   | `floribot-stage`, `floribot-tasks`                                                                         | 2D-Simulation                             |
 | `sim`     | `floribot-base-sim`, `floribot-webteleop-sim`, `floribot-gazebo`, `floribot-sim-backend`, `floribot-tasks` | 3D-Simulationsumgebung mit Backend        |
-| `tasks`   | `floribot-tasks`                                                                                           | Tasks fürs FRE 2026                       |
+| `tasks`   | `floribot-tasks`                                                                                           | Nur Tasks fürs FRE 2026                       |
 
 #### Einzelne Profile starten am Beispiel von Profil `robot`:
 ```bash

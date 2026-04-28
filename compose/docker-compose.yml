@@ -60,10 +60,21 @@ services:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+
+      SICK_LAUNCH_FILE: ${SICK_LAUNCH_FILE:-sick_tim_5xx.launch.py}
+      SICK_FRONT_IP: ${SICK_FRONT_IP:-192.168.0.51}
+      SICK_REAR_IP: ${SICK_REAR_IP:-192.168.0.52}
+      SICK_FRONT_FRAME: ${SICK_FRONT_FRAME:-sick_front_link}
+      SICK_REAR_FRAME: ${SICK_REAR_FRAME:-sick_rear_link}
+
+      RS_FRONT_SERIAL: ${RS_FRONT_SERIAL:-}
+      RS_REAR_SERIAL: ${RS_REAR_SERIAL:-}
     volumes:
       - /dev:/dev
       - /dev/bus/usb:/dev/bus/usb
       - /run/udev:/run/udev:ro
+    command:
+      - /start_sensors.sh
     restart: unless-stopped
 
   floribot-webteleop:
@@ -152,14 +163,14 @@ services:
             /sim/joint_frontRight/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
             /sim/joint_rearLeft/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
             /sim/joint_rearRight/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
-            /sensors/scanFront@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan \
-            /sensors/scanRear@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan \
+            /sensors/scan_front@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan \
+            /sensors/scan_rear@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan \
             /sensors/front_camera/image@sensor_msgs/msg/Image@gz.msgs.Image \
             /sensors/rear_camera/image@sensor_msgs/msg/Image@gz.msgs.Image &
 
           exec ros2 run sim_backend sim_backend_node
     restart: unless-stopped
-    
+
   floribot-tasks:
     profiles: ["robot", "sim", "stage", "tasks"]
     build:

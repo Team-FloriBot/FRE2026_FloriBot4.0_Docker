@@ -19,16 +19,18 @@ pids=()
 
 ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
   hostname:="${SICK_FRONT_IP}" \
-  scanner_name:=sick_front \
+  nodename:=sick_front \
   frame_id:="${SICK_FRONT_FRAME}" \
-  scan:=/sensors/scan_front &
+  laserscan_topic:=/sensors/scan_front \
+  cloud_topic:=/sensors/cloud_front &
 pids+=($!)
 
 ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
   hostname:="${SICK_REAR_IP}" \
-  scanner_name:=sick_rear \
+  nodename:=sick_rear \
   frame_id:="${SICK_REAR_FRAME}" \
-  scan:=/sensors/scan_rear &
+  laserscan_topic:=/sensors/scan_rear \
+  cloud_topic:=/sensors/cloud_rear &
 pids+=($!)
 
 if [ -n "${RS_FRONT_SERIAL}" ]; then

@@ -42,8 +42,6 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-rviz2 \
     && rm -rf /var/lib/apt/lists/*
 
-ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-
 WORKDIR /ws/src
 
 RUN git clone --branch ${VIRTUAL_MAIZE_FIELD_REF} --depth 1 ${VIRTUAL_MAIZE_FIELD_REPO} /ws/src/virtual_maize_field

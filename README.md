@@ -131,7 +131,7 @@ docker compose up <Service1> <Service2> <Service3>
 | `base`    | `floribot-base`                                                                                            | Nur Robotik-Kern                          |
 | `sensors` | `floribot-sensors`                                                                                         | Nur Sensorintegration                     |
 | `stage`   | `floribot-stage`, `floribot-tasks`                                                                         | 2D-Simulation                             |
-| `sim`     | `floribot-base-sim`, `floribot-webteleop-sim`, `floribot-gazebo`, `floribot-sim-backend`, `floribot-tasks` | 3D-Simulationsumgebung mit Backend        |
+| `sim`     | `floribot-base-sim`, `floribot-gazebo`, `floribot-sim-backend`, `floribot-tasks` | 3D-Simulationsumgebung mit Backend        |
 | `tasks`   | `floribot-tasks`                                                                                           | Nur Tasks fürs FRE 2026                       |
 
 #### Einzelne Profile starten am Beispiel von Profil `robot`:

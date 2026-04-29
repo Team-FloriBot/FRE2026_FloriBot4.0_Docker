@@ -9,6 +9,11 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-rclpy \
     ros-jazzy-geometry-msgs \
     ros-jazzy-sensor-msgs \
+    && rm -rf /var/lib/apt/lists/* \
+    ros-jazzy-laser-geometry \
+    ros-jazzy-tf2-ros \
+    ros-jazzy-tf2-sensor-msgs \
+    ros-jazzy-sensor-msgs-py \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ws

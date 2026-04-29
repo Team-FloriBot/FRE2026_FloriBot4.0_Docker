@@ -48,7 +48,7 @@ floorplan
 
 floribot
 (
-	name "flori"
+	name "FloriBot"
 	pose [-6.5 -5.5 0 0]
 )
 

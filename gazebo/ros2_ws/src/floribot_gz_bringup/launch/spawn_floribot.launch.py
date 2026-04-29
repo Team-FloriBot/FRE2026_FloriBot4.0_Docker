@@ -10,15 +10,14 @@ def generate_launch_description():
             "source /ws/install/setup.bash && "
             "xacro /ws/src/robot_description/src/urdf/Floribot.urdf.xacro > /tmp/floribot_gz.urdf && "
             "ros2 run ros_gz_sim create "
-            "-world virtual_maize_field "
             "-name FloriBot "
             "-file /tmp/floribot_gz.urdf "
-            "-x -1.3631752758808973 "
-            "-y -3.460156696047507 "
-            "-z 0.6499999999999999 "
+            "-x 0 "
+            "-y 0 "
+            "-z 0.65 "
             "-R 0.0 "
             "-P 0.0 "
-            "-Y 1.5980816365126524"
+            "-Y 0.0"
         ],
         output="screen",
     )

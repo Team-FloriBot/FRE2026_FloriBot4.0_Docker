@@ -4,7 +4,7 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    xacro_file = "/ws/src/floribot_gz_description/urdf/Floribot_gz.urdf.xacro"
+    xacro_file = "/ws/src/robot_description/src/urdf/Floribot.urdf.xacro"
 
     robot_description = {
         "robot_description": Command(["xacro ", xacro_file])

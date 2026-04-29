@@ -6,8 +6,8 @@ source /ws/install/setup.bash
 
 SICK_LAUNCH_FILE="${SICK_LAUNCH_FILE:-sick_tim_5xx.launch.py}"
 
-SICK_FRONT_IP="${SICK_FRONT_IP:-192.168.0.51}"
-SICK_REAR_IP="${SICK_REAR_IP:-192.168.0.52}"
+SICK_FRONT_IP="${SICK_FRONT_IP:-192.168.0.52}"
+SICK_REAR_IP="${SICK_REAR_IP:-192.168.0.51}"
 
 SICK_FRONT_FRAME="${SICK_FRONT_FRAME:-sick_front_link}"
 SICK_REAR_FRAME="${SICK_REAR_FRAME:-sick_rear_link}"

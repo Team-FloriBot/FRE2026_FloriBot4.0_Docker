@@ -8,10 +8,10 @@ def generate_launch_description():
             "bash", "-lc",
             "source /opt/ros/jazzy/setup.bash && "
             "source /ws/install/setup.bash && "
-            "xacro /ws/src/floribot_gz_description/urdf/Floribot_gz.urdf.xacro > /tmp/floribot_gz.urdf && "
+            "xacro xacro /ws/src/robot_description/src/urdf/Floribot.urdf.xacro > /tmp/floribot_gz.urdf && "
             "ros2 run ros_gz_sim create "
             "-world virtual_maize_field "
-            "-name floribot4 "
+            "-name FloriBot "
             "-file /tmp/floribot_gz.urdf "
             "-x -1.3631752758808973 "
             "-y -3.460156696047507 "

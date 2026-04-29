@@ -31,6 +31,7 @@ FRE2026_FloriBot4.0_Docker/<br/>
 ├── stage/<br/>
 ├── gazebo/<br/>
 ├── tasks/<br/>
+├── object_detection/<br/>
 ├── compose/<br/>
 ├── scripts/<br/>
 └── README.md<br/>

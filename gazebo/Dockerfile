@@ -55,6 +55,7 @@ COPY gazebo/ros2_ws/src/sim_backend /ws/src/sim_backend
 RUN git clone --branch ${FLORIBOT_BASE_REF} --depth 1 ${FLORIBOT_BASE_REPO} /tmp/floribot_base_repo && \
     cp -r /tmp/floribot_base_repo/src/base /ws/src/ && \
     cp -r /tmp/floribot_base_repo/src/plc_connection /ws/src/ && \
+    cp -r /tmp/floribot_base_repo/src/robot_description /ws/src/ && \
     rm -rf /tmp/floribot_base_repo
 
 WORKDIR /ws

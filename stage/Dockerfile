@@ -49,4 +49,12 @@ COPY stage/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["bash", "-lc", "source /opt/ros/jazzy/setup.bash && source /ws/install/setup.bash && ros2 launch stage_ros2 stage.launch.py world:=maize_field enforce_prefixes:=false one_tf_tree:=true & sleep 2 && ros2 run topic_tools relay /scan_front /sensors/scan_front & ros2 run topic_tools relay /scan_rear /sensors/scan_rear & exec rviz2 -d /ws/src/stage_rviz/floribot_stage.rviz"]
+CMD ["bash", "-lc", "\
+source /opt/ros/jazzy/setup.bash && \
+source /ws/install/setup.bash && \
+ros2 launch stage_ros2 stage.launch.py world:=maize_field enforce_prefixes:=false one_tf_tree:=true & \
+sleep 5 && \
+ros2 topic list -t && \
+ros2 run topic_tools relay /flori/scan_front /sensors/scan_front & \
+ros2 run topic_tools relay /flori/scan_rear /sensors/scan_rear & \
+exec rviz2 -d /ws/src/stage_rviz/floribot_stage.rviz"]

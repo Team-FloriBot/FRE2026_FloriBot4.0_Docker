@@ -190,3 +190,34 @@ services:
       - |
           exec ros2 launch maize_navigation maize_navigation.launch.py
     restart: unless-stopped
+
+  floribot-object-detection:
+    profiles: ["robot", "object-detection"]
+    build:
+      context: ..
+      dockerfile: object_detection/Dockerfile
+    container_name: floribot-object-detection
+    network_mode: host
+    ipc: host
+    pid: host
+    privileged: true
+    runtime: nvidia
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+    volumes:
+      - /dev:/dev
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command:
+      - bash
+      - -lc
+      - |
+          python3 - <<'PY'
+          import torch
+          print("CUDA available:", torch.cuda.is_available())
+          PY
+          exec ros2 launch object_detection object_detection.launch.py
+    restart: unless-stopped

@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     libglu1-mesa-dev \
     ros-jazzy-ackermann-msgs \
     ros-jazzy-rmw-fastrtps-cpp \
+    ros-jazzy-topic-tools \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ws/src

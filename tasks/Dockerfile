@@ -5,15 +5,22 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     git \
     python3-numpy \
+    python3-pip \
+    build-essential \
     python3-colcon-common-extensions \
+    # 2. ROS 2 Kern-Komponenten
     ros-jazzy-rclpy \
     ros-jazzy-geometry-msgs \
     ros-jazzy-sensor-msgs \
+    ros-jazzy-sensor-msgs-py \
+    # 3. Transformationen & Geometrie (Wichtig für Punktwolken)
     ros-jazzy-laser-geometry \
     ros-jazzy-tf2-ros \
     ros-jazzy-tf2-sensor-msgs \
-    ros-jazzy-sensor-msgs-py \
+    ros-jazzy-tf2-geometry-msgs \
+    # 4. Utilities
     ros-jazzy-message-filters \
+    ros-jazzy-launch-ros \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ws

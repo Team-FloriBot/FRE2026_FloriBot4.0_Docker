@@ -120,7 +120,6 @@ services:
     network_mode: host
     ipc: host
     pid: host
-    runtime: nvidia
     environment:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
@@ -135,8 +134,15 @@ services:
       GZ_SIM_RESOURCE_PATH: /ws/src/floribot_gz_description:/ws/src/floribot_gz_description/meshes:/ws/src/robot_description:/ws/src/robot_description/meshes
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     restart: unless-stopped
-
+    
   floribot-sim-backend:
     profiles: ["sim"]
     build:

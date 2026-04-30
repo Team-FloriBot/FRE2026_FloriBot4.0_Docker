@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-tf2-ros \
     ros-jazzy-tf2-sensor-msgs \
     ros-jazzy-sensor-msgs-py \
+    ros-jazzy-message-filters \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ws

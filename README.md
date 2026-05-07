@@ -157,5 +157,9 @@ docker exec -it <Service> bash
 
 #### Stoppen von Containern:
 ```bash
-docker compose down
+docker compose down <Service>
+```
+Alternativ:
+```bash
+docker compose down <Service1> <Service2> <Service3>
 ```

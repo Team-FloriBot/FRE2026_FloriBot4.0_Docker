@@ -223,6 +223,7 @@ services:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: all
       ULTRALYTICS_CONFIG_DIR: /tmp
+      YOLO_CONFIG_DIR: /tmp
       DISPLAY: ${DISPLAY}
       QT_X11_NO_MITSHM: "1"
     volumes:

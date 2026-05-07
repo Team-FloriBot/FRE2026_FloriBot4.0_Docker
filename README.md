@@ -32,6 +32,7 @@ FRE2026_FloriBot4.0_Docker/<br/>
 ├── gazebo/<br/>
 ├── tasks/<br/>
 ├── object_detection/<br/>
+├── rviz/<br/>
 ├── compose/<br/>
 ├── scripts/<br/>
 └── README.md<br/>
@@ -66,7 +67,7 @@ Damit grafische Anwendungen aus dem Container angezeigt werden können
 xhost +local:docker
 ```
 ### 4. Konfiguration
-Die Datei compose/.env enthält aktuell folgende Konfigurationsparameter:
+Die Datei `compose/.env.example` enthält Beispielwerte. Für die lokale Ausführung muss daraus eine eigene `.env` erzeugt werden:
 
 ```bash
 ROS_DOMAIN_ID=42 # ROS-2-Domain-ID zur Trennung von Kommunikationsdomänen
@@ -98,6 +99,8 @@ cp compose/.env.example compose/.env
 | `floribot-gazebo`        | 3D-Simulation mit Gazebo                          |
 | `floribot-sim-backend`   | Simulations-Backend inkl. ROS–Gazebo-Bridge       |
 | `floribot-tasks`         | Tasks fürs FRE 2026                               |
+| `floribot-object-detection`         | Objekterkennung mit NVIDIA/CUDA        |
+| `floribot-rviz `         | RViz-Visualisierung                               |
 
 #### Services bauen:
 ```bash
@@ -133,6 +136,7 @@ docker compose up <Service1> <Service2> <Service3>
 | `stage`   | `floribot-stage`, `floribot-tasks`                                                                         | 2D-Simulation                             |
 | `sim`     | `floribot-base-sim`, `floribot-gazebo`, `floribot-sim-backend`, `floribot-tasks` | 3D-Simulationsumgebung mit Backend        |
 | `tasks`   | `floribot-tasks`                                                                                           | Nur Tasks fürs FRE 2026                       |
+| `ui`   | `floribot-base`, `floribot-webteleop`                                                                                           | Robotik-Kern und Web-Fernsteuerung                       |
 
 #### Einzelne Profile starten am Beispiel von Profil `robot`:
 ```bash

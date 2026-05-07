@@ -15,6 +15,7 @@ ARG OBJECT_DETECTION_BRANCH=docker_ros2
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     python3-pip \
+    python3-setuptools \
     python3-rosdep \
     python3-colcon-common-extensions \
     libgl1 \
@@ -27,7 +28,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-realsense2-camera-msgs \
     && rm -rf /var/lib/apt/lists/*
 
-RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
+# ROS 2 Humble ist mit neueren setuptools-Versionen beim ament_python-Build problematisch.
+# Daher setuptools explizit auf eine kompatible Version pinnen.
+RUN python3 -m pip install --no-cache-dir --upgrade pip wheel && \
+    python3 -m pip install --no-cache-dir "setuptools==58.2.0"
 
 RUN python3 -m pip install --no-cache-dir "numpy<2.0"
 
@@ -51,7 +55,7 @@ RUN git clone --branch ${OBJECT_DETECTION_BRANCH} ${OBJECT_DETECTION_REPO} /tmp/
 RUN source /opt/ros/humble/setup.bash && \
     rosdep update || true && \
     rosdep install --from-paths /ws/src --ignore-src -r -y || true && \
-    colcon build --symlink-install
+    colcon build
 
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
     echo "source /ws/install/setup.bash" >> /root/.bashrc

@@ -1,4 +1,3 @@
-# ROS 2 Humble base image
 FROM ros:humble
 
 SHELL ["/bin/bash", "-c"]
@@ -10,11 +9,9 @@ ENV ULTRALYTICS_CONFIG_DIR=/tmp
 
 WORKDIR /ws
 
-# GitHub repository
 ARG OBJECT_DETECTION_REPO=https://github.com/Team-FloriBot/FRE_object_detection.git
 ARG OBJECT_DETECTION_BRANCH=main
 
-# System dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     python3-pip \
@@ -30,10 +27,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-realsense2-camera-msgs \
     && rm -rf /var/lib/apt/lists/*
 
-# Python dependencies
 RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# numpy < 2.0 wegen ROS cv_bridge / OpenCV-Kompatibilität
 RUN python3 -m pip install --no-cache-dir "numpy<2.0"
 
 RUN python3 -m pip install --no-cache-dir \
@@ -44,25 +39,27 @@ RUN python3 -m pip install --no-cache-dir \
     pyyaml \
     ultralytics
 
-# Create ROS 2 workspace
-RUN mkdir -p /ws/src
+RUN mkdir -p /ws/src /ws/model
 
-# Clone object detection repository from GitHub
 RUN git clone --branch ${OBJECT_DETECTION_BRANCH} ${OBJECT_DETECTION_REPO} /tmp/FRE_object_detection && \
-    cp -r /tmp/FRE_object_detection/ros2_detection /ws/src/ && \
-    cp -r /tmp/FRE_object_detection/ros2_detection_interfaces /ws/src/ && \
-    cp -r /tmp/FRE_object_detection/ros2_detection_client /ws/src/ && \
-    mkdir -p /ws/model && \
-    if [ -d /tmp/FRE_object_detection/model ]; then cp -r /tmp/FRE_object_detection/model/* /ws/model/; fi && \
+    ROS2_DETECTION_DIR=$(find /tmp/FRE_object_detection -type d -name ros2_detection | head -n 1) && \
+    ROS2_INTERFACES_DIR=$(find /tmp/FRE_object_detection -type d -name ros2_detection_interfaces | head -n 1) && \
+    ROS2_CLIENT_DIR=$(find /tmp/FRE_object_detection -type d -name ros2_detection_client | head -n 1) && \
+    if [ -z "$ROS2_DETECTION_DIR" ]; then echo "ERROR: ros2_detection package not found"; find /tmp/FRE_object_detection -maxdepth 4 -type d; exit 1; fi && \
+    if [ -z "$ROS2_INTERFACES_DIR" ]; then echo "ERROR: ros2_detection_interfaces package not found"; find /tmp/FRE_object_detection -maxdepth 4 -type d; exit 1; fi && \
+    if [ -z "$ROS2_CLIENT_DIR" ]; then echo "ERROR: ros2_detection_client package not found"; find /tmp/FRE_object_detection -maxdepth 4 -type d; exit 1; fi && \
+    cp -r "$ROS2_DETECTION_DIR" /ws/src/ && \
+    cp -r "$ROS2_INTERFACES_DIR" /ws/src/ && \
+    cp -r "$ROS2_CLIENT_DIR" /ws/src/ && \
+    MODEL_DIR=$(find /tmp/FRE_object_detection -type d -name model | head -n 1) && \
+    if [ -n "$MODEL_DIR" ]; then cp -r "$MODEL_DIR"/* /ws/model/ || true; fi && \
     rm -rf /tmp/FRE_object_detection
 
-# Install ROS dependencies and build workspace
 RUN source /opt/ros/humble/setup.bash && \
     rosdep update || true && \
     rosdep install --from-paths /ws/src --ignore-src -r -y || true && \
     colcon build --symlink-install
 
-# Source ROS and workspace automatically
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
     echo "source /ws/install/setup.bash" >> /root/.bashrc
 

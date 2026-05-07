@@ -60,4 +60,8 @@ RUN source /opt/ros/humble/setup.bash && \
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
     echo "source /ws/install/setup.bash" >> /root/.bashrc
 
-CMD ["/bin/bash"]
+COPY object_detection/ros_entrypoint.sh /ros_entrypoint.sh
+RUN chmod +x /ros_entrypoint.sh
+
+ENTRYPOINT ["/ros_entrypoint.sh"]
+CMD ["ros2", "launch", "ros2_detection", "detector.launch.py"]

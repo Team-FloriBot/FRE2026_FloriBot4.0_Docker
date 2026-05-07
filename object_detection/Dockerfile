@@ -10,7 +10,7 @@ ENV ULTRALYTICS_CONFIG_DIR=/tmp
 WORKDIR /ws
 
 ARG OBJECT_DETECTION_REPO=https://github.com/Team-FloriBot/FRE_object_detection.git
-ARG OBJECT_DETECTION_BRANCH=main
+ARG OBJECT_DETECTION_BRANCH=docker_ros2
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
@@ -42,17 +42,10 @@ RUN python3 -m pip install --no-cache-dir \
 RUN mkdir -p /ws/src /ws/model
 
 RUN git clone --branch ${OBJECT_DETECTION_BRANCH} ${OBJECT_DETECTION_REPO} /tmp/FRE_object_detection && \
-    ROS2_DETECTION_DIR=$(find /tmp/FRE_object_detection -type d -name ros2_detection | head -n 1) && \
-    ROS2_INTERFACES_DIR=$(find /tmp/FRE_object_detection -type d -name ros2_detection_interfaces | head -n 1) && \
-    ROS2_CLIENT_DIR=$(find /tmp/FRE_object_detection -type d -name ros2_detection_client | head -n 1) && \
-    if [ -z "$ROS2_DETECTION_DIR" ]; then echo "ERROR: ros2_detection package not found"; find /tmp/FRE_object_detection -maxdepth 4 -type d; exit 1; fi && \
-    if [ -z "$ROS2_INTERFACES_DIR" ]; then echo "ERROR: ros2_detection_interfaces package not found"; find /tmp/FRE_object_detection -maxdepth 4 -type d; exit 1; fi && \
-    if [ -z "$ROS2_CLIENT_DIR" ]; then echo "ERROR: ros2_detection_client package not found"; find /tmp/FRE_object_detection -maxdepth 4 -type d; exit 1; fi && \
-    cp -r "$ROS2_DETECTION_DIR" /ws/src/ && \
-    cp -r "$ROS2_INTERFACES_DIR" /ws/src/ && \
-    cp -r "$ROS2_CLIENT_DIR" /ws/src/ && \
-    MODEL_DIR=$(find /tmp/FRE_object_detection -type d -name model | head -n 1) && \
-    if [ -n "$MODEL_DIR" ]; then cp -r "$MODEL_DIR"/* /ws/model/ || true; fi && \
+    cp -r /tmp/FRE_object_detection/ros2_detection /ws/src/ && \
+    cp -r /tmp/FRE_object_detection/ros2_detection_interfaces /ws/src/ && \
+    cp -r /tmp/FRE_object_detection/ros2_detection_client /ws/src/ && \
+    if [ -d /tmp/FRE_object_detection/model ]; then cp -r /tmp/FRE_object_detection/model/* /ws/model/ || true; fi && \
     rm -rf /tmp/FRE_object_detection
 
 RUN source /opt/ros/humble/setup.bash && \

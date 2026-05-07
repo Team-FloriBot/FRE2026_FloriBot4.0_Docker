@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV ROS_DOMAIN_ID=0
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ENV ULTRALYTICS_CONFIG_DIR=/tmp
+ENV YOLO_CONFIG_DIR=/tmp/Ultralytics
 
 WORKDIR /ws
 
@@ -28,19 +29,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-realsense2-camera-msgs \
     && rm -rf /var/lib/apt/lists/*
 
-# ROS 2 Humble ist mit neueren setuptools-Versionen beim ament_python-Build problematisch.
-# Daher setuptools explizit auf eine kompatible Version pinnen.
+# ROS 2 Humble benötigt für ament_python eine kompatible setuptools-Version.
 RUN python3 -m pip install --no-cache-dir --upgrade pip wheel && \
     python3 -m pip install --no-cache-dir "setuptools==58.2.0"
 
 RUN python3 -m pip install --no-cache-dir \
     torch \
-    opencv-python \
+    opencv-python-headless \
     scikit-learn \
     pyrealsense2 \
     pyyaml \
     ultralytics
 
+# cv_bridge aus ROS 2 Humble ist gegen NumPy 1.x gebaut.
+# Deshalb NumPy nach allen pip-Installationen erneut pinnen.
 RUN python3 -m pip install --no-cache-dir --force-reinstall "numpy<2.0"
 
 RUN mkdir -p /ws/src /ws/model
@@ -60,8 +62,8 @@ RUN source /opt/ros/humble/setup.bash && \
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
     echo "source /ws/install/setup.bash" >> /root/.bashrc
 
-COPY object_detection/ros_entrypoint.sh /ros_entrypoint.sh
-RUN chmod +x /ros_entrypoint.sh
+COPY object_detection/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["ros2", "launch", "ros2_detection", "detector.launch.py"]

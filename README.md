@@ -68,26 +68,30 @@ xhost +local:docker
 ```
 ### 4. Konfiguration
 Die Datei `compose/.env.example` enthält Beispielwerte. Für die lokale Ausführung muss daraus eine eigene `.env` erzeugt werden:
-
-```bash
-ROS_DOMAIN_ID=42 # ROS-2-Domain-ID zur Trennung von Kommunikationsdomänen
-```
-
-```bash
-ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET # Discovery-Bereich für ROS-2-Teilnehmer im Netzwerk
-```
-
-```bash
-RMW_IMPLEMENTATION=rmw_fastrtps_cpp # Verwendete ROS-2-Middleware
-```
-
-```bash
-DISPLAY=:0 # X11-Display für GUI-Anwendungen wie Gazebo oder Stage
-```
 Konfigurationsdatei kopieren und eigene .env‑Datei erstellen:
 ```bash
 cp compose/.env.example compose/.env
 ```
+
+### Konfigurationsparameter
+
+| Variable | Bedeutung |
+|---|---|
+| `ROS_DOMAIN_ID` | ROS-2-Domain-ID zur Trennung mehrerer ROS-Netze |
+| `ROS_AUTOMATIC_DISCOVERY_RANGE` | Discovery-Bereich für ROS-2-Teilnehmer |
+| `RMW_IMPLEMENTATION` | Verwendete ROS-2-Middleware |
+| `DISPLAY` | X11-Display für GUI-Anwendungen |
+| `WAYLAND_DISPLAY` | Wayland-Display, relevant für WSLg/Wayland |
+| `XDG_RUNTIME_DIR` | Runtime-Verzeichnis für Wayland/WSLg |
+| `SICK_LAUNCH_FILE` | Launch-Datei für SICK-LiDAR |
+| `SICK_FRONT_IP` | IP-Adresse des vorderen SICK-Sensors |
+| `SICK_REAR_IP` | IP-Adresse des hinteren SICK-Sensors |
+| `SICK_FRONT_FRAME` | TF-Frame des vorderen SICK-Sensors |
+| `SICK_REAR_FRAME` | TF-Frame des hinteren SICK-Sensors |
+| `RS_FRONT_SERIAL` | Seriennummer der vorderen Intel RealSense |
+| `RS_REAR_SERIAL` | Seriennummer der hinteren Intel RealSense |
+
+
 ### 5. Services bauen und starten
 | Service                  | Beschreibung                                      |
 | ------------------------ | ------------------------------------------------- |
@@ -100,7 +104,7 @@ cp compose/.env.example compose/.env
 | `floribot-sim-backend`   | Simulations-Backend inkl. ROS–Gazebo-Bridge       |
 | `floribot-tasks`         | Tasks fürs FRE 2026                               |
 | `floribot-object-detection`         | Objekterkennung mit NVIDIA/CUDA        |
-| `floribot-rviz `         | RViz-Visualisierung                               |
+| `floribot-rviz`          | RViz-Visualisierung                               |
 
 #### Services bauen:
 ```bash
@@ -157,9 +161,9 @@ docker exec -it <Service> bash
 
 #### Stoppen von Containern:
 ```bash
-docker compose down <Service>
+docker compose down
 ```
 Alternativ:
 ```bash
-docker compose down <Service1> <Service2> <Service3>
+docker compose stop <Service1>
 ```

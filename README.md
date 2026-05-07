@@ -73,7 +73,7 @@ Konfigurationsdatei kopieren und eigene .env‑Datei erstellen:
 cp compose/.env.example compose/.env
 ```
 
-### Konfigurationsparameter
+#### Konfigurationsparameter
 
 | Variable | Bedeutung |
 |---|---|

@@ -209,6 +209,14 @@ services:
       context: ..
       dockerfile: object_detection/Dockerfile
     container_name: floribot-object-detection
+    network_mode: host  floribot-object-detection:
+    profiles: ["robot", "object-detection"]
+    build:
+      context: ..
+      dockerfile: object_detection/Dockerfile
+      args:
+        OBJECT_DETECTION_BRANCH: docker_ros2
+    container_name: floribot-object-detection
     network_mode: host
     ipc: host
     pid: host
@@ -220,20 +228,33 @@ services:
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: all
+      ULTRALYTICS_CONFIG_DIR: /tmp
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
     volumes:
       - /dev:/dev
+      - /dev/bus/usb:/dev/bus/usb
+      - /run/udev:/run/udev:ro
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     command:
       - bash
       - -lc
       - |
+          source /opt/ros/humble/setup.bash
+          source /ws/install/setup.bash
+
           python3 - <<'PY'
           import torch
           print("CUDA available:", torch.cuda.is_available())
           PY
+
+          echo "AMENT_PREFIX_PATH=$AMENT_PREFIX_PATH"
+          echo "Available detection packages:"
+          ros2 pkg list | grep detection || true
+
           exec ros2 launch ros2_detection detector.launch.py
     restart: unless-stopped
-
+    
   floribot-rviz:
     profiles: ["rviz"]
     build:

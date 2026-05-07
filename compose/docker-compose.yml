@@ -231,7 +231,7 @@ services:
           import torch
           print("CUDA available:", torch.cuda.is_available())
           PY
-          exec ros2 launch object_detection object_detection.launch.py
+          exec ros2 launch ros2_detection detector.launch.py
     restart: unless-stopped
 
   floribot-rviz:

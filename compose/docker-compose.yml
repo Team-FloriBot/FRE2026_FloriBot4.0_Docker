@@ -203,13 +203,7 @@ services:
           exec ros2 launch maize_navigation maize_navigation.launch.py
     restart: unless-stopped
 
-  floribot-object-detection:
-    profiles: ["robot", "object-detection"]
-    build:
-      context: ..
-      dockerfile: object_detection/Dockerfile
-    container_name: floribot-object-detection
-    network_mode: host  floribot-object-detection:
+    floribot-object-detection:
     profiles: ["robot", "object-detection"]
     build:
       context: ..
@@ -230,7 +224,7 @@ services:
       NVIDIA_DRIVER_CAPABILITIES: all
       ULTRALYTICS_CONFIG_DIR: /tmp
       DISPLAY: ${DISPLAY}
-      QT_X11_NO_MITSHM: 1
+      QT_X11_NO_MITSHM: "1"
     volumes:
       - /dev:/dev
       - /dev/bus/usb:/dev/bus/usb
@@ -239,20 +233,14 @@ services:
     command:
       - bash
       - -lc
-      - |
-          source /opt/ros/humble/setup.bash
-          source /ws/install/setup.bash
-
-          python3 - <<'PY'
-          import torch
-          print("CUDA available:", torch.cuda.is_available())
-          PY
-
-          echo "AMENT_PREFIX_PATH=$AMENT_PREFIX_PATH"
-          echo "Available detection packages:"
-          ros2 pkg list | grep detection || true
-
-          exec ros2 launch ros2_detection detector.launch.py
+      - >
+        source /opt/ros/humble/setup.bash &&
+        source /ws/install/setup.bash &&
+        python3 -c "import torch; print('CUDA available:', torch.cuda.is_available())" &&
+        echo "AMENT_PREFIX_PATH=$AMENT_PREFIX_PATH" &&
+        echo "Available detection packages:" &&
+        ros2 pkg list | grep detection &&
+        exec ros2 launch ros2_detection detector.launch.py
     restart: unless-stopped
     
   floribot-rviz:

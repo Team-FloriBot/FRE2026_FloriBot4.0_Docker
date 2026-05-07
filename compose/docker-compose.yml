@@ -142,7 +142,7 @@ services:
               count: all
               capabilities: [gpu]
     restart: unless-stopped
-    
+
   floribot-sim-backend:
     profiles: ["sim"]
     build:
@@ -203,7 +203,7 @@ services:
           exec ros2 launch maize_navigation maize_navigation.launch.py
     restart: unless-stopped
 
-    floribot-object-detection:
+  floribot-object-detection:
     profiles: ["robot", "object-detection"]
     build:
       context: ..
@@ -242,7 +242,7 @@ services:
         ros2 pkg list | grep detection &&
         exec ros2 launch ros2_detection detector.launch.py
     restart: unless-stopped
-    
+
   floribot-rviz:
     profiles: ["rviz"]
     build:
@@ -261,7 +261,6 @@ services:
       WAYLAND_DISPLAY: ${WAYLAND_DISPLAY}
       XDG_RUNTIME_DIR: ${XDG_RUNTIME_DIR}
       QT_X11_NO_MITSHM: 1
-
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /mnt/wslg:/mnt/wslg

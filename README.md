@@ -67,7 +67,7 @@ Damit grafische Anwendungen aus dem Container angezeigt werden können
 xhost +local:docker
 ```
 ### 4. Konfiguration
-Die Datei `compose/.env.example` enthält Beispielwerte. Für die lokale Ausführung muss daraus eine eigene `.env` erzeugt werden:
+Die Datei `compose/.env.example` enthält Beispielwerte. Für die lokale Ausführung muss daraus eine eigene `.env` erzeugt werden.<br/>
 Konfigurationsdatei kopieren und eigene .env‑Datei erstellen:
 ```bash
 cp compose/.env.example compose/.env

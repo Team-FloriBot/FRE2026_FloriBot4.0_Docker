@@ -33,8 +33,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN python3 -m pip install --no-cache-dir --upgrade pip wheel && \
     python3 -m pip install --no-cache-dir "setuptools==58.2.0"
 
-RUN python3 -m pip install --no-cache-dir "numpy<2.0"
-
 RUN python3 -m pip install --no-cache-dir \
     torch \
     opencv-python \
@@ -42,6 +40,8 @@ RUN python3 -m pip install --no-cache-dir \
     pyrealsense2 \
     pyyaml \
     ultralytics
+
+RUN python3 -m pip install --no-cache-dir --force-reinstall "numpy<2.0"
 
 RUN mkdir -p /ws/src /ws/model
 

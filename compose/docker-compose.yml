@@ -69,6 +69,15 @@ services:
 
       RS_FRONT_SERIAL: ${RS_FRONT_SERIAL:-}
       RS_REAR_SERIAL: ${RS_REAR_SERIAL:-}
+
+      XSENS_ENABLE: ${XSENS_ENABLE:-true}
+      XSENS_SCAN_FOR_DEVICES: ${XSENS_SCAN_FOR_DEVICES:-true}
+      XSENS_PORT: ${XSENS_PORT:-/dev/ttyUSB0}
+      XSENS_BAUDRATE: ${XSENS_BAUDRATE:-115200}
+      XSENS_FRAME_ID: ${XSENS_FRAME_ID:-xsens_mti_link}
+      XSENS_NAMESPACE: ${XSENS_NAMESPACE:-/sensors/xsens}
+      XSENS_LOG_LEVEL: ${XSENS_LOG_LEVEL:-info}
+      
     volumes:
       - /dev:/dev
       - /dev/bus/usb:/dev/bus/usb

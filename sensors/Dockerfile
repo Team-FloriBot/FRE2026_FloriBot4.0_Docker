@@ -9,6 +9,8 @@ ARG REALSENSE_ROS_REPO=https://github.com/realsenseai/realsense-ros.git
 ARG REALSENSE_ROS_REF=ros2-master
 ARG LIBREALSENSE_REPO=https://github.com/IntelRealSense/librealsense.git
 ARG LIBREALSENSE_REF=v2.57.7
+ARG XSENS_MTI_ROS2_REPO=https://github.com/xsenssupport/Xsens_MTi_ROS_Driver_and_Ntrip_Client.git
+ARG XSENS_MTI_ROS2_REF=ros2
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -36,6 +38,7 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-std-msgs \
     ros-jazzy-sensor-msgs \
     ros-jazzy-sensor-msgs-py \
+    ros-jazzy-nmea-msgs \
     ros-jazzy-geometry-msgs \
     ros-jazzy-diagnostic-updater \
     ros-jazzy-tf2 \
@@ -72,7 +75,8 @@ RUN git clone --branch ${LIBREALSENSE_REF} --depth 1 ${LIBREALSENSE_REPO} librea
 
 WORKDIR /ws/src
 RUN git clone --branch ${SICK_SCAN_REF} --depth 1 ${SICK_SCAN_REPO} sick_scan_xd && \
-    git clone --branch ${REALSENSE_ROS_REF} --depth 1 ${REALSENSE_ROS_REPO} realsense-ros
+    git clone --branch ${REALSENSE_ROS_REF} --depth 1 ${REALSENSE_ROS_REPO} realsense-ros && \
+    git clone --branch ${XSENS_MTI_ROS2_REF} --depth 1 ${XSENS_MTI_ROS2_REPO} xsens_mti_ros2
 
 WORKDIR /ws
 
@@ -82,7 +86,10 @@ RUN rosdep update || true
 RUN apt-get update && \
     source /opt/ros/jazzy/setup.bash && \
     rosdep install -i \
-      --from-paths /ws/src \
+      --from-paths \
+        /ws/src/sick_scan_xd \
+        /ws/src/realsense-ros \
+        /ws/src/xsens_mti_ros2/src/xsens_mti_ros2_driver \
       --rosdistro jazzy \
       --skip-keys "librealsense2" \
       -r -y && \
@@ -95,6 +102,7 @@ RUN source /opt/ros/jazzy/setup.bash && \
         realsense2_camera \
         realsense2_camera_msgs \
         realsense2_description \
+        xsens_mti_ros2_driver \
       --symlink-install
 
 COPY sensors/entrypoint.sh /entrypoint.sh

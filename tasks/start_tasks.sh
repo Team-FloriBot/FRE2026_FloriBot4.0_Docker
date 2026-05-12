@@ -7,7 +7,7 @@ if [ -f /ws/install/setup.bash ]; then
 fi
 
 # Starte beide Launch-Befehle
-ros2 launch maize_navigation maize_navigation.launch.py &
+#ros2 launch maize_navigation maize_navigation.launch.py &
 ros2 launch laser_scan_merger start.launch.py robotname:=floribot_config &
 ros2 launch slam_toolbox online_sync_launch.py &
 

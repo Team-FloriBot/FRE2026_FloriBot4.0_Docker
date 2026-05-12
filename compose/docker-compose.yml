@@ -22,6 +22,7 @@ services:
       - -lc
       - |
           ros2 launch plc_connection plc_connection_launch.py &
+          ros2 launch robot_description robot_description.launch.py &
           exec ros2 launch base base_node.launch.py
     restart: unless-stopped
 

@@ -32,36 +32,21 @@ from pathlib import Path
 path = Path("/ws/src/stage_ros2/src/ranger.cpp")
 text = path.read_text()
 
-old = '''  frame_id = vehicle->frame_name_space_ + FRAME_LASER;
-  topic_name = vehicle->topic_name_space_ + TOPIC_LASER;
+old = "msg->header.frame_id = frame_id;"
 
-  if (add_id_to_topic) {
-    topic_name += std::to_string(id());
-    frame_id += std::to_string(id());
-  }
-'''
-
-new = '''  topic_name = vehicle->topic_name_space_ + TOPIC_LASER;
-
-  if (add_id_to_topic) {
-    topic_name += std::to_string(id());
-
-    if (id() == 1) {
-      frame_id = vehicle->frame_name_space_ + "laser_front";
+new = '''if (id() == 1) {
+      msg->header.frame_id = vehicle->frame_name_space_ + "laser_front";
     } else if (id() == 2) {
-      frame_id = vehicle->frame_name_space_ + "laser_rear";
+      msg->header.frame_id = vehicle->frame_name_space_ + "laser_rear";
     } else {
-      frame_id = vehicle->frame_name_space_ + FRAME_LASER + std::to_string(id());
-    }
-  } else {
-    frame_id = vehicle->frame_name_space_ + FRAME_LASER;
-  }
-'''
+      msg->header.frame_id = frame_id;
+    }'''
 
 if old not in text:
-    raise RuntimeError("Patch target not found in ranger.cpp")
+    raise RuntimeError("Patch target not found: msg->header.frame_id = frame_id;")
 
-path.write_text(text.replace(old, new))
+text = text.replace(old, new, 1)
+path.write_text(text)
 PY
 
 COPY stage/maize_world/ /ws/src/stage_ros2/world/

@@ -25,7 +25,44 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /ws/src
 
 RUN git clone --depth 1 --branch ros2 https://github.com/tuw-robotics/Stage.git && \
-    git clone --depth 1 --branch jazzy https://github.com/tuw-robotics/stage_ros2.git
+    git clone --depth 1 --branch jazzy https://github.com/tuw-robotics/stage_ros2.git && \
+    python3 - <<'PY'
+from pathlib import Path
+
+path = Path("/ws/src/stage_ros2/src/ranger.cpp")
+text = path.read_text()
+
+old = '''  frame_id = vehicle->frame_name_space_ + FRAME_LASER;
+  topic_name = vehicle->topic_name_space_ + TOPIC_LASER;
+
+  if (add_id_to_topic) {
+    topic_name += std::to_string(id());
+    frame_id += std::to_string(id());
+  }
+'''
+
+new = '''  topic_name = vehicle->topic_name_space_ + TOPIC_LASER;
+
+  if (add_id_to_topic) {
+    topic_name += std::to_string(id());
+
+    if (id() == 1) {
+      frame_id = vehicle->frame_name_space_ + "laser_front";
+    } else if (id() == 2) {
+      frame_id = vehicle->frame_name_space_ + "laser_rear";
+    } else {
+      frame_id = vehicle->frame_name_space_ + FRAME_LASER + std::to_string(id());
+    }
+  } else {
+    frame_id = vehicle->frame_name_space_ + FRAME_LASER;
+  }
+'''
+
+if old not in text:
+    raise RuntimeError("Patch target not found in ranger.cpp")
+
+path.write_text(text.replace(old, new))
+PY
 
 COPY stage/maize_world/ /ws/src/stage_ros2/world/
 COPY stage/rviz/ /ws/src/stage_rviz/

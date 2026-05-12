@@ -20,6 +20,8 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-ackermann-msgs \
     ros-jazzy-rmw-fastrtps-cpp \
     ros-jazzy-topic-tools \
+    ros-jazzy-tf2-ros \
+    ros-jazzy-tf2-tools \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ws/src
@@ -71,11 +73,14 @@ COPY stage/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
+
 CMD ["bash", "-lc", "\
 source /opt/ros/jazzy/setup.bash && \
 source /ws/install/setup.bash && \
-ros2 launch stage_ros2 stage.launch.py world:=maize_field enforce_prefixes:=false one_tf_tree:=false frame_id_base_link:=base_link & \
+ros2 launch stage_ros2 stage.launch.py world:=maize_field enforce_prefixes:=false one_tf_tree:=true frame_id_base_link:=base_link & \
 sleep 5 && \
+ros2 run tf2_ros static_transform_publisher --x 0.30 --y 0.00 --z 0.20 --roll 0.0 --pitch 0.0 --yaw 0.0 --frame-id base_link --child-frame-id sick_front_link & \
+ros2 run tf2_ros static_transform_publisher --x -0.30 --y 0.00 --z 0.20 --roll 0.0 --pitch 0.0 --yaw 3.14159265359 --frame-id base_link --child-frame-id sick_rear_link & \
 ros2 run topic_tools relay /base_scan1 /sensors/scan_front & \
 ros2 run topic_tools relay /base_scan2 /sensors/scan_rear & \
 exec rviz2 -d /ws/src/stage_rviz/floribot_stage.rviz"]

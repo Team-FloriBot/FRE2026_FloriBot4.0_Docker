@@ -35,9 +35,9 @@ text = path.read_text()
 old = "msg->header.frame_id = frame_id;"
 
 new = '''if (id() == 1) {
-      msg->header.frame_id = vehicle->frame_name_space_ + "laser_front";
+      msg->header.frame_id = vehicle->frame_name_space_ + "sick_front_link";
     } else if (id() == 2) {
-      msg->header.frame_id = vehicle->frame_name_space_ + "laser_rear";
+      msg->header.frame_id = vehicle->frame_name_space_ + "sick_rear_link";
     } else {
       msg->header.frame_id = frame_id;
     }'''

@@ -34,18 +34,12 @@ from pathlib import Path
 path = Path("/ws/src/stage_ros2/src/ranger.cpp")
 text = path.read_text()
 
-old = "msg->header.frame_id = frame_id;"
+old = 'topic_name = vehicle->topic_name_space_ + TOPIC_LASER;\n  frame_id = vehicle->frame_name_space_ + FRAME_LASER;\n  if (add_id_to_topic) {\n    topic_name += std::to_string(id());\n    frame_id += std::to_string(id());\n  }'
 
-new = '''if (id() == 1) {
-      msg->header.frame_id = vehicle->frame_name_space_ + "sick_front_link";
-    } else if (id() == 2) {
-      msg->header.frame_id = vehicle->frame_name_space_ + "sick_rear_link";
-    } else {
-      msg->header.frame_id = frame_id;
-    }'''
+new = 'topic_name = vehicle->topic_name_space_ + TOPIC_LASER;\n  if (add_id_to_topic) {\n    topic_name += std::to_string(id());\n  }\n\n  if (id() == 1) {\n    frame_id = "sick_front_link";\n  } else if (id() == 2) {\n    frame_id = "sick_rear_link";\n  } else {\n    frame_id = vehicle->frame_name_space_ + FRAME_LASER;\n    if (add_id_to_topic) {\n      frame_id += std::to_string(id());\n    }\n  }'
 
 if old not in text:
-    raise RuntimeError("Patch target not found: msg->header.frame_id = frame_id;")
+    raise RuntimeError("Patch target not found in ranger.cpp")
 
 text = text.replace(old, new, 1)
 path.write_text(text)
@@ -77,10 +71,8 @@ ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash", "-lc", "\
 source /opt/ros/jazzy/setup.bash && \
 source /ws/install/setup.bash && \
-ros2 launch stage_ros2 stage.launch.py world:=maize_field enforce_prefixes:=false one_tf_tree:=true frame_id_base_link:=base_link & \
+ros2 launch stage_ros2 stage.launch.py world:=maize_field enforce_prefixes:=false one_tf_tree:=false frame_id_base_link:=base_link & \
 sleep 5 && \
-ros2 run tf2_ros static_transform_publisher --x 0.30 --y 0.00 --z 0.20 --roll 0.0 --pitch 0.0 --yaw 0.0 --frame-id base_link --child-frame-id FloriBot/sick_front_link & \
-ros2 run tf2_ros static_transform_publisher --x -0.30 --y 0.00 --z 0.20 --roll 0.0 --pitch 0.0 --yaw 3.14159265359 --frame-id base_link --child-frame-id FloriBot/sick_rear_link & \
 ros2 run topic_tools relay /base_scan1 /sensors/scan_front & \
 ros2 run topic_tools relay /base_scan2 /sensors/scan_rear & \
 exec rviz2 -d /ws/src/stage_rviz/floribot_stage.rviz"]

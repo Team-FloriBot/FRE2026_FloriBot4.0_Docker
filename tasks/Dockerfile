@@ -29,11 +29,6 @@ ARG CACHEBUST=1
 RUN mkdir -p /ws/src && \
     git clone https://github.com/Team-FloriBot/FRE2026_Tasks.git /ws/src/FRE2026_Tasks
 
-RUN apt-get update && \
-    rosdep update && \
-    rosdep install --from-paths src --ignore-src -y --rosdistro jazzy && \
-    rm -rf /var/lib/apt/lists/*
-
 RUN . /opt/ros/jazzy/setup.sh && \
     colcon build
 

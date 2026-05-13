@@ -4,6 +4,8 @@ services:
     build:
       context: ..
       dockerfile: base/Dockerfile
+      args:
+        - CACHEBUST=${BUILD_DATE:-1}
     container_name: floribot-base
     network_mode: host
     ipc: host
@@ -17,13 +19,6 @@ services:
       - /dev:/dev
       - /dev/bus/usb:/dev/bus/usb
       - /run/udev:/run/udev:ro
-    command:
-      - bash
-      - -lc
-      - |
-          ros2 launch plc_connection plc_connection_launch.py &
-          ros2 launch robot_description robot_description.launch.py &
-          exec ros2 launch base base_node.launch.py
     restart: unless-stopped
 
   floribot-base-sim:

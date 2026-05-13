@@ -39,8 +39,8 @@ RUN . /opt/ros/jazzy/setup.sh && \
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /etc/bash.bashrc && \
     echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /etc/bash.bashrc
 
-COPY tasks/entrypoint.sh /entrypoint.sh
-COPY tasks/start_tasks.sh /start_tasks.sh
+COPY entrypoint.sh /entrypoint.sh
+COPY start_tasks.sh /start_tasks.sh
 RUN chmod +x /entrypoint.sh /start_tasks.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

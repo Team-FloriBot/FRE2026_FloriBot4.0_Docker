@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /ws
 
+ARG CACHEBUST=1
 RUN mkdir -p /ws/src && \
     git clone https://github.com/Team-FloriBot/FRE2026_Tasks.git /ws/src/FRE2026_Tasks
 

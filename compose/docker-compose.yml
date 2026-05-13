@@ -198,6 +198,8 @@ services:
     build:
       context: ..
       dockerfile: tasks/Dockerfile
+      args:
+        - CACHEBUST=${BUILD_DATE:-1}
     container_name: floribot-tasks
     network_mode: host
     ipc: host

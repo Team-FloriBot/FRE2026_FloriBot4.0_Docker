@@ -7,12 +7,12 @@ if [ -f /ws/install/setup.bash ]; then
 fi
 
 echo "Starte Laser Scan Merger..."
-ros2 launch laser_scan_merger start.launch.py robotname:=floribot_config
+ros2 launch laser_scan_merger start.launch.py robotname:=floribot_config &
 
 #echo "Starte SLAM Toolbox..."
 #ros2 launch slam_toolbox online_sync_launch.py &
 
 #echo "Starte Maize Navigaion..."
-#ros2 launch maize_navigation maize_navigation.launch.py
+#ros2 launch maize_navigation maize_navigation.launch.py &
 
 wait

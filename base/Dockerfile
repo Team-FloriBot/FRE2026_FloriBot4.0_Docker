@@ -31,11 +31,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /ws
 
-RUN git clone --branch ${FLORIBOT_BASE_REF} --depth 1 ${FLORIBOT_BASE_REPO} /tmp/floribot_base
-
+ARG CACHEBUST=1
 RUN mkdir -p /ws/src && \
-    cp -r /tmp/floribot_base/src/base /ws/src/ && \
-    cp -r /tmp/floribot_base/src/plc_connection /ws/src/
+    git clone --branch ${FLORIBOT_BASE_REF} --depth 1 ${FLORIBOT_BASE_REPO} /ws/src/floribot_base
 
 RUN rosdep init 2>/dev/null || true
 RUN rosdep update || true
@@ -47,13 +45,14 @@ RUN apt-get update && \
 
 RUN source /opt/ros/jazzy/setup.bash && \
     cd /ws && \
-    colcon build --packages-select base plc_connection
+    colcon build
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
     echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /root/.bashrc
 
 COPY base/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY base/start_base.sh /start_base.sh
+RUN chmod +x /entrypoint.sh /start_base.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["bash"]
+CMD ["/start_base.sh"]

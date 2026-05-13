@@ -209,8 +209,6 @@ services:
     command:
       - bash
       - -lc
-      - |
-          exec ros2 launch maize_navigation maize_navigation.launch.py
     restart: unless-stopped
 
   floribot-object-detection:

@@ -40,6 +40,7 @@ ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
   hostname:="${SICK_FRONT_IP}" \
   nodename:=sick_front \
   frame_id:="${SICK_FRONT_FRAME}" \
+  tf_publish_rate:=0 \
   laserscan_topic:=/sensors/scan_front \
   cloud_topic:=/sensors/cloud_front &
 pids+=($!)
@@ -49,6 +50,7 @@ ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
   hostname:="${SICK_REAR_IP}" \
   nodename:=sick_rear \
   frame_id:="${SICK_REAR_FRAME}" \
+  tf_publish_rate:=0 \
   laserscan_topic:=/sensors/scan_rear \
   cloud_topic:=/sensors/cloud_rear &
 pids+=($!)
@@ -61,6 +63,7 @@ if [ -n "${RS_FRONT_SERIAL}" ]; then
     serial_no:="'${RS_FRONT_SERIAL}'" \
     enable_color:=true \
     enable_depth:=true \
+    publish_tf:=false \
     align_depth.enable:=true &
   pids+=($!)
 else
@@ -75,6 +78,7 @@ if [ -n "${RS_REAR_SERIAL}" ]; then
     serial_no:="'${RS_REAR_SERIAL}'" \
     enable_color:=true \
     enable_depth:=true \
+    publish_tf:=false \
     align_depth.enable:=true &
   pids+=($!)
 else
@@ -94,6 +98,7 @@ if [ "${XSENS_ENABLE}" = "true" ] || [ "${XSENS_ENABLE}" = "1" ]; then
     -p port:="${XSENS_PORT}"
     -p baudrate:="${XSENS_BAUDRATE}"
     -p frame_id:="${XSENS_FRAME_ID}"
+    -p pub_transform:=false
     --log-level "${XSENS_LOG_LEVEL}"
   )
 

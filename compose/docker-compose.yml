@@ -4,6 +4,8 @@ services:
     build:
       context: ..
       dockerfile: base/Dockerfile
+      args:
+        - CACHEBUST=${BUILD_DATE:-1}
     container_name: floribot-base
     network_mode: host
     ipc: host
@@ -17,12 +19,6 @@ services:
       - /dev:/dev
       - /dev/bus/usb:/dev/bus/usb
       - /run/udev:/run/udev:ro
-    command:
-      - bash
-      - -lc
-      - |
-          ros2 launch plc_connection plc_connection_launch.py &
-          exec ros2 launch base base_node.launch.py
     restart: unless-stopped
 
   floribot-base-sim:
@@ -198,6 +194,8 @@ services:
     build:
       context: ..
       dockerfile: tasks/Dockerfile
+      args:
+        - CACHEBUST=${BUILD_DATE:-1}
     container_name: floribot-tasks
     network_mode: host
     ipc: host
@@ -206,11 +204,6 @@ services:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
-    command:
-      - bash
-      - -lc
-      - |
-          exec ros2 launch maize_navigation maize_navigation.launch.py
     restart: unless-stopped
 
   floribot-object-detection:

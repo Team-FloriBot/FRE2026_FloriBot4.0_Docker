@@ -52,6 +52,7 @@ services:
       context: ..
       dockerfile: sensors/Dockerfile
     container_name: floribot-sensors
+    platform: linux/arm64
     network_mode: host
     ipc: host
     pid: host

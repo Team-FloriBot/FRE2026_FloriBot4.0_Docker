@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y \
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc
 
 COPY rviz/entrypoint.sh /entrypoint.sh
+COPY rviz/rviz/ /ws/src/rviz/
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["rviz2"]
+CMD ["rviz2", "-d", "/ws/src/rviz/floribot.rviz"]

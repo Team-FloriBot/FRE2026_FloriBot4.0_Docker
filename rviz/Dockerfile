@@ -18,4 +18,4 @@ COPY rviz/rviz/ /ws/src/rviz/
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["rviz2", "-d", "/ws/src/rviz/floribot.rviz"]
+CMD ["rviz2"]

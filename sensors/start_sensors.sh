@@ -37,7 +37,6 @@ trap shutdown SIGINT SIGTERM
 
 echo "[sensors] Starting SICK front lidar on ${SICK_FRONT_IP}"
 ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
-  --ros-args \
   hostname:="${SICK_FRONT_IP}" \
   -r nodename:=sick_front \
   -r node_name:=sick_front \
@@ -50,7 +49,6 @@ pids+=($!)
 
 echo "[sensors] Starting SICK rear lidar on ${SICK_REAR_IP}"
 ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
-  --ros-args \
   hostname:="${SICK_REAR_IP}" \
   -r nodename:=sick_rear \
   -r node_name:=sick_rear \

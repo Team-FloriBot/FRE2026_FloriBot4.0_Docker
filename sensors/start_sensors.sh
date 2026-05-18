@@ -36,27 +36,34 @@ shutdown()
 trap shutdown SIGINT SIGTERM
 
 echo "[sensors] Starting SICK front lidar on ${SICK_FRONT_IP}"
-ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
-  hostname:="${SICK_FRONT_IP}" \
-  -r nodename:=sick_front \
-  -r node_name:=sick_front \
-  frame_id:="${SICK_FRONT_FRAME}" \
-  tf_publish_rate:=0 \
-  ros_timestamp_control:=0 \
-  -r laserscan_topic:=/sensors/scan_front \
-  -r cloud_topic:=/sensors/cloud_front &
+ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/"${SICK_LAUNCH_FILE}" \
+  --ros-args \
+  -p hostname:="${SICK_FRONT_IP}" \
+  -p nodename:=sick_front \
+  -p frame_id:="${SICK_FRONT_FRAME}" \
+  -p tf_publish_rate:=0.0 \
+  -p ros_timestamp_control:=1 \
+  -p use_binary_protocol:=True \
+  -r /scan:=/sensors/scan_front \
+  -r cloud_topic:=/sensors/cloud_front \
+  -r __node:=sick_front &
+sleep 1
 pids+=($!)
 
+
+
 echo "[sensors] Starting SICK rear lidar on ${SICK_REAR_IP}"
-ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
-  hostname:="${SICK_REAR_IP}" \
-  -r nodename:=sick_rear \
-  -r node_name:=sick_rear \
-  frame_id:="${SICK_REAR_FRAME}" \
-  tf_publish_rate:=0 \
-  ros_timestamp_control:=0 \
-  -r laserscan_topic:=/sensors/scan_rear \
+ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/"${SICK_LAUNCH_FILE}" \
+  --ros-args \
+  -p hostname:="${SICK_REAR_IP}" \
+  -p nodename:=sick_rear \
+  -p frame_id:="${SICK_REAR_FRAME}" \
+  -p tf_publish_rate:=0.0 \
+  -p ros_timestamp_control:=1 \
+  -p use_binary_protocol:=True \
+  -r /scan:=/sensors/scan_rear \
   -r cloud_topic:=/sensors/cloud_rear &
+sleep 1
 pids+=($!)
 
 if [ -n "${RS_FRONT_SERIAL}" ]; then

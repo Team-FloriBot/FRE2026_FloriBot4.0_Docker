@@ -35,17 +35,19 @@ shutdown()
 
 trap shutdown SIGINT SIGTERM
 
-# Extrahiert den Scanner-Typen (z.B. "sick_tim_5xx" aus "sick_tim_5xx.launch.py")
-SCANNER_TYPE=$(echo "${SICK_LAUNCH_FILE}" | sed 's/\.launch\.py//')
+# Pfad zum Share-Verzeichnis des SICK-Treibers ermitteln
+SICK_SHARE_DIR="$(ros2 pkg prefix sick_scan_xd)/share/sick_scan_xd"
 
-echo "[sensors] Detected Scanner Type: ${SCANNER_TYPE}"
+# Konvertiert "sick_tim_5xx.launch.py" zu "sick_tim_5xx.launch"
+SICK_CONFIG_FILE=$(echo "${SICK_LAUNCH_FILE}" | sed 's/\.py//')
+SICK_LAUNCH_PATH="${SICK_SHARE_DIR}/launch/${SICK_CONFIG_FILE}"
+
+echo "[sensors] Using SICK config file: ${SUNCH_PATH}"
 
 echo "[sensors] Starting SICK front lidar on ${SICK_FRONT_IP}"
-ros2 run sick_scan_xd sick_generic_caller \
+ros2 run sick_scan_xd sick_generic_caller "${SICK_LAUNCH_PATH}" \
   --ros-args \
   -p hostname:="${SICK_FRONT_IP}" \
-  -p scanner_type:="${SCANNER_TYPE}" \
-  -p frame_id:="${SICK_FRONT_FRAME}" \
   -p tf_publish_rate:=0.0 \
   -p ros_timestamp_control:=1 \
   -r /scan:=/sensors/scan_front \
@@ -54,16 +56,15 @@ ros2 run sick_scan_xd sick_generic_caller \
 pids+=($!)
 
 echo "[sensors] Starting SICK rear lidar on ${SICK_REAR_IP}"
-ros2 run sick_scan_xd sick_generic_caller \
+ros2 run sick_scan_xd sick_generic_caller "${SICK_LAUNCH_PATH}" \
   --ros-args \
   -p hostname:="${SICK_REAR_IP}" \
-  -p scanner_type:="${SCANNER_TYPE}" \
-  -p frame_id:="${SICK_REAR_FRAME}" \
   -p tf_publish_rate:=0.0 \
   -p ros_timestamp_control:=1 \
   -r /scan:=/sensors/scan_rear \
   -r /cloud:=/sensors/cloud_rear \
   -r __node:=sick_rear &
+pids+=($!)ck_rear &
 pids+=($!)
 
 if [ -n "${RS_FRONT_SERIAL}" ]; then

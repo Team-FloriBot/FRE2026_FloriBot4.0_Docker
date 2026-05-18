@@ -41,6 +41,7 @@ ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
   nodename:=sick_front \
   frame_id:="${SICK_FRONT_FRAME}" \
   tf_publish_rate:=0 \
+  use_generation_timestamp:=false \
   laserscan_topic:=/sensors/scan_front \
   cloud_topic:=/sensors/cloud_front &
 pids+=($!)
@@ -51,6 +52,7 @@ ros2 launch sick_scan_xd "${SICK_LAUNCH_FILE}" \
   nodename:=sick_rear \
   frame_id:="${SICK_REAR_FRAME}" \
   tf_publish_rate:=0 \
+  use_generation_timestamp:=false \
   laserscan_topic:=/sensors/scan_rear \
   cloud_topic:=/sensors/cloud_rear &
 pids+=($!)

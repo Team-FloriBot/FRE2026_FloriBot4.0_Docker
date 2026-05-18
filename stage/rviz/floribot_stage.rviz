@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /Grid1
+        - /SLAM Map1
         - /LaserScan1
         - /LaserScan1/Topic1
         - /TF1
@@ -29,7 +30,8 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: LaserScan Merged
+
 Visualization Manager:
   Class: ""
   Displays:
@@ -51,6 +53,28 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
+
+    - Alpha: 0.7
+      Class: rviz_default_plugins/Map
+      Color Scheme: map
+      Draw Behind: true
+      Enabled: true
+      Name: SLAM Map
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /map
+      Update Topic:
+        Depth: 1
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /map_updates
+      Use Timestamp: false
+      Value: true
+
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -85,6 +109,7 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: false
       Value: true
+
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -94,7 +119,7 @@ Visualization Manager:
       Axis: Z
       Channel Name: intensity
       Class: rviz_default_plugins/LaserScan
-      Color: 255; 0; 0 # Rot für hinten
+      Color: 255; 0; 0
       Color Transformer: FlatColor
       Decay Time: 0
       Enabled: true
@@ -119,6 +144,7 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: false
       Value: true
+
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -128,7 +154,7 @@ Visualization Manager:
       Axis: Z
       Channel Name: intensity
       Class: rviz_default_plugins/LaserScan
-      Color: 255; 255; 0 # Gelb für den Merger
+      Color: 255; 255; 0
       Color Transformer: FlatColor
       Decay Time: 0
       Enabled: true
@@ -140,7 +166,7 @@ Visualization Manager:
       Name: LaserScan Merged
       Position Transformer: XYZ
       Selectable: true
-      Size (Pixels): 5 # Etwas größer für bessere Sichtbarkeit
+      Size (Pixels): 5
       Size (m): 0.01
       Style: Flat Squares
       Topic:
@@ -153,6 +179,7 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: false
       Value: true
+
     - Class: rviz_default_plugins/TF
       Enabled: true
       Filter (blacklist): ""
@@ -162,11 +189,13 @@ Visualization Manager:
         All Enabled: true
         base_link:
           Value: true
+        map:
+          Value: true
+        odom:
+          Value: true
         sick_front_link:
           Value: true
         sick_rear_link:
-          Value: true
-        odom:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -174,20 +203,25 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        odom:
-          base_link:
-            sick_front_link:
-              {}
-            sick_rear_link:
-              {}
+        map:
+          odom:
+            base_link:
+              sick_front_link:
+                {}
+              sick_rear_link:
+                {}
       Update Interval: 0
       Value: true
+
   Enabled: true
+
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: odom
+    Fixed Frame: map
     Frame Rate: 30
+
   Name: root
+
   Tools:
     - Class: rviz_default_plugins/Interact
       Hide Inactive Objects: true
@@ -221,10 +255,13 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /clicked_point
+
   Transformation:
     Current:
       Class: rviz_default_plugins/TF
+
   Value: true
+
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
@@ -248,6 +285,7 @@ Visualization Manager:
       Value: Orbit (rviz)
       Yaw: 2.929945230484009
     Saved: ~
+
 Window Geometry:
   Displays:
     collapsed: false

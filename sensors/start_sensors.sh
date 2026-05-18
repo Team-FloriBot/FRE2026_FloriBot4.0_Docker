@@ -48,6 +48,7 @@ echo "[sensors] Starting SICK front lidar on ${SICK_FRONT_IP}"
 ros2 run sick_scan_xd sick_generic_caller "${SICK_LAUNCH_PATH}" \
   --ros-args \
   -p hostname:="${SICK_FRONT_IP}" \
+  -p frame_id:="${SICK_FRONT_FRAME}" \
   -p tf_publish_rate:=0.0 \
   -p ros_timestamp_control:=1 \
   -r /scan:=/sensors/scan_front \
@@ -59,12 +60,12 @@ echo "[sensors] Starting SICK rear lidar on ${SICK_REAR_IP}"
 ros2 run sick_scan_xd sick_generic_caller "${SICK_LAUNCH_PATH}" \
   --ros-args \
   -p hostname:="${SICK_REAR_IP}" \
+  -p frame_id:="${SICK_REAR_FRAME}" \
   -p tf_publish_rate:=0.0 \
   -p ros_timestamp_control:=1 \
   -r /scan:=/sensors/scan_rear \
   -r /cloud:=/sensors/cloud_rear \
   -r __node:=sick_rear &
-pids+=($!)ck_rear &
 pids+=($!)
 
 if [ -n "${RS_FRONT_SERIAL}" ]; then

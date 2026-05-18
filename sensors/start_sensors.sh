@@ -42,7 +42,7 @@ ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx
   frame_id:="${SICK_FRONT_FRAME}" \
   tf_publish_rate:=0.0 \
   ros_timestamp_control:=1 \
-  use_binary_protocol:=True \
+  use_binary_protocol:=False \
   laserscan_topic:=/sensors/scan_front \
   cloud_topic:=/sensors/cloud_front \
   --ros-args \
@@ -59,7 +59,7 @@ ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx
   frame_id:="${SICK_REAR_FRAME}" \
   tf_publish_rate:=0.0 \
   ros_timestamp_control:=1 \
-  use_binary_protocol:=True \
+  use_binary_protocol:=False \
   laserscan_topic:=/sensors/scan_rear \
   --ros-args \
   -r __node:=sick_rear &

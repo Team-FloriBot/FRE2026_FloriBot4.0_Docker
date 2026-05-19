@@ -14,10 +14,13 @@ Dieses Repository stellt eine modulare Docker-Infrastruktur für den FloriBot 4.
 - Unterstützung für:
   - Base (Kinematik + Robotik-Grundsystem)
   - Sensors (Sensorintegration)
+  - Mapping (Kartierung und Lokalisierung)
   - Webteleop (Webbasierte Steuerung)
   - Stage (2D-Simulation)
   - Gazebo (3D-Simulation)
   - Tasks (Lösung der Aufgaben fürs FRE 2026)
+  - Object Detection (Objekterkennung)
+  - RViz (Visualisierung und Debugging)
 - Docker Compose mit Profilen
 - Skriptbasierte Steuerung (Build, Start, Stop, Logs)
 

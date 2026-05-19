@@ -187,5 +187,6 @@ docker compose down
 ```
 Alternativ:
 ```bash
+cd compose
 docker compose stop <Service1>
 ```

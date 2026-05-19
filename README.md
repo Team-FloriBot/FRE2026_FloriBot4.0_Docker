@@ -199,11 +199,13 @@ docker compose stop <Service>
 Der Navigations-Task wird über den ROS-2-Service `/start_navigation` gestartet. Der Service-Call kann aus jedem laufenden Container dieses Repositories ausgeführt werden.
 
 ```bash
-docker exec -it <Service> ros2 service call /start_navigation std_srvs/srv/Trigger "{}"
+docker exec -it <Service> bash
+ros2 service call /start_navigation std_srvs/srv/Trigger "{}"
 ```
 
 Beispiel:
 
 ```bash
-docker exec -it floribot-tasks ros2 service call /start_navigation std_srvs/srv/Trigger "{}"
+docker exec -it floribot-tasks bash
+ros2 service call /start_navigation std_srvs/srv/Trigger "{}"
 ```

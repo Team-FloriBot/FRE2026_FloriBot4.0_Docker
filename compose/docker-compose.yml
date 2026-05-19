@@ -190,7 +190,7 @@ services:
     restart: unless-stopped
 
   floribot-mapping:
-    profiles: ["sim", "stage", "robot", "mapping", "tasks"]
+    profiles: ["sim", "stage", "robot", "mapping"]
     build:
       context: ..
       dockerfile: mapping/Dockerfile

@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-message-filters \
     ros-jazzy-launch-ros \
     ros-jazzy-slam-toolbox \
+    ros-jazzy-rmw-cyclonedds-cpp \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ws

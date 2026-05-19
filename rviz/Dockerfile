@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-rqt \
     ros-jazzy-rqt-common-plugins \
     ros-jazzy-tf2-tools \
-    ros-jazzy-rmw-fastrtps-cpp \
+    ros-jazzy-rmw-cyclonedds-cpp \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc

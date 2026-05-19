@@ -48,7 +48,7 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-laser-geometry \
     ros-jazzy-xacro \
     ros-jazzy-urdf \
-    ros-jazzy-rmw-fastrtps-cpp \
+    ros-jazzy-rmw-cyclonedds-cpp \
     && rm -rf /var/lib/apt/lists/*
 
 ENV CMAKE_PREFIX_PATH=/usr/local:${CMAKE_PREFIX_PATH}

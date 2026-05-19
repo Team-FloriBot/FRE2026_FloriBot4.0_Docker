@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-dev \
     libglu1-mesa-dev \
     ros-jazzy-ackermann-msgs \
-    ros-jazzy-rmw-fastrtps-cpp \
+    ros-jazzy-rmw-cyclonedds-cpp \
     ros-jazzy-topic-tools \
     ros-jazzy-tf2-ros \
     ros-jazzy-tf2-tools \

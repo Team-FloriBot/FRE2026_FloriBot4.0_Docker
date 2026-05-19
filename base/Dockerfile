@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-tf2-geometry-msgs \
     ros-jazzy-rosidl-default-generators \
     ros-jazzy-rosidl-default-runtime \
-    ros-jazzy-rmw-fastrtps-cpp \
+    ros-jazzy-rmw-cyclonedds-cpp \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ws

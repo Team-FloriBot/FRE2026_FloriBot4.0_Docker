@@ -188,5 +188,20 @@ docker compose down
 Alternativ:
 ```bash
 cd compose
-docker compose stop <Service1>
+docker compose stop <Service>
+```
+
+### 7. Tasks starten
+
+Der Navigations-Task wird über den ROS-2-Service `/start_navigation` gestartet. Der Service-Call kann aus jedem laufenden Container dieses Repositories ausgeführt werden.
+
+```bash
+docker exec -it <Service> ros2 service call /start_navigation std_srvs/srv/Trigger "{}"
+```
+
+Beispiel:
+
+```bash
+docker exec -it floribot-tasks ros2 service call /start_navigation std_srvs/srv/Trigger "{}"
+```
 ```

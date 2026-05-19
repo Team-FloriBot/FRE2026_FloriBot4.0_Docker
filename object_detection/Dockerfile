@@ -4,7 +4,7 @@ SHELL ["/bin/bash", "-c"]
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ROS_DOMAIN_ID=0
-ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ENV ULTRALYTICS_CONFIG_DIR=/tmp
 ENV YOLO_CONFIG_DIR=/tmp
 
@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-cv-bridge \
     ros-humble-vision-opencv \
     ros-humble-realsense2-camera-msgs \
+    ros-humble-rmw-cyclonedds-cpp \
     && rm -rf /var/lib/apt/lists/*
 
 # ROS 2 Humble benötigt für ament_python eine kompatible setuptools-Version.

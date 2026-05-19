@@ -39,7 +39,6 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-ros-gz-bridge \
     ros-jazzy-ros-gz-interfaces \
     ros-jazzy-rmw-cyclonedds-cpp \
-    ros-jazzy-rviz2 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ws/src

@@ -153,7 +153,7 @@ docker compose up <Service1> <Service2> <Service3>
 | `sensors` | `floribot-sensors` | Nur Sensorintegration |
 | `stage` | `floribot-stage`, `floribot-mapping`, `floribot-tasks` | 2D-Simulation mit Stage |
 | `sim` | `floribot-base-sim`, `floribot-gazebo`, `floribot-sim-backend`, `floribot-mapping`, `floribot-tasks` | 3D-Simulation mit Gazebo |
-| `tasks` | `floribot-mapping`, `floribot-tasks` | Mapping und FRE-Tasks |
+| `tasks` | `floribot-tasks` | Nur FRE-Tasks |
 | `mapping` | `floribot-mapping` | Nur Mapping |
 | `ui` | `floribot-base`, `floribot-webteleop` | Robotik-Kern und Web-Fernsteuerung |
 | `webteleop` | `floribot-webteleop` | Nur Web-Fernsteuerung |

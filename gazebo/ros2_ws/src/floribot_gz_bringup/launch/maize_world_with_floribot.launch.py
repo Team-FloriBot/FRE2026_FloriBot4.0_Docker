@@ -1,7 +1,6 @@
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
 
@@ -35,14 +34,6 @@ def generate_launch_description():
         )
     )
 
-    rviz = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz",
-        output="screen",
-        parameters=[{"use_sim_time": True}],
-    )
-
     return LaunchDescription([
         world_launch,
 
@@ -51,10 +42,5 @@ def generate_launch_description():
         TimerAction(
             period=8.0,
             actions=[robot_launch],
-        ),
-
-        TimerAction(
-            period=10.0,
-            actions=[rviz],
         ),
     ])

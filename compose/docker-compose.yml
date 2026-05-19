@@ -74,7 +74,7 @@ services:
       XSENS_FRAME_ID: ${XSENS_FRAME_ID:-xsens_mti_link}
       XSENS_NAMESPACE: ${XSENS_NAMESPACE:-/sensors/xsens}
       XSENS_LOG_LEVEL: ${XSENS_LOG_LEVEL:-info}
-      
+
     volumes:
       - /dev:/dev
       - /dev/bus/usb:/dev/bus/usb
@@ -189,6 +189,23 @@ services:
           exec ros2 run sim_backend sim_backend_node
     restart: unless-stopped
 
+  floribot-mapping:
+    profiles: ["sim", "stage", "robot", "mapping", "tasks"]
+    build:
+      context: ..
+      dockerfile: mapping/Dockerfile
+      args:
+        - CACHEBUST=${BUILD_DATE:-1}
+    container_name: floribot-mapping
+    network_mode: host
+    ipc: host
+    pid: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+    restart: unless-stopped
+
   floribot-tasks:
     profiles: ["sim", "stage", "tasks", "robot"]
     build:
@@ -200,6 +217,8 @@ services:
     network_mode: host
     ipc: host
     pid: host
+    depends_on:
+      - floribot-mapping
     environment:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}

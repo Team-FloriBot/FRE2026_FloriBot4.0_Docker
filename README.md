@@ -204,4 +204,3 @@ Beispiel:
 ```bash
 docker exec -it floribot-tasks ros2 service call /start_navigation std_srvs/srv/Trigger "{}"
 ```
-```

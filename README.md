@@ -67,7 +67,7 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-### 3. X11-Freigabe für GUI (Gazebo)
+### 3. X11-Freigabe für GUI (Gazebo, Stage und RViz)
 Damit grafische Anwendungen aus dem Container angezeigt werden können
 (z. B. Gazebo oder Stage), muss der lokale X-Server für Docker freigegeben werden:
 ```bash

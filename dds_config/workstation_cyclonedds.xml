@@ -1,0 +1,15 @@
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain id="any">
+
+    <General>
+
+      <Interfaces>
+        <NetworkInterface name="wlp9s0"/>
+      </Interfaces>
+
+      <AllowMulticast>true</AllowMulticast>
+
+    </General>
+
+  </Domain>
+</CycloneDDS>

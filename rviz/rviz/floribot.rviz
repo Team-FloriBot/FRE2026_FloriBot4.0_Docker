@@ -11,6 +11,11 @@ Panels:
         - /LaserScan1
         - /LaserScan1/Topic1
         - /TF1
+        - /Local Path1
+        - /Local Row Markers1
+        - /SLAM Row Lines1
+        - /SLAM Lane Markers1
+        - /SLAM Target Markers1
       Splitter Ratio: 0.5
     Tree Height: 555
   - Class: rviz_common/Selection
@@ -178,6 +183,94 @@ Visualization Manager:
         Value: /sensors/merged_scan
       Use Fixed Frame: true
       Use rainbow: false
+      Value: true
+
+
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 0; 255; 255
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.060000000000000005
+      Name: Local Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0.04
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic:
+        Depth: 10
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /debug/local_path
+      Value: true
+
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: Local Row Markers
+      Namespaces:
+        rows: true
+      Topic:
+        Depth: 10
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /debug/row_markers
+      Value: true
+
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: SLAM Row Lines
+      Namespaces:
+        map_rows: true
+        slam_rows: true
+        rows: true
+      Topic:
+        Depth: 10
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /debug/map_row_lines
+      Value: true
+
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: SLAM Lane Markers
+      Namespaces:
+        map_lanes: true
+        slam_lanes: true
+        lanes: true
+      Topic:
+        Depth: 10
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /debug/map_lane_markers
+      Value: true
+
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: SLAM Target Markers
+      Namespaces:
+        reference_row: true
+        target_row: true
+        target_lane: true
+        target: true
+      Topic:
+        Depth: 10
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /debug/map_target_markers
       Value: true
 
     - Class: rviz_default_plugins/TF

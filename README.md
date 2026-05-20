@@ -82,8 +82,17 @@ Konfigurationsdatei kopieren und eigene .env‑Datei erstellen:
 ```bash
 cp compose/.env.example compose/.env
 ```
+#### Netzwerk-Schnittstelle (CycloneDDS) wechseln
 
 #### Konfigurationsparameter
+Um schnell zwischen verschiedenen Netzwerk-Konfigurationen (z. B. Ethernet eth0 oder WLAN wlp9s0) zu wechseln, kann die Variable CYCLONEDDS_CONFIG direkt in der .env überschrieben werden:
+```bash
+# Beispiel: Dauerhaft auf WLAN (wlp9s0) umstellen (Für PC mit WLAN-Verbindung)
+sed -i 's/CYCLONEDDS_CONFIG=.*/CYCLONEDDS_CONFIG=wlp9s0/' compose/.env
+
+# Beispiel: Dauerhaft auf Ethernet (eth0) umstellen (Für NVIDIA Jetson)
+sed -i 's/CYCLONEDDS_CONFIG=.*/CYCLONEDDS_CONFIG=eth0/' compose/.env
+```
 
 | Variable | Bedeutung |
 |---|---|
@@ -107,6 +116,7 @@ cp compose/.env.example compose/.env
 | `XSENS_FRAME_ID` | TF-Frame des XSens-Sensors |
 | `XSENS_NAMESPACE` | ROS-Namespace für XSens-Daten |
 | `XSENS_LOG_LEVEL` | Log-Level des XSens-Treibers |
+
 
 ### 5. Services bauen und starten
 | Service                  | Beschreibung                                      |

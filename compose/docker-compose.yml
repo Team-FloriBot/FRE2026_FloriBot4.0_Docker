@@ -59,6 +59,7 @@ services:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      CYCLONEDDS_URI: ${CYCLONEDDS_URI}
 
       SICK_LAUNCH_FILE: ${SICK_LAUNCH_FILE:-sick_tim_5xx.launch.py}
       SICK_FRONT_IP: ${SICK_FRONT_IP:-192.168.0.52}
@@ -81,6 +82,7 @@ services:
       - /dev:/dev
       - /dev/bus/usb:/dev/bus/usb
       - /run/udev:/run/udev:ro
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
     command:
       - /start_sensors.sh
     restart: unless-stopped
@@ -98,7 +100,10 @@ services:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      CYCLONEDDS_URI: ${CYCLONEDDS_URI}
     restart: unless-stopped
+    volumes:
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
 
   floribot-stage:
     profiles: ["stage"]
@@ -206,7 +211,10 @@ services:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      CYCLONEDDS_URI: ${CYCLONEDDS_URI}
     restart: unless-stopped
+    volumes:
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
 
   floribot-tasks:
     profiles: ["sim", "stage", "tasks", "robot"]
@@ -225,7 +233,10 @@ services:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      CYCLONEDDS_URI: ${CYCLONEDDS_URI}
     restart: unless-stopped
+    volumes:
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
 
   floribot-object-detection:
     profiles: ["robot", "object-detection"]
@@ -250,11 +261,13 @@ services:
       YOLO_CONFIG_DIR: /tmp
       DISPLAY: ${DISPLAY}
       QT_X11_NO_MITSHM: "1"
+      CYCLONEDDS_URI: ${CYCLONEDDS_URI}
     volumes:
       - /dev:/dev
       - /dev/bus/usb:/dev/bus/usb
       - /run/udev:/run/udev:ro
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
     command:
       - bash
       - -lc

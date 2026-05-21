@@ -84,7 +84,7 @@ cp compose/.env.example compose/.env
 ```
 #### Netzwerk-Schnittstelle (CycloneDDS) wechseln
 
-#### Konfigurationsparameter
+#### Konfigurationsparameter (Nur notwendig bei Containern auf verschiedenen Geräten im selben Netzwerk)
 Um schnell zwischen verschiedenen Netzwerk-Konfigurationen (z. B. Ethernet eth0 oder WLAN wlp9s0) zu wechseln, kann die Variable CYCLONEDDS_CONFIG direkt in der .env überschrieben werden:
 ```bash
 # Beispiel: Dauerhaft auf WLAN (wlp9s0) umstellen (Für PC mit WLAN-Verbindung)

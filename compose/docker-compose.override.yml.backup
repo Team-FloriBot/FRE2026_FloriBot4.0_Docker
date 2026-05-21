@@ -1,0 +1,10 @@
+# compose/docker-compose.override.yml
+services:
+  floribot-base:
+    image: benedictbauer/floribot-base:latest
+  floribot-sensors:
+    image: benedictbauer/floribot-sensors:latest
+  floribot-object-detection:
+    image: benedictbauer/floribot-object-detection:latest
+  floribot-tasks:
+    image: benedictbauer/floribot-tasks:latest

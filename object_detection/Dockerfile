@@ -17,10 +17,16 @@ WORKDIR /ws
 ARG VISION_OPENCV_REPO=https://github.com/ros-perception/vision_opencv.git
 ARG VISION_OPENCV_REF=humble
 
-# Only required for the RGBD ROS message definition.
+# Required only for the RGBD ROS message definition.
 # No RealSense camera driver is built in this container.
 ARG REALSENSE_MSGS_REPO=https://github.com/realsenseai/realsense-ros.git
 ARG REALSENSE_MSGS_REF=ros2-master
+
+# Middleware used by the other FloriBot ROS containers.
+ARG CYCLONEDDS_REPO=https://github.com/eclipse-cyclonedds/cyclonedds.git
+ARG CYCLONEDDS_REF=0.10.5
+ARG RMW_CYCLONEDDS_REPO=https://github.com/ros2/rmw_cyclonedds.git
+ARG RMW_CYCLONEDDS_REF=humble
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
@@ -58,22 +64,27 @@ RUN mkdir -p /ws/src /ws/model && \
     git clone --depth 1 --branch ${REALSENSE_MSGS_REF} \
         ${REALSENSE_MSGS_REPO} /tmp/realsense-msgs-source && \
     cp -r /tmp/realsense-msgs-source/realsense2_camera_msgs /ws/src/ && \
-    rm -rf /tmp/realsense-msgs-source
+    rm -rf /tmp/realsense-msgs-source && \
+    git clone --depth 1 --branch ${CYCLONEDDS_REF} \
+        ${CYCLONEDDS_REPO} /ws/src/cyclonedds && \
+    git clone --depth 1 --branch ${RMW_CYCLONEDDS_REF} \
+        ${RMW_CYCLONEDDS_REPO} /ws/src/rmw_cyclonedds
 
-# Only the message definition is compiled here. The RealSense camera node and
-# librealsense remain exclusively in the sensors container.
+# Only the RGBD message definition is taken from RealSense.
+# The RealSense camera node and librealsense remain in the sensors container.
 COPY object_detection/ros2_ws/src /ws/src
 COPY object_detection/model /ws/model
 
 RUN source /opt/ros/humble/install/setup.bash && \
     colcon build --symlink-install --packages-select \
+        cyclonedds \
+        rmw_cyclonedds_cpp \
         cv_bridge \
         realsense2_camera_msgs \
         ros2_detection_interfaces \
         ros2_detection
 
-# Same behaviour as the other FloriBot containers:
-# ROS and workspace are available in an interactive container shell.
+# ROS and workspace packages are directly available in interactive shells.
 RUN echo 'if [ -f /opt/ros/humble/setup.bash ]; then source /opt/ros/humble/setup.bash; elif [ -f /opt/ros/humble/install/setup.bash ]; then source /opt/ros/humble/install/setup.bash; fi' >> /etc/bash.bashrc && \
     echo 'if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi' >> /etc/bash.bashrc
 

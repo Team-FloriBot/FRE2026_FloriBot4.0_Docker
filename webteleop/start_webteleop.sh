@@ -1,12 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-source /opt/ros/jazzy/setup.bash
-
-if [ -f /ws/install/setup.bash ]; then
-    source /ws/install/setup.bash
-fi
-
 echo "Starte cmd_vel_selector..."
 ros2 launch cmd_vel_selector cmd_vel_selector.launch.py &
 selector_pid=$!

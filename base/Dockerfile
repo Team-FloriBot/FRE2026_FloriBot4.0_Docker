@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     libboost-system-dev \
     ros-jazzy-rclcpp \
     ros-jazzy-std-msgs \
+    ros-jazzy-std-srvs \
     ros-jazzy-geometry-msgs \
     ros-jazzy-nav-msgs \
     ros-jazzy-sensor-msgs \
@@ -37,7 +38,8 @@ RUN git clone --branch ${FLORIBOT_BASE_REF} --depth 1 ${FLORIBOT_BASE_REPO} /tmp
 RUN mkdir -p /ws/src && \
     cp -r /tmp/floribot_base/src/base /ws/src/ && \
     cp -r /tmp/floribot_base/src/plc_connection /ws/src/ && \
-    cp -r /tmp/floribot_base/src/robot_description /ws/src/
+    cp -r /tmp/floribot_base/src/robot_description /ws/src/ && \
+    cp -r /tmp/floribot_base/src/cmd_vel_selector /ws/src/
 
 RUN rosdep init 2>/dev/null || true
 RUN rosdep update || true
@@ -49,13 +51,18 @@ RUN apt-get update && \
 
 RUN source /opt/ros/jazzy/setup.bash && \
     cd /ws && \
-    colcon build --packages-select base plc_connection robot_description
+    colcon build --packages-select \
+        base \
+        plc_connection \
+        robot_description \
+        cmd_vel_selector
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
     echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /root/.bashrc
 
 COPY base/entrypoint.sh /entrypoint.sh
 COPY base/start_base.sh /start_base.sh
+
 RUN chmod +x /entrypoint.sh /start_base.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

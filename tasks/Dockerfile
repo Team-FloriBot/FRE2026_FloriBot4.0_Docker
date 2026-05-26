@@ -55,7 +55,7 @@ RUN echo "Cache bust: ${CACHEBUST}" && \
     cd /ws/src/FRE2026_Tasks && \
     git sparse-checkout set \
       src/maize_navigation \
-      src/fre2026_task_interfaces
+      src/fre2026_tasks_interfaces
 
 RUN git clone \
       --depth 1 \

@@ -53,10 +53,9 @@ RUN git clone \
       ${FRE2026_TASKS_REPO} \
       /tmp/fre2026_tasks && \
     cd /tmp/fre2026_tasks && \
-    git sparse-checkout set src/fre2026_task_interfaces && \
-    cp -r /tmp/fre2026_tasks/src/fre2026_task_interfaces /ws/src/ && \
+    git sparse-checkout set src/fre2026_tasks_interfaces && \
+    cp -r /tmp/fre2026_tasks/src/fre2026_tasks_interfaces /ws/src/ && \
     rm -rf /tmp/fre2026_tasks
-
 WORKDIR /ws
 
 RUN python3 -m pip install --no-cache-dir --break-system-packages \

@@ -33,7 +33,24 @@ shutdown()
   exit 0
 }
 
+wait_for_lidar()
+{
+  local ip="$1"
+
+  echo "[sensors] Waiting for lidar ${ip}"
+
+  until nc -z "${ip}" 2112; do
+    sleep 1
+  done
+
+  echo "[sensors] Lidar ${ip} is reachable"
+  sleep 3
+}
+
 trap shutdown SIGINT SIGTERM
+
+echo "[sensors] Checking SICK front connectivity"
+wait_for_lidar "${SICK_FRONT_IP}"
 
 echo "[sensors] Starting SICK front lidar on ${SICK_FRONT_IP}"
 ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
@@ -43,14 +60,15 @@ ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx
   tf_publish_rate:=0.0 \
   ros_timestamp_control:=1 \
   laserscan_topic:=/sensors/scan_front \
-  sw_pll_only_publish:=false \
   cloud_topic:=/sensors/cloud_front \
   --ros-args \
-  -r __node:=sick_front &
+  -r __node:=sick_front \
+  -r sw_pll_only_publish:=false &
 sleep 1
 pids+=($!)
 
-
+echo "[sensors] Checking SICK rear connectivity"
+wait_for_lidar "${SICK_REAR_IP}"
 
 echo "[sensors] Starting SICK rear lidar on ${SICK_REAR_IP}"
 ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
@@ -60,9 +78,9 @@ ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx
   tf_publish_rate:=0.0 \
   ros_timestamp_control:=1 \
   laserscan_topic:=/sensors/scan_rear \
-  sw_pll_only_publish:=false \
   --ros-args \
-  -r __node:=sick_rear &
+  -r __node:=sick_rear \
+  -r sw_pll_only_publish:=false &
 sleep 1
 pids+=($!)
 

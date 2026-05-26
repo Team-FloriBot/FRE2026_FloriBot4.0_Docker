@@ -34,16 +34,19 @@ ARG RMW_CYCLONEDDS_REF=humble
 ARG OBJECT_DETECTION_REPO=https://github.com/Team-FloriBot/FRE_object_detection.git
 ARG OBJECT_DETECTION_REF=docker_ros2
 
-# The Jetson base image contains an obsolete ROS 2 APT source.
-# No ROS Debian packages are installed in this image; ROS Humble is already
-# provided by the base image and required workspace packages are built from source.
-# Disable the inherited ROS repository before the first apt-get update.
+# The Jetson base image contains an obsolete ROS 2 APT source with an expired key.
+# ROS Humble is already provided by the base image. All additionally required ROS
+# packages are built from source, therefore the inherited ROS APT source is disabled.
 RUN set -eux; \
     for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do \
         [ -f "${source}" ] || continue; \
         sed -i '\|packages\.ros\.org/ros2/ubuntu|d' "${source}"; \
     done
 
+# Do not install python3-opencv or libopencv-dev here.
+# The Jetson base image already provides NVIDIA-compatible OpenCV packages
+# named opencv-libs and opencv-dev. Installing Ubuntu/NVIDIA repository variants
+# would overwrite files from those existing packages and cause dpkg conflicts.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     build-essential \
@@ -51,8 +54,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     python3-colcon-common-extensions \
     python3-numpy \
-    python3-opencv \
-    libopencv-dev \
     libboost-dev \
     libgl1 \
     libglib2.0-0 \
@@ -60,7 +61,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
-# CUDA-enabled torch and torchvision are supplied by the Jetson base image.
+# CUDA-enabled torch, torchvision and OpenCV are supplied by the Jetson base image.
 RUN python3 -m pip install --no-cache-dir \
     "numpy<2.0" \
     pyyaml \

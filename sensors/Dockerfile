@@ -49,6 +49,7 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-xacro \
     ros-jazzy-urdf \
     ros-jazzy-rmw-cyclonedds-cpp \
+    netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
 ENV CMAKE_PREFIX_PATH=/usr/local:${CMAKE_PREFIX_PATH}

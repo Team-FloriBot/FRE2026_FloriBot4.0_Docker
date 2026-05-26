@@ -9,10 +9,13 @@ fi
 echo "Starte Robot Description..."
 ros2 launch robot_description launch.py &
 
+echo "Starte cmd_vel Selector..."
+ros2 launch cmd_vel_selector cmd_vel_selector.launch.py &
+
 echo "Starte Base..."
 ros2 launch base base_node.launch.py &
 
-echo "Starte PLC Connection ..."
+echo "Starte PLC Connection..."
 ros2 launch plc_connection plc_connection_launch.py &
 
 wait

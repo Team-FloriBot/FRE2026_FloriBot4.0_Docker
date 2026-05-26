@@ -9,6 +9,9 @@ ARG WEBTELEOP_REF=main
 ARG FLORIBOT_BASE_REPO=https://github.com/Team-FloriBot/FloriBot4.0_ROS2_Jazzy_Base.git
 ARG FLORIBOT_BASE_REF=main
 
+ARG FRE2026_TASKS_REPO=https://github.com/Team-FloriBot/FRE2026_Tasks.git
+ARG FRE2026_TASKS_REF=main
+
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -41,6 +44,18 @@ RUN git clone --branch ${FLORIBOT_BASE_REF} --depth 1 \
     cp -r /tmp/floribot_base/src/cmd_vel_selector /ws/src/ && \
     rm -rf /tmp/floribot_base
 
+RUN git clone \
+      --depth 1 \
+      --filter=blob:none \
+      --sparse \
+      --branch ${FRE2026_TASKS_REF} \
+      ${FRE2026_TASKS_REPO} \
+      /tmp/fre2026_tasks && \
+    cd /tmp/fre2026_tasks && \
+    git sparse-checkout set src/fre2026_tasks_interfaces && \
+    cp -r /tmp/fre2026_tasks/src/fre2026_tasks_interfaces /ws/src/ && \
+    rm -rf /tmp/fre2026_tasks
+
 WORKDIR /ws
 
 RUN python3 -m pip install --no-cache-dir --break-system-packages \
@@ -49,7 +64,7 @@ RUN python3 -m pip install --no-cache-dir --break-system-packages \
 
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build --symlink-install \
-    --packages-select web_teleop cmd_vel_selector
+    --packages-select fre2026_tasks_interfaces web_teleop cmd_vel_selector
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
     echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /root/.bashrc

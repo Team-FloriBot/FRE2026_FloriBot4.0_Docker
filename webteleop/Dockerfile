@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     ros-jazzy-rmw-cyclonedds-cpp \
     ros-jazzy-rclcpp \
+    ros-jazzy-rclpy \
     ros-jazzy-geometry-msgs \
     ros-jazzy-std-msgs \
     ros-jazzy-std-srvs \
@@ -52,8 +53,8 @@ RUN git clone \
       ${FRE2026_TASKS_REPO} \
       /tmp/fre2026_tasks && \
     cd /tmp/fre2026_tasks && \
-    git sparse-checkout set src/fre2026_tasks_interfaces && \
-    cp -r /tmp/fre2026_tasks/src/fre2026_tasks_interfaces /ws/src/ && \
+    git sparse-checkout set src/fre2026_task_interfaces && \
+    cp -r /tmp/fre2026_tasks/src/fre2026_task_interfaces /ws/src/ && \
     rm -rf /tmp/fre2026_tasks
 
 WORKDIR /ws
@@ -64,7 +65,10 @@ RUN python3 -m pip install --no-cache-dir --break-system-packages \
 
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build --symlink-install \
-    --packages-select fre2026_tasks_interfaces web_teleop cmd_vel_selector
+    --packages-select \
+        fre2026_task_interfaces \
+        web_teleop \
+        cmd_vel_selector
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
     echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /root/.bashrc

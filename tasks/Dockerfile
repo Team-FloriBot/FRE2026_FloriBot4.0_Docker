@@ -3,7 +3,6 @@ FROM ros:jazzy
 ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 
-# --- Repositories & Branches ---
 ARG FRE2026_TASKS_REPO=https://github.com/Team-FloriBot/FRE2026_Tasks.git
 ARG FRE2026_TASKS_REF=main
 
@@ -12,19 +11,18 @@ ARG FRE_DETECTION_REF=docker_ros2_client
 
 ARG CACHEBUST=1
 
-# --- System- & ROS-Abhängigkeiten installieren ---
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
+    build-essential \
+    cmake \
     python3-colcon-common-extensions \
     python3-numpy \
     python3-pip \
     python3-rosdep \
-    # Bibliotheken aus dem 2. Dockerfile (OpenCV / System)
     libgl1 \
     libusb-1.0-0 \
     libsm6 \
     libxext6 \
-    # ROS-Pakete aus dem 1. Dockerfile
     ros-jazzy-rclpy \
     ros-jazzy-geometry-msgs \
     ros-jazzy-nav-msgs \
@@ -37,17 +35,17 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-launch \
     ros-jazzy-launch-ros \
     ros-jazzy-rmw-cyclonedds-cpp \
-    # ROS-Pakete aus dem 2. Dockerfile
+    ros-jazzy-rosidl-default-generators \
+    ros-jazzy-rosidl-default-runtime \
     ros-jazzy-cv-bridge \
     ros-jazzy-vision-opencv \
     && rm -rf /var/lib/apt/lists/*
 
-# --- Workspace einrichten & Repositories klonen ---
 WORKDIR /ws
 RUN mkdir -p /ws/src
 
-# 1. FRE2026_Tasks (Sparse Checkout für maize_navigation)
-RUN git clone \
+RUN echo "Cache bust: ${CACHEBUST}" && \
+    git clone \
       --depth 1 \
       --filter=blob:none \
       --sparse \
@@ -55,41 +53,47 @@ RUN git clone \
       ${FRE2026_TASKS_REPO} \
       /ws/src/FRE2026_Tasks && \
     cd /ws/src/FRE2026_Tasks && \
-    git sparse-checkout set src/maize_navigation
+    git sparse-checkout set \
+      src/maize_navigation \
+      src/fre2026_task_interfaces
 
-# 2. FRE_object_detection (Komplettes Repo klonen)
 RUN git clone \
       --depth 1 \
       --branch ${FRE_DETECTION_REF} \
       ${FRE_DETECTION_REPO} \
       /ws/src/FRE_object_detection
 
-# --- Rosdep Installation ---
 RUN rosdep init 2>/dev/null || true && \
     rosdep update && \
     apt-get update && \
     source /opt/ros/jazzy/setup.bash && \
-    rosdep install --from-paths /ws/src --ignore-src -r -y \
+    rosdep install \
+      --from-paths /ws/src \
+      --ignore-src \
+      -r \
+      -y \
       --skip-keys="laser_scan_merger slam_toolbox" && \
     rm -rf /var/lib/apt/lists/*
 
-# --- Workspace bauen ---
-# Baut maize_navigation sowie die erkannten Pakete aus dem Detection-Repo
 RUN source /opt/ros/jazzy/setup.bash && \
-    colcon build --symlink-install --packages-select maize_navigation ros2_detection_interfaces ros2_detection_client
+    colcon build \
+      --symlink-install \
+      --packages-select \
+        fre2026_task_interfaces \
+        maize_navigation \
+        ros2_detection_interfaces \
+        ros2_detection_client
 
-# --- Umgebungsvariablen & Sourcing ---
+
 ENV ROS_DOMAIN_ID=0
-# Hinweis: Im 2. Dockerfile stand fastrtps, das 1. Dockerfile installierte cyclonedds. 
-# Ich habe es hier auf CycloneDDS belassen, da es oben via apt installiert wird. Bei Bedarf anpassen!
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /etc/bash.bashrc && \
     echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /etc/bash.bashrc
 
-# --- Entrypoint & Startup ---
 COPY tasks/entrypoint.sh /entrypoint.sh
 COPY tasks/start_tasks.sh /start_tasks.sh
+
 RUN chmod +x /entrypoint.sh /start_tasks.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

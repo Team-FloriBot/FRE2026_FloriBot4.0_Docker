@@ -74,10 +74,10 @@ if [ -n "${RS_FRONT_SERIAL}" ]; then
     serial_no:="'${RS_FRONT_SERIAL}'" \
     enable_rgbd:=true \
     enable_sync:=true \
-    align_depth.enable:= true \
+    align_depth.enable:=true \
     enable_color:=true \
     enable_depth:=true \
-    color_module.profile:= 640x480x30 \
+    color_module.profile:=640x480x30 \
     publish_tf:=false &
   pids+=($!)
 else

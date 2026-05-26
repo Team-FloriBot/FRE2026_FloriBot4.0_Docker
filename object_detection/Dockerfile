@@ -34,6 +34,17 @@ ARG RMW_CYCLONEDDS_REF=humble
 ARG OBJECT_DETECTION_REPO=https://github.com/Team-FloriBot/FRE_object_detection.git
 ARG OBJECT_DETECTION_REF=docker_ros2
 
+# The Jetson base image currently carries an expired ROS repository signing key.
+# Import the current key and recreate the ROS 2 source before the first apt-get update.
+ADD https://raw.githubusercontent.com/ros/rosdistro/master/ros.key /usr/share/keyrings/ros-archive-keyring.gpg
+RUN set -eux; \
+    chmod 0644 /usr/share/keyrings/ros-archive-keyring.gpg; \
+    for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do \
+        [ -f "${source}" ] || continue; \
+        sed -i '\|packages\.ros\.org/ros2/ubuntu|d' "${source}"; \
+    done; \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] https://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}}) main" > /etc/apt/sources.list.d/ros2.list
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     build-essential \

@@ -4,13 +4,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 
 ARG SICK_SCAN_REPO=https://github.com/SICKAG/sick_scan_xd.git
-ARG SICK_SCAN_REF=develop
+ARG SICK_SCAN_XD_SHA=2d4796699158762cfee78ece05bf8d7c2ceb68d0
 ARG REALSENSE_ROS_REPO=https://github.com/realsenseai/realsense-ros.git
-ARG REALSENSE_ROS_REF=ros2-master
+ARG REALSENSE_ROS_SHA=6d87b071dcfef15f2a0407e1e78945256add70d0
 ARG LIBREALSENSE_REPO=https://github.com/IntelRealSense/librealsense.git
 ARG LIBREALSENSE_REF=v2.57.7
 ARG XSENS_MTI_ROS2_REPO=https://github.com/xsenssupport/Xsens_MTi_ROS_Driver_and_Ntrip_Client.git
-ARG XSENS_MTI_ROS2_REF=ros2
+ARG XSENS_MTI_ROS2_SHA=d6b87ecf63297b814a4084b95a7b5daf0713be62
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -75,9 +75,14 @@ RUN git clone --branch ${LIBREALSENSE_REF} --depth 1 ${LIBREALSENSE_REPO} librea
     cd / && rm -rf /opt/librealsense
 
 WORKDIR /ws/src
-RUN git clone --branch ${SICK_SCAN_REF} --depth 1 ${SICK_SCAN_REPO} sick_scan_xd && \
-    git clone --branch ${REALSENSE_ROS_REF} --depth 1 ${REALSENSE_ROS_REPO} realsense-ros && \
-    git clone --branch ${XSENS_MTI_ROS2_REF} --depth 1 ${XSENS_MTI_ROS2_REPO} xsens_mti_ros2
+RUN git clone --no-checkout ${SICK_SCAN_REPO} sick_scan_xd && \
+    cd sick_scan_xd && git fetch --depth 1 origin ${SICK_SCAN_XD_SHA} && git checkout --detach FETCH_HEAD && \
+    cd /ws/src && \
+    git clone --no-checkout ${REALSENSE_ROS_REPO} realsense-ros && \
+    cd realsense-ros && git fetch --depth 1 origin ${REALSENSE_ROS_SHA} && git checkout --detach FETCH_HEAD && \
+    cd /ws/src && \
+    git clone --no-checkout ${XSENS_MTI_ROS2_REPO} xsens_mti_ros2 && \
+    cd xsens_mti_ros2 && git fetch --depth 1 origin ${XSENS_MTI_ROS2_SHA} && git checkout --detach FETCH_HEAD
 
 WORKDIR /ws
 

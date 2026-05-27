@@ -94,10 +94,18 @@ RUN mkdir -p /ws/src /ws/model && \
     cp -r /tmp/fre-object-detection/model/. /ws/model/ && \
     rm -rf /tmp/fre-object-detection
 
-# Build only packages required by the object detection container.
+# Build CycloneDDS without ddsperf. The optional ddsperf build invokes idlc,
+# which fails in this base image due to a CycloneDDS shared-library mismatch.
+# After CycloneDDS has been installed into the workspace overlay, build the
+# remaining ROS packages against that overlay.
 RUN source /opt/ros/humble/install/setup.bash && \
+    colcon build --symlink-install --packages-select cyclonedds \
+        --cmake-args \
+            -DBUILD_DDSPERF=OFF \
+            -DBUILD_EXAMPLES=OFF \
+            -DBUILD_TESTING=OFF && \
+    source /ws/install/setup.bash && \
     colcon build --symlink-install --packages-select \
-        cyclonedds \
         rmw_cyclonedds_cpp \
         cv_bridge \
         realsense2_camera_msgs \

@@ -36,68 +36,27 @@ shutdown()
 wait_for_lidar()
 {
   local ip="$1"
-  echo "[sensors] Waiting for lidar TCP 2112 on ${ip}"
+
+  echo "[sensors] Waiting for lidar ${ip}"
+
   until nc -z "${ip}" 2112; do
     sleep 1
   done
-  echo "[sensors] Lidar ${ip} is reachable on TCP 2112"
+
+  echo "[sensors] Lidar ${ip} is reachable"
   sleep 3
-}
-
-# Neue Wrapper-Funktion für den Lidar-Launch mit Node-Überprüfung
-launch_lidar_with_retry()
-{
-  local ip="$1"
-  local node_name="$2"
-  # Überspringe die ersten zwei Argumente, der Rest ist der eigentliche ROS-Befehl
-  shift 2
-  local ros_cmd=("$@")
-
-  # 1. Stelle sicher, dass das Gerät physisch im Netzwerk da ist
-  wait_for_lidar "${ip}"
-
-  while true; do
-    echo "[sensors] Starting Lidar Node /${node_name} on ${ip}..."
-    
-    # 2. Starte den ROS-Befehl im Hintergrund
-    "${ros_cmd[@]}" &
-    local child_pid=$!
-
-    local node_found=false
-    local timeout_sec=10
-
-    echo "[sensors] Waiting up to ${timeout_sec}s for node /${node_name} to appear in ROS graph..."
-    
-    # 3. Überprüfe zyklisch den ROS 2 Graphen
-    for (( i=1; i<=timeout_sec; i++ )); do
-      # In einem if-Statement führt grep bei Nicht-Finden nicht zum Skript-Abbruch (trotz set -e)
-      if ros2 node list 2>/dev/null | grep -q "^/${node_name}$"; then
-        node_found=true
-        break
-      fi
-      sleep 1
-    done
-
-    # 4. Auswertung
-    if [ "$node_found" = true ]; then
-      echo "[sensors] SUCCESS: Node /${node_name} is active."
-      pids+=($child_pid)
-      break # Raus aus der Retry-Schleife
-    else
-      echo "[sensors] ERROR: Node /${node_name} did not appear in time. Retrying..."
-      # Schieße den hängenden Prozess ab
-      kill -9 $child_pid 2>/dev/null || true
-      wait $child_pid 2>/dev/null || true
-      sleep 2
-    fi
-  done
 }
 
 trap shutdown SIGINT SIGTERM
 
-echo "[sensors] Initializing SICK front lidar"
-launch_lidar_with_retry "${SICK_FRONT_IP}" "sick_front" \
-  ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
+echo "[sensors] Checking SICK front connectivity"
+wait_for_lidar "${SICK_FRONT_IP}"
+
+
+sleep 30
+
+echo "[sensors] Starting SICK front lidar on ${SICK_FRONT_IP}"
+ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
   hostname:="${SICK_FRONT_IP}" \
   nodename:=sick_front \
   frame_id:="${SICK_FRONT_FRAME}" \
@@ -107,11 +66,15 @@ launch_lidar_with_retry "${SICK_FRONT_IP}" "sick_front" \
   cloud_topic:=/sensors/cloud_front \
   --ros-args \
   -r __node:=sick_front \
-  -p sw_pll_only_publish:=false
+  -p sw_pll_only_publish:=false &
+sleep 1
+pids+=($!)
 
-echo "[sensors] Initializing SICK rear lidar"
-launch_lidar_with_retry "${SICK_REAR_IP}" "sick_rear" \
-  ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
+echo "[sensors] Checking SICK rear connectivity"
+wait_for_lidar "${SICK_REAR_IP}"
+
+echo "[sensors] Starting SICK rear lidar on ${SICK_REAR_IP}"
+ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
   hostname:="${SICK_REAR_IP}" \
   nodename:=sick_rear \
   frame_id:="${SICK_REAR_FRAME}" \
@@ -121,7 +84,9 @@ launch_lidar_with_retry "${SICK_REAR_IP}" "sick_rear" \
   cloud_topic:=/sensors/cloud_rear \
   --ros-args \
   -r __node:=sick_rear \
-  -p sw_pll_only_publish:=false
+  -p sw_pll_only_publish:=false &
+sleep 1
+pids+=($!)
 
 if [ -n "${RS_FRONT_SERIAL}" ]; then
   echo "[sensors] Starting RealSense front, serial ${RS_FRONT_SERIAL}"

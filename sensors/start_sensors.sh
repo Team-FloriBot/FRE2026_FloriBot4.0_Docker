@@ -82,19 +82,9 @@ if [ "${XSENS_ENABLE}" = "true" ] || [ "${XSENS_ENABLE}" = "1" ]; then
   echo "[sensors] Xsens namespace: ${XSENS_NAMESPACE}"
   echo "[sensors] Xsens port: ${XSENS_PORT}, baudrate: ${XSENS_BAUDRATE}, scan_for_devices: ${XSENS_SCAN_FOR_DEVICES}"
 
-  xsens_args=(
-    --ros-args
-    --params-file "$(ros2 pkg prefix xsens_mti_ros2_driver)/share/xsens_mti_ros2_driver/param/xsens_mti_node.yaml"
-    -r __ns:="${XSENS_NAMESPACE}"
-    -p scan_for_devices:="${XSENS_SCAN_FOR_DEVICES}"
-    -p port:="${XSENS_PORT}"
-    -p baudrate:="${XSENS_BAUDRATE}"
-    -p frame_id:="${XSENS_FRAME_ID}"
-    -p pub_transform:=false
-    --log-level "${XSENS_LOG_LEVEL}"
-  )
+  ros2 launch xsens_mti_ros2_driver imu.launch.py \
+  xsens_namespace:=${XSENS_NAMESPACE} &
 
-  ros2 run xsens_mti_ros2_driver xsens_mti_node "${xsens_args[@]}" &
   pids+=($!)
 else
   echo "[sensors] Xsens MTi IMU disabled because XSENS_ENABLE=${XSENS_ENABLE}"

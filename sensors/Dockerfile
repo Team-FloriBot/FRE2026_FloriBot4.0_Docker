@@ -81,8 +81,6 @@ RUN git clone --branch ${SICK_SCAN_REF} --depth 1 ${SICK_SCAN_REPO} sick_scan_xd
 
 WORKDIR /ws
 
-COPY sensors/launch_lasers/ /ws/src/sick_scan_xd/launch/
-
 RUN rosdep init 2>/dev/null || true
 RUN rosdep update || true
 
@@ -97,6 +95,10 @@ RUN apt-get update && \
       --skip-keys "librealsense2" \
       -r -y && \
     rm -rf /var/lib/apt/lists/*
+
+COPY sensors/launch_lasers/ /ws/src/sick_scan_xd/launch/
+COPY sensors/config_imu/ /ws/src/xsens_mti_ros2/param/
+COPY sensors/launch_imu/ /ws/src/xsens_mti_ros2/launch/
 
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build \

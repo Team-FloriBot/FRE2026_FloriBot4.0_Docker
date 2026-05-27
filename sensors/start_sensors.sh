@@ -33,108 +33,127 @@ shutdown()
   exit 0
 }
 
+trap shutdown SIGINT SIGTERM
+
+# ==========================================
+# FUNKTIONEN: LiDAR Prüfung & Launch
+# ==========================================
+
 wait_for_lidar()
 {
   local ip="$1"
-  local max_attempts="${2:-30}"  # Standard 30 Sekunden Timeout
+  local max_attempts="${2:-45}" # 45 Sekunden Timeout
   local attempt=0
 
-  echo "[sensors] Waiting for lidar ${ip} (max ${max_attempts}s)"
+  echo "[sensors] Waiting for lidar ${ip} to be fully ready (network + firmware)..."
 
-  until nc -z "${ip}" 2112; do
+  while [ $attempt -lt $max_attempts ]; do
     attempt=$((attempt + 1))
-    if [ $attempt -ge $max_attempts ]; then
-      echo "[sensors] ERROR: Lidar ${ip} not reachable after ${max_attempts} seconds"
-      return 1
+
+    # Prüfe zuerst, ob der Port überhaupt offen ist
+    if nc -z -w 1 "${ip}" 2112 2>/dev/null; then
+      
+      # Sende CoLa-Befehl für den Gerätestatus und bereinige STX/ETX Zeichen
+      local response
+      response=$(echo -e "\x02sRN STlms\x03" | nc -w 2 "${ip}" 2112 2>/dev/null | tr -d '\x02\x03')
+      
+      # Überprüfe, ob die Antwort mit "sRA STlms 0" endet (0 = Kein Fehler / Bereit)
+      if [[ "$response" == *"sRA STlms 0"* ]]; then
+        echo "[sensors] Success: Lidar ${ip} firmware reports READY status."
+        return 0
+      else
+        if [ $((attempt % 5)) -eq 0 ]; then
+          echo "[sensors] Attempt ${attempt}/${max_attempts}: Port open, but firmware status not ready yet (Response: ${response:-Timeout})"
+        fi
+      fi
+    else
+      if [ $((attempt % 5)) -eq 0 ]; then
+        echo "[sensors] Attempt ${attempt}/${max_attempts}: Network port 2112 closed..."
+      fi
     fi
-    if [ $((attempt % 5)) -eq 0 ]; then
-      echo "[sensors] Attempt ${attempt}/${max_attempts}: Still waiting for lidar ${ip}..."
-    fi
+    
     sleep 1
   done
 
-  echo "[sensors] Lidar ${ip} is reachable"
-  sleep 2  # Extra Wartezeit für vollständige Initialisierung
-  return 0
-}
-
-wait_for_node()
-{
-  local node_name="$1"
-  local max_attempts="${2:-10}"
-
-  echo "[sensors] Waiting for node ${node_name} to start..."
-
-  for ((attempt=1; attempt<=max_attempts; attempt++)); do
-    if ros2 node list | grep -q "${node_name}"; then
-      echo "[sensors] Node ${node_name} is running"
-      return 0
-    fi
-    if [ $((attempt % 3)) -eq 0 ]; then
-      echo "[sensors] Attempt ${attempt}/${max_attempts}: Waiting for node ${node_name}..."
-    fi
-    sleep 1
-  done
-
-  echo "[sensors] ERROR: Node ${node_name} did not start after ${max_attempts} seconds"
+  echo "[sensors] ERROR: Lidar ${ip} did not reach READY status within ${max_attempts}s"
   return 1
 }
 
-trap shutdown SIGINT SIGTERM
+launch_lidar_node()
+{
+  local ip="$1"
+  local frame="$2"
+  local node_name="$3"
+  local scan_topic="$4"
+  local cloud_topic="$5" # Optional
+  local max_retries=3
+  local retry=0
 
-echo "[sensors] Checking SICK front connectivity"
-if ! wait_for_lidar "${SICK_FRONT_IP}"; then
-  echo "[sensors] FATAL: Front LiDAR at ${SICK_FRONT_IP} could not be reached. Exiting."
+  while [ $retry -lt $max_retries ]; do
+    retry=$((retry + 1))
+    echo "[sensors] Launching ROS 2 node for ${node_name} (Attempt ${retry}/${max_retries})..."
+
+    # Argumente dynamisch aufbauen
+    local cmd=(ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch)
+    cmd+=(hostname:="${ip}")
+    cmd+=(nodename:="${node_name}")
+    cmd+=(frame_id:="${frame}")
+    cmd+=(tf_publish_rate:=0.0)
+    cmd+=(ros_timestamp_control:=1)
+    cmd+=(laserscan_topic:="${scan_topic}")
+    cmd+=(cloud_topic:="${cloud_topic}")
+
+    cmd+=(--ros-args -r __node:="${node_name}" -p sw_pll_only_publish:=false)
+
+    # Starte den Treiber im Hintergrund
+    "${cmd[@]}" &
+    
+    local pid=$!
+    sleep 3 # Warte 3 Sekunden, um zu sehen, ob der Knoten abstürzt
+
+    # Prüfe, ob der Prozess im Hintergrund noch läuft
+    if kill -0 $pid 2>/dev/null; then
+      echo "[sensors] Node ${node_name} started successfully (PID: $pid)"
+      pids+=($pid) # Füge PID zum globalen Array hinzu
+      return 0
+    else
+      echo "[sensors] WARNING: Node ${node_name} died immediately after launch!"
+    fi
+  done
+
+  echo "[sensors] FATAL: Failed to launch ${node_name} after ${max_retries} attempts."
+  return 1
+}
+
+# ==========================================
+# HAUPTABLAUF: Sensoren starten
+# ==========================================
+
+# 1. Front LiDAR
+echo "[sensors] Checking SICK front connectivity and firmware..."
+if wait_for_lidar "${SICK_FRONT_IP}"; then
+  # Hier übergeben wir zusätzlich das cloud_topic
+  if ! launch_lidar_node "${SICK_FRONT_IP}" "${SICK_FRONT_FRAME}" "sick_front" "/sensors/scan_front" "/sensors/cloud_front"; then
+    exit 1
+  fi
+else
+  echo "[sensors] FATAL: Front LiDAR unavailable. Exiting."
   exit 1
 fi
 
-echo "[sensors] Starting SICK front lidar on ${SICK_FRONT_IP}"
-ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
-  hostname:="${SICK_FRONT_IP}" \
-  nodename:=sick_front \
-  frame_id:="${SICK_FRONT_FRAME}" \
-  tf_publish_rate:=0.0 \
-  ros_timestamp_control:=1 \
-  laserscan_topic:=/sensors/scan_front \
-  cloud_topic:=/sensors/cloud_front \
-  --ros-args \
-  -r __node:=sick_front \
-  -r sw_pll_only_publish:=false &
-sleep 1
-pids+=($!)
-
-# Warte auf Node
-if ! wait_for_node "/sick_front" 10; then
-  echo "[sensors] FATAL: sick_front node did not start. Exiting."
+# 2. Rear LiDAR
+echo "[sensors] Checking SICK rear connectivity and firmware..."
+if wait_for_lidar "${SICK_REAR_IP}"; then
+  # Kein cloud_topic für den Rear-LiDAR
+  if ! launch_lidar_node "${SICK_REAR_IP}" "${SICK_REAR_FRAME}" "sick_rear" "/sensors/scan_rear" ""; then
+    exit 1
+  fi
+else
+  echo "[sensors] FATAL: Rear LiDAR unavailable. Exiting."
   exit 1
 fi
 
-echo "[sensors] Checking SICK rear connectivity"
-if ! wait_for_lidar "${SICK_REAR_IP}"; then
-  echo "[sensors] FATAL: Rear LiDAR at ${SICK_REAR_IP} could not be reached. Exiting."
-  exit 1
-fi
-
-echo "[sensors] Starting SICK rear lidar on ${SICK_REAR_IP}"
-ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
-  hostname:="${SICK_REAR_IP}" \
-  nodename:=sick_rear \
-  frame_id:="${SICK_REAR_FRAME}" \
-  tf_publish_rate:=0.0 \
-  ros_timestamp_control:=1 \
-  laserscan_topic:=/sensors/scan_rear \
-  --ros-args \
-  -r __node:=sick_rear \
-  -r sw_pll_only_publish:=false &
-sleep 1
-pids+=($!)
-
-# Warte auf Node
-if ! wait_for_node "/sick_rear" 10; then
-  echo "[sensors] FATAL: sick_rear node did not start. Exiting."
-  exit 1
-fi
-
+# 3. RealSense Front
 if [ -n "${RS_FRONT_SERIAL}" ]; then
   echo "[sensors] Starting RealSense front, serial ${RS_FRONT_SERIAL}"
   ros2 launch realsense2_camera rs_launch.py \
@@ -153,6 +172,7 @@ else
   echo "[sensors] RealSense front disabled because RS_FRONT_SERIAL is empty"
 fi
 
+# 4. RealSense Rear
 if [ -n "${RS_REAR_SERIAL}" ]; then
   echo "[sensors] Starting RealSense rear, serial ${RS_REAR_SERIAL}"
   ros2 launch realsense2_camera rs_launch.py \
@@ -168,6 +188,7 @@ else
   echo "[sensors] RealSense rear disabled because RS_REAR_SERIAL is empty"
 fi
 
+# 5. Xsens IMU
 if [ "${XSENS_ENABLE}" = "true" ] || [ "${XSENS_ENABLE}" = "1" ]; then
   echo "[sensors] Starting Xsens MTi IMU"
   echo "[sensors] Xsens namespace: ${XSENS_NAMESPACE}"

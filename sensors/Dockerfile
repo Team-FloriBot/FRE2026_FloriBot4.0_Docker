@@ -81,6 +81,8 @@ RUN git clone --branch ${SICK_SCAN_REF} --depth 1 ${SICK_SCAN_REPO} sick_scan_xd
 
 WORKDIR /ws
 
+COPY sensors/launch_lasers/ /ws/src/sick_scan_xd/launch/
+
 RUN rosdep init 2>/dev/null || true
 RUN rosdep update || true
 
@@ -109,7 +111,7 @@ RUN source /opt/ros/jazzy/setup.bash && \
 COPY sensors/entrypoint.sh /entrypoint.sh
 COPY sensors/start_sensors.sh /start_sensors.sh
 
-COPY sensors/launch_lasers/ /ws/src/sick_scan_xd/launch/
+
 
 RUN chmod +x /entrypoint.sh /start_sensors.sh
 

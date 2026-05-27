@@ -145,7 +145,7 @@ fi
 echo "[sensors] Checking SICK rear connectivity and firmware..."
 if wait_for_lidar "${SICK_REAR_IP}"; then
   # Kein cloud_topic für den Rear-LiDAR
-  if ! launch_lidar_node "${SICK_REAR_IP}" "${SICK_REAR_FRAME}" "sick_rear" "/sensors/scan_rear" ""; then
+  if ! launch_lidar_node "${SICK_REAR_IP}" "${SICK_REAR_FRAME}" "sick_rear" "/sensors/scan_rear" "/sensors/cloud_rear"; then
     exit 1
   fi
 else

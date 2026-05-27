@@ -24,10 +24,17 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-tf2-tools \
     && rm -rf /var/lib/apt/lists/*
 
+ARG STAGE_SHA=f4a722c9508c9bd89eec22223ed44aeeab3e8265
+ARG STAGE_ROS2_SHA=ddb0f45a73254847f902e959e22e88683908cbc1
+
 WORKDIR /ws/src
 
-RUN git clone --depth 1 --branch ros2 https://github.com/tuw-robotics/Stage.git && \
-    git clone --depth 1 --branch jazzy https://github.com/tuw-robotics/stage_ros2.git && \
+RUN git clone --no-checkout https://github.com/tuw-robotics/Stage.git Stage && \
+    cd Stage && git fetch --depth 1 origin ${STAGE_SHA} && git checkout --detach FETCH_HEAD && \
+    cd /ws/src && \
+    git clone --no-checkout https://github.com/tuw-robotics/stage_ros2.git stage_ros2 && \
+    cd stage_ros2 && git fetch --depth 1 origin ${STAGE_ROS2_SHA} && git checkout --detach FETCH_HEAD && \
+    cd /ws/src && \
     python3 - <<'PY'
 from pathlib import Path
 

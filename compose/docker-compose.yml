@@ -6,6 +6,7 @@ services:
       dockerfile: base/Dockerfile
       args:
         - CACHEBUST=${BUILD_DATE:-1}
+        - ROBOT_LOCALIZATION_SHA=${ROBOT_LOCALIZATION_SHA:-3efa714fb9c1ff40966327b7bed7053b2570be4d}
     container_name: floribot-base
     network_mode: host
     ipc: host
@@ -16,6 +17,7 @@ services:
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
       CYCLONEDDS_URI: ${CYCLONEDDS_URI}
+      LOCALIZATION_CONFIG: ${LOCALIZATION_CONFIG:-/ws/config/localization/local_ekf.yaml}
     volumes:
       - /dev:/dev
       - /dev/bus/usb:/dev/bus/usb

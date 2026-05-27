@@ -36,21 +36,57 @@ shutdown()
 wait_for_lidar()
 {
   local ip="$1"
+  local max_attempts="${2:-30}"  # Standard 30 Sekunden Timeout
+  local attempt=0
 
-  echo "[sensors] Waiting for lidar ${ip}"
+  echo "[sensors] Waiting for lidar ${ip} (max ${max_attempts}s)"
 
   until nc -z "${ip}" 2112; do
+    attempt=$((attempt + 1))
+    if [ $attempt -ge $max_attempts ]; then
+      echo "[sensors] ERROR: Lidar ${ip} not reachable after ${max_attempts} seconds"
+      return 1
+    fi
+    if [ $((attempt % 5)) -eq 0 ]; then
+      echo "[sensors] Attempt ${attempt}/${max_attempts}: Still waiting for lidar ${ip}..."
+    fi
     sleep 1
   done
 
   echo "[sensors] Lidar ${ip} is reachable"
-  sleep 3
+  sleep 2  # Extra Wartezeit für vollständige Initialisierung
+  return 0
+}
+
+wait_for_node()
+{
+  local node_name="$1"
+  local max_attempts="${2:-10}"
+
+  echo "[sensors] Waiting for node ${node_name} to start..."
+
+  for ((attempt=1; attempt<=max_attempts; attempt++)); do
+    if ros2 node list | grep -q "${node_name}"; then
+      echo "[sensors] Node ${node_name} is running"
+      return 0
+    fi
+    if [ $((attempt % 3)) -eq 0 ]; then
+      echo "[sensors] Attempt ${attempt}/${max_attempts}: Waiting for node ${node_name}..."
+    fi
+    sleep 1
+  done
+
+  echo "[sensors] ERROR: Node ${node_name} did not start after ${max_attempts} seconds"
+  return 1
 }
 
 trap shutdown SIGINT SIGTERM
 
 echo "[sensors] Checking SICK front connectivity"
-wait_for_lidar "${SICK_FRONT_IP}"
+if ! wait_for_lidar "${SICK_FRONT_IP}"; then
+  echo "[sensors] FATAL: Front LiDAR at ${SICK_FRONT_IP} could not be reached. Exiting."
+  exit 1
+fi
 
 echo "[sensors] Starting SICK front lidar on ${SICK_FRONT_IP}"
 ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
@@ -67,8 +103,17 @@ ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx
 sleep 1
 pids+=($!)
 
+# Warte auf Node
+if ! wait_for_node "/sick_front" 10; then
+  echo "[sensors] FATAL: sick_front node did not start. Exiting."
+  exit 1
+fi
+
 echo "[sensors] Checking SICK rear connectivity"
-wait_for_lidar "${SICK_REAR_IP}"
+if ! wait_for_lidar "${SICK_REAR_IP}"; then
+  echo "[sensors] FATAL: Rear LiDAR at ${SICK_REAR_IP} could not be reached. Exiting."
+  exit 1
+fi
 
 echo "[sensors] Starting SICK rear lidar on ${SICK_REAR_IP}"
 ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
@@ -83,6 +128,12 @@ ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx
   -r sw_pll_only_publish:=false &
 sleep 1
 pids+=($!)
+
+# Warte auf Node
+if ! wait_for_node "/sick_rear" 10; then
+  echo "[sensors] FATAL: sick_rear node did not start. Exiting."
+  exit 1
+fi
 
 if [ -n "${RS_FRONT_SERIAL}" ]; then
   echo "[sensors] Starting RealSense front, serial ${RS_FRONT_SERIAL}"

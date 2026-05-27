@@ -109,6 +109,8 @@ RUN source /opt/ros/jazzy/setup.bash && \
 COPY sensors/entrypoint.sh /entrypoint.sh
 COPY sensors/start_sensors.sh /start_sensors.sh
 
+COPY sensors/launch_lasers/ /ws/src/sick_scan_xd/launch/
+
 RUN chmod +x /entrypoint.sh /start_sensors.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

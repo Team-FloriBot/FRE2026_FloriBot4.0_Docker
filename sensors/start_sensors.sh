@@ -33,62 +33,16 @@ shutdown()
   exit 0
 }
 
-wait_for_lidar()
-{
-  local ip="$1"
-
-  echo "[sensors] Waiting for lidar ${ip}"
-
-  until nc -z "${ip}" 2112; do
-    sleep 1
-  done
-
-  echo "[sensors] Lidar ${ip} is reachable"
-  sleep 3
-}
-
 trap shutdown SIGINT SIGTERM
 
-echo "[sensors] Checking SICK front connectivity"
-wait_for_lidar "${SICK_FRONT_IP}"
-
-
-sleep 30
 
 echo "[sensors] Starting SICK front lidar on ${SICK_FRONT_IP}"
-ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
-  hostname:="${SICK_FRONT_IP}" \
-  nodename:=sick_front \
-  frame_id:="${SICK_FRONT_FRAME}" \
-  tf_publish_rate:=0.0 \
-  ros_timestamp_control:=1 \
-  laserscan_topic:=/sensors/scan_front \
-  cloud_topic:=/sensors/cloud_front \
-  use_binary_protocol:=false \
-  --ros-args \
-  -r __node:=sick_front \
-  -p sw_pll_only_publish:=false &
-sleep 1
-pids+=($!)
-
-echo "[sensors] Checking SICK rear connectivity"
-wait_for_lidar "${SICK_REAR_IP}"
-
 echo "[sensors] Starting SICK rear lidar on ${SICK_REAR_IP}"
-ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx.launch \
-  hostname:="${SICK_REAR_IP}" \
-  nodename:=sick_rear \
-  frame_id:="${SICK_REAR_FRAME}" \
-  tf_publish_rate:=0.0 \
-  ros_timestamp_control:=1 \
-  laserscan_topic:=/sensors/scan_rear \
-  cloud_topic:=/sensors/cloud_rear \
-  use_binary_protocol:=false \
-  --ros-args \
-  -r __node:=sick_rear \
-  -p sw_pll_only_publish:=false &
-sleep 1
+ros2 launch sick_scan_xd laser.launch.py &
+
 pids+=($!)
+sleep 1
+
 
 if [ -n "${RS_FRONT_SERIAL}" ]; then
   echo "[sensors] Starting RealSense front, serial ${RS_FRONT_SERIAL}"

@@ -64,6 +64,7 @@ ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx
   ros_timestamp_control:=1 \
   laserscan_topic:=/sensors/scan_front \
   cloud_topic:=/sensors/cloud_front \
+  use_binary_protocol:=false \
   --ros-args \
   -r __node:=sick_front \
   -p sw_pll_only_publish:=false &
@@ -82,6 +83,7 @@ ros2 run sick_scan_xd sick_generic_caller ./src/sick_scan_xd/launch/sick_tim_5xx
   ros_timestamp_control:=1 \
   laserscan_topic:=/sensors/scan_rear \
   cloud_topic:=/sensors/cloud_rear \
+  use_binary_protocol:=false \
   --ros-args \
   -r __node:=sick_rear \
   -p sw_pll_only_publish:=false &

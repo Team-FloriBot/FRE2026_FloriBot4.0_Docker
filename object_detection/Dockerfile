@@ -115,7 +115,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # ros2_detection requires pyrealsense2 even though RGBD image data are supplied
 # through ROS topics by the separate sensors container.
 RUN set -eux; \
-    PYTHON_INSTALL_DIR="$(python3 -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib(prefix="/usr/local"))')"; \
+    PYTHON_INSTALL_DIR="$(python3 -c 'import site; paths=site.getsitepackages(); print(next((p for p in paths if p.startswith("/usr/local/")), paths[0]))')"; \
+    echo "Installing pyrealsense2 into Python-visible directory: ${PYTHON_INSTALL_DIR}"; \
     git clone --depth 1 --branch "${LIBREALSENSE_REF}" \
         "${LIBREALSENSE_REPO}" /opt/librealsense; \
     mkdir -p /opt/librealsense/build; \
@@ -136,7 +137,7 @@ RUN set -eux; \
     make -j"$(nproc)"; \
     make install; \
     ldconfig; \
-    python3 -c "import pyrealsense2 as rs; print('pyrealsense2 available:', rs.__name__)"; \
+    python3 -c "import pyrealsense2 as rs; print('pyrealsense2 available:', rs.__file__)"; \
     rm -rf /opt/librealsense
 
 # Clone ROS dependencies and copy only the required source packages into /ws/src.

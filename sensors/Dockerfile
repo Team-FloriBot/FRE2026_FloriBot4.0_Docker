@@ -97,8 +97,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY sensors/launch_lasers/ /ws/src/sick_scan_xd/launch/
-COPY sensors/config_imu/ /ws/src/xsens_mti_ros2/param/
-COPY sensors/launch_imu/ /ws/src/xsens_mti_ros2/launch/
+COPY sensors/config_imu/ /ws/src/xsens_mti_ros2/src/xsens_mti_ros2_driver/param/
+COPY sensors/launch_imu/ /ws/src/xsens_mti_ros2/src/xsens_mti_ros2_driver/launch/
 
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build \

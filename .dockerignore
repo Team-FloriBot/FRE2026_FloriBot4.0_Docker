@@ -1,0 +1,45 @@
+# Versionsverwaltung
+.git
+.gitignore
+
+# Lokale Konfiguration
+.env
+**/.env
+*.env
+!.env.example
+!**/.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ROS 2 / colcon
+build/
+install/
+log/
+**/build/
+**/install/
+**/log/
+
+# Aufzeichnungen und Laufzeitdaten
+*.bag
+*.db3
+*.mcap
+*.log
+
+# Archive und temporäre Dateien
+*.zip
+*.tmp
+*.swp
+
+# Betriebssystemdateien
+.DS_Store
+Thumbs.db

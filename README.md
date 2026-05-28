@@ -77,22 +77,32 @@ Damit grafische Anwendungen aus dem Container angezeigt werden können
 xhost +local:docker
 ```
 ### 4. Konfiguration
-Die Datei `compose/.env.example` enthält Beispielwerte. Für die lokale Ausführung muss daraus eine eigene `.env` erzeugt werden.<br/>
-Konfigurationsdatei kopieren und eigene .env‑Datei erstellen:
-```bash
-cp compose/.env.example compose/.env
-```
-#### Netzwerk-Schnittstelle (CycloneDDS) wechseln
 
-#### Konfigurationsparameter (Nur notwendig bei Containern auf verschiedenen Geräten im selben Netzwerk)
-Um schnell zwischen verschiedenen Netzwerk-Konfigurationen (z. B. Ethernet eth0 oder WLAN wlp9s0) zu wechseln, kann die Variable CYCLONEDDS_CONFIG direkt in der .env überschrieben werden:
+Die Umgebungsvariablen sind in der Datei `compose/.env` definiert. Diese Datei wird beim Start der Container automatisch geladen.
+
+#### Netzwerkkonfiguration (für verteilte Systeme)
+
+Wenn die Docker-Container auf verschiedenen Geräten im selben Netzwerk laufen, muss die Netzwerkschnittstelle für die CycloneDDS-Kommunikation konfiguriert werden. Um die richtige Schnittstelle zu finden, führen Sie aus:
+
 ```bash
-# Beispiel: Dauerhaft auf WLAN (wlp9s0) umstellen (Für PC mit WLAN-Verbindung)
+ip route
+```
+
+Die Ausgabe zeigt die Standard-Schnittstelle an (z. B. `enp11s0` für Ethernet oder `wlp9s0` für WLAN).
+
+**Schnittstelle konfigurieren:**
+```bash
+# Beispiel: WLAN-Schnittstelle (wlp9s0) für PCs mit WLAN
 sed -i 's/CYCLONEDDS_CONFIG=.*/CYCLONEDDS_CONFIG=wlp9s0/' compose/.env
 
-# Beispiel: Dauerhaft auf Ethernet (eth0) umstellen (Für NVIDIA Jetson)
+# Beispiel: Ethernet-Schnittstelle (enp11s0) für PCs mit Ethernetkabel
+sed -i 's/CYCLONEDDS_CONFIG=.*/CYCLONEDDS_CONFIG=enp11s0/' compose/.env
+
+# Beispiel: Ethernet-Schnittstelle (eth0) für NVIDIA Jetson
 sed -i 's/CYCLONEDDS_CONFIG=.*/CYCLONEDDS_CONFIG=eth0/' compose/.env
 ```
+
+#### Umgebungsvariablen
 
 | Variable | Bedeutung |
 |---|---|

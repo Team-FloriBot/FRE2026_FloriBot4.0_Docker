@@ -290,7 +290,6 @@ services:
       ULTRALYTICS_CONFIG_DIR: /tmp
       YOLO_CONFIG_DIR: /tmp
     volumes:
-      - ../object_detection/model:/ws/model:ro
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
     command:
       - /start_object_detection.sh

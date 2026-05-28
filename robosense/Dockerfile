@@ -10,31 +10,41 @@ RUN apt-get update && apt-get install -y \
     git \
     build-essential \
     cmake \
+    pkg-config \
     python3-colcon-common-extensions \
     python3-rosdep \
     libpcap-dev \
     libyaml-cpp-dev \
     libpcl-dev \
-    ros-jazzy-rmw-cyclonedds-cpp \
+    ros-jazzy-rclcpp \
+    ros-jazzy-std-msgs \
+    ros-jazzy-sensor-msgs \
     ros-jazzy-pcl-conversions \
     ros-jazzy-tf2 \
     ros-jazzy-tf2-ros \
+    ros-jazzy-rmw-cyclonedds-cpp \
     && rm -rf /var/lib/apt/lists/*
+
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
+    echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /root/.bashrc
 
 WORKDIR /ws/src
 
-RUN git clone --branch ${ROBOSENSE_REF} --depth 1 \
-    ${ROBOSENSE_REPO} FRE_RoboSenseAIRY
+RUN git clone --branch "${ROBOSENSE_REF}" --depth 1 \
+    "${ROBOSENSE_REPO}" FRE_RoboSenseAIRY
 
 WORKDIR /ws
 
 RUN rosdep init 2>/dev/null || true && \
-    rosdep update && \
-    apt-get update && \
+    rosdep update || true
+
+RUN apt-get update && \
     source /opt/ros/jazzy/setup.bash && \
-    rosdep install \
-      --from-paths /ws/src/FRE_RoboSenseAIRY \
-      --ignore-src \
+    rosdep install -i \
+      --from-paths \
+        /ws/src/FRE_RoboSenseAIRY/rslidar_msg \
+        /ws/src/FRE_RoboSenseAIRY/rslidar_sdk \
+        /ws/src/FRE_RoboSenseAIRY/ground_segmentation \
       --rosdistro jazzy \
       -r -y && \
     rm -rf /var/lib/apt/lists/*
@@ -46,12 +56,15 @@ RUN source /opt/ros/jazzy/setup.bash && \
         rslidar_sdk \
         ground_segmentation \
       --symlink-install \
-      --cmake-args -DCMAKE_BUILD_TYPE=Release
+      --cmake-args \
+        -DCMAKE_BUILD_TYPE=Release
 
-COPY robosense/config/rslidar_config.yaml /ws/config/rslidar_config.yaml
-COPY robosense/config/ground_segmentation.yaml /ws/config/ground_segmentation.yaml
+COPY robosense/config/ /ws/config/
+
+COPY robosense/entrypoint.sh /entrypoint.sh
 COPY robosense/start_robosense.sh /start_robosense.sh
 
-RUN chmod +x /start_robosense.sh
+RUN chmod +x /entrypoint.sh /start_robosense.sh
 
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/start_robosense.sh"]

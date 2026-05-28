@@ -107,8 +107,8 @@ services:
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
       CYCLONEDDS_URI: ${CYCLONEDDS_URI}
 
-      RSLIDAR_CONFIG: ${RSLIDAR_CONFIG:-/ws/config/rslidar_config.yaml}
-      GROUND_SEGMENTATION_CONFIG: ${GROUND_SEGMENTATION_CONFIG:-/ws/config/ground_segmentation.yaml}
+      RSLIDAR_CONFIG: ${RSLIDAR_CONFIG:-/ws/install/rslidar_sdk/share/rslidar_sdk/config/config.yaml}
+      GROUND_SEGMENTATION_CONFIG: ${GROUND_SEGMENTATION_CONFIG:-/ws/install/ground_segmentation/share/ground_segmentation/config/ground_segmentation.yaml}
       GROUND_SEGMENTATION_ENABLE: ${GROUND_SEGMENTATION_ENABLE:-true}
 
     volumes:

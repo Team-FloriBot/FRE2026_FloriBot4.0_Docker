@@ -19,9 +19,13 @@ shutdown()
 
 trap shutdown SIGINT SIGTERM
 
+# Robosense must not contribute transforms to the robot-wide TF tree.
+# Keep point-cloud frame_ids intact, but isolate any current or future TF publishers.
 ros2 run rslidar_sdk rslidar_sdk_node \
   --ros-args \
-  -p config_path:="${RSLIDAR_CONFIG}" &
+  -p config_path:="${RSLIDAR_CONFIG}" \
+  -r /tf:=/robosense/blocked_tf \
+  -r /tf_static:=/robosense/blocked_tf_static &
 
 pids+=($!)
 
@@ -32,7 +36,9 @@ if [ "${GROUND_SEGMENTATION_ENABLE}" = "true" ] || \
 
   ros2 run ground_segmentation ground_segmentation_node \
     --ros-args \
-    --params-file "${GROUND_SEGMENTATION_CONFIG}" &
+    --params-file "${GROUND_SEGMENTATION_CONFIG}" \
+    -r /tf:=/robosense/blocked_tf \
+    -r /tf_static:=/robosense/blocked_tf_static &
 
   pids+=($!)
 fi

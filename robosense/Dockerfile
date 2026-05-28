@@ -59,8 +59,6 @@ RUN source /opt/ros/jazzy/setup.bash && \
       --cmake-args \
         -DCMAKE_BUILD_TYPE=Release
 
-COPY robosense/config/ /ws/config/
-
 COPY robosense/entrypoint.sh /entrypoint.sh
 COPY robosense/start_robosense.sh /start_robosense.sh
 

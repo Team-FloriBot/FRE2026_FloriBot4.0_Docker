@@ -20,8 +20,8 @@
 
 <launch>
     <arg name="hostname" default="192.168.0.52"/>
-    <arg name="cloud_topic" default="/cloud_front"/>
-    <arg name="laserscan_topic" default="/scan_front"/>
+    <arg name="cloud_topic" default="/sensors/cloud_front"/>
+    <arg name="laserscan_topic" default="/sensors/scan_front"/>
     <arg name="frame_id" default="sick_front_link"/>
     <arg name="sw_pll_only_publish" default="false"/>
     <arg name="nodename" default="/sick_front"/>

@@ -20,8 +20,8 @@
 
 <launch>
     <arg name="hostname" default="192.168.0.51"/>
-    <arg name="cloud_topic" default="/cloud_rear"/>
-    <arg name="laserscan_topic" default="/scan_rear"/>
+    <arg name="cloud_topic" default="/sensors/cloud_rear"/>
+    <arg name="laserscan_topic" default="/sensors/scan_rear"/>
     <arg name="frame_id" default="sick_rear_link"/>
     <arg name="sw_pll_only_publish" default="false"/>
     <arg name="nodename" default="/sick_rear"/>

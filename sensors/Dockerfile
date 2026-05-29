@@ -109,8 +109,9 @@ RUN source /opt/ros/jazzy/setup.bash && \
         realsense2_description \
       --symlink-install
 
+ARG CACHEBUST=1
+
 COPY sensors/launch_lasers/ /ws/src/sick_scan_xd/launch/
-COPY sensors/config_imu/ /ws/src/xsens_mti_ros2/src/xsens_mti_ros2_driver/param/
 COPY sensors/launch_imu/ /ws/src/xsens_mti_ros2/src/xsens_mti_ros2_driver/launch/
 
 RUN source /opt/ros/jazzy/setup.bash && \
@@ -118,6 +119,8 @@ RUN source /opt/ros/jazzy/setup.bash && \
       --packages-select \
         sick_scan_xd \
       --symlink-install
+
+COPY sensors/config_imu/ /ws/src/xsens_mti_ros2/src/xsens_mti_ros2_driver/param/
 
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build \

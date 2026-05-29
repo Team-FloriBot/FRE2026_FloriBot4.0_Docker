@@ -108,10 +108,20 @@ COPY sensors/launch_imu/ /ws/src/xsens_mti_ros2/src/xsens_mti_ros2_driver/launch
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build \
       --packages-select \
-        sick_scan_xd \
         realsense2_camera \
         realsense2_camera_msgs \
         realsense2_description \
+      --symlink-install
+
+RUN source /opt/ros/jazzy/setup.bash && \
+    colcon build \
+      --packages-select \
+        sick_scan_xd \
+      --symlink-install
+
+RUN source /opt/ros/jazzy/setup.bash && \
+    colcon build \
+      --packages-select \
         xsens_mti_ros2_driver \
       --symlink-install
 

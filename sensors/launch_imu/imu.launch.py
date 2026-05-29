@@ -33,10 +33,12 @@ def generate_launch_description():
             package='xsens_mti_ros2_driver',
             executable='xsens_mti_node',
             name='xsens_mti_node',
-            namespace=xsens_ns, # Hier wird der Namespace gesetzt
+            namespace=xsens_ns,
             output='screen',
             parameters=[parameters_file_path],
-            arguments=[]
+            arguments=[],
+            respawn=True,
+            respawn_delay=3.0
             )
     ld.add_action(xsens_mti_node)
 

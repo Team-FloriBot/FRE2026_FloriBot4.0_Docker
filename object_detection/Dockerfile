@@ -109,7 +109,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         --retries 10 \
         --prefer-binary \
         --no-deps \
-        "ultralytics<8.4"
+        "ultralytics==8.4.48"
 
 # Build librealsense with Python bindings.
 # ros2_detection requires pyrealsense2 even though RGBD image data are supplied

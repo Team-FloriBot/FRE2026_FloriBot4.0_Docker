@@ -89,8 +89,36 @@ services:
       - /start_sensors.sh
     restart: unless-stopped
 
+  floribot-robosense:
+    profiles: ["robot", "robosense"]
+    build:
+      context: ..
+      dockerfile: robosense/Dockerfile
+      args:
+        - ROBOSENSE_REF=${ROBOSENSE_REF:-main}
+    container_name: floribot-robosense
+    platform: linux/arm64
+    network_mode: host
+    ipc: host
+    pid: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      CYCLONEDDS_URI: ${CYCLONEDDS_URI}
+
+      RSLIDAR_CONFIG: ${RSLIDAR_CONFIG:-/ws/install/rslidar_sdk/share/rslidar_sdk/config/config.yaml}
+      GROUND_SEGMENTATION_CONFIG: ${GROUND_SEGMENTATION_CONFIG:-/ws/install/ground_segmentation/share/ground_segmentation/config/ground_segmentation.yaml}
+      GROUND_SEGMENTATION_ENABLE: ${GROUND_SEGMENTATION_ENABLE:-true}
+
+    volumes:
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+    command:
+      - /start_robosense.sh
+    restart: unless-stopped
+
   floribot-webteleop:
-    profiles: ["webteleop", "ui"]
+    profiles: ["webteleop", "ui", "robot"]
     build:
       context: ..
       dockerfile: webteleop/Dockerfile
@@ -262,11 +290,11 @@ services:
       ULTRALYTICS_CONFIG_DIR: /tmp
       YOLO_CONFIG_DIR: /tmp
     volumes:
-      - ../object_detection/model:/ws/model:ro
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
     command:
       - /start_object_detection.sh
     restart: unless-stopped
+
   floribot-rviz:
     profiles: ["rviz"]
     build:

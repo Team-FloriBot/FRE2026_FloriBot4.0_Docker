@@ -30,7 +30,7 @@ def generate_launch_description():
     node_front = Node(
         package='sick_scan_xd',
         executable='sick_generic_caller',
-        name='sick_front',  # Eigener Node-Name zur Vermeidung von Konflikten
+        name='sensors/sick_front',  # Eigener Node-Name zur Vermeidung von Konflikten
         output='screen',
         arguments=node_arguments_front
     )
@@ -39,7 +39,7 @@ def generate_launch_description():
     node_rear = Node(
         package='sick_scan_xd',
         executable='sick_generic_caller',
-        name='sick_rear',  # Eigener Node-Name zur Vermeidung von Konflikten
+        name='sensors/sick_rear',  # Eigener Node-Name zur Vermeidung von Konflikten
         output='screen',
         arguments=node_arguments_rear
     )

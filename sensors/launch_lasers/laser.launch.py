@@ -26,23 +26,23 @@ def generate_launch_description():
             node_arguments_front.append(arg)
             node_arguments_rear.append(arg)
     
-    # Node-Definition für den Front-Laser
     node_front = Node(
         package='sick_scan_xd',
         executable='sick_generic_caller',
-        name='sensors/sick_front',  # Eigener Node-Name zur Vermeidung von Konflikten
+        namespace='sensors',
+        name='sick_front',
         output='screen',
         arguments=node_arguments_front
     )
-    
-    # Node-Definition für den Heck-Laser
+
     node_rear = Node(
         package='sick_scan_xd',
         executable='sick_generic_caller',
-        name='sensors/sick_rear',  # Eigener Node-Name zur Vermeidung von Konflikten
+        namespace='sensors',
+        name='sick_rear',
         output='screen',
         arguments=node_arguments_rear
-    )
+)
     
     # Beide Nodes zur Launch-Description hinzufügen
     ld.add_action(node_front)

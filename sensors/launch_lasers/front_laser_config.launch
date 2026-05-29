@@ -20,11 +20,11 @@
 
 <launch>
     <arg name="hostname" default="192.168.0.52"/>
-    <arg name="cloud_topic" default="/sensors/cloud_front"/>
-    <arg name="laserscan_topic" default="/sensors/scan_front"/>
+    <arg name="cloud_topic" default="/cloud_front"/>
+    <arg name="laserscan_topic" default="/scan_front"/>
     <arg name="frame_id" default="sick_front_link"/>
     <arg name="sw_pll_only_publish" default="false"/>
-    <arg name="nodename" default="/sensors/sick_front"/>
+    <arg name="nodename" default="/sick_front"/>
     <arg name="port" default="2112"/>
     <arg name="add_transform_xyz_rpy" default="0,0,0,0,0,0"/>
     <arg name="add_transform_check_dynamic_updates" default="false"/> <!-- Note: dynamical updates of parameter add_transform_xyz_rpy can decrease the performance and is therefor deactivated by default -->

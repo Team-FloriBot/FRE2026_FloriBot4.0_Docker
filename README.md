@@ -93,12 +93,15 @@ Die Ausgabe zeigt die Standard-Schnittstelle an (z. B. `enp11s0` für Ethernet o
 **Schnittstelle konfigurieren:**
 ```bash
 # Beispiel: WLAN-Schnittstelle (wlp9s0) für PCs mit WLAN
+cd FRE2026_FloriBot4.0_Docker
 sed -i 's/CYCLONEDDS_CONFIG=.*/CYCLONEDDS_CONFIG=wlp9s0/' compose/.env
 
 # Beispiel: Ethernet-Schnittstelle (enp11s0) für PCs mit Ethernetkabel
+cd FRE2026_FloriBot4.0_Docker
 sed -i 's/CYCLONEDDS_CONFIG=.*/CYCLONEDDS_CONFIG=enp11s0/' compose/.env
 
 # Beispiel: Ethernet-Schnittstelle (eth0) für NVIDIA Jetson
+cd FRE2026_FloriBot4.0_Docker
 sed -i 's/CYCLONEDDS_CONFIG=.*/CYCLONEDDS_CONFIG=eth0/' compose/.env
 ```
 

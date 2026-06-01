@@ -92,7 +92,7 @@ services:
     restart: unless-stopped
 
   floribot-pantilt:
-    profiles: ["robot", "pantilt"]
+    profiles: ["robot"]
     build:
       context: ..
       dockerfile: pantilt/Dockerfile

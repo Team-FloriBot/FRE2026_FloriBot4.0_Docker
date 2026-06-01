@@ -4,8 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 
 ARG FRE2026_TASKS_REPO=https://github.com/Team-FloriBot/FRE2026_Tasks.git
-ARG FRE2026_TASKS_REF=main
-ARG CACHEBUST=1
+ARG FRE2026_TASKS_REF=task4
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -34,11 +33,23 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-nav2-controller \
     ros-jazzy-nav2-planner \
     ros-jazzy-nav2-behavior-tree \
-    ros-jazzy-nav2-recoveries \
-    ros-jazzy-regulated-pure-pursuit-controller \
+    ros-jazzy-nav2-behaviors \
+    swig \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN git clone https://github.com/Fields2Cover/Fields2Cover.git /tmp/Fields2Cover && \
+    cd /tmp/Fields2Cover && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON=ON .. && \
+    make -j$(nproc) && \
+    make install && \
+    ldconfig && \
+    rm -rf /tmp/Fields2Cover
+
 WORKDIR /ws
+
+ARG CACHEBUST=1
 
 RUN mkdir -p /ws/src && \
     git clone \
@@ -47,10 +58,15 @@ RUN mkdir -p /ws/src && \
       --sparse \
       --branch ${FRE2026_TASKS_REF} \
       ${FRE2026_TASKS_REPO} \
-      /ws/src/FRE2026_Tasks && \
-    cd /ws/src/FRE2026_Tasks && \
-    git sparse-checkout set src/maize_navigation \
-    git sparse-checkout set src/task4
+      /tmp/FRE2026_Tasks && \
+    cd /tmp/FRE2026_Tasks && \
+    git sparse-checkout set src/maize_navigation src/task4 src/path_tracking_controller && \
+    # Verschiebe die Pakete direkt nach /ws/src/
+    mv src/maize_navigation /ws/src/ && \
+    mv src/task4 /ws/src/ && \
+    mv src/path_tracking_controller /ws/src/ && \
+    # Aufräumen des temporären Git-Verzeichnisses
+    rm -rf /tmp/FRE2026_Tasks
 
 RUN rosdep init 2>/dev/null || true && \
     rosdep update && \
@@ -61,7 +77,7 @@ RUN rosdep init 2>/dev/null || true && \
     rm -rf /var/lib/apt/lists/*
 
 RUN source /opt/ros/jazzy/setup.bash && \
-    colcon build --packages-select maize_navigation task4
+    colcon build --packages-select maize_navigation task4 path_tracking_controller
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /etc/bash.bashrc && \
     echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /etc/bash.bashrc

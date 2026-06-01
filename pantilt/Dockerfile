@@ -7,7 +7,7 @@ ARG PANTILT_REPO=https://github.com/Team-FloriBot/PANTILT_ROS2_Jazzy.git
 ARG PANTILT_REF=main
 
 ARG FLIR_PTU_DRIVER_REPO=https://github.com/vicoslab/flir_ptu_driver.git
-ARG FLIR_PTU_DRIVER_REF=main
+ARG FLIR_PTU_DRIVER_REF=ros2
 
 ARG CACHEBUST=1
 

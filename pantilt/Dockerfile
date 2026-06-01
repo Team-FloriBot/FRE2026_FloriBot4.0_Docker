@@ -8,6 +8,7 @@ ARG PANTILT_REF=main
 
 ARG FLIR_PTU_DRIVER_REPO=https://github.com/vicoslab/flir_ptu_driver.git
 ARG FLIR_PTU_DRIVER_REF=ros2
+ARG FLIR_PTU_DRIVER_SHA=69bdda85a52eac2f16a34ec2f390671f0596412f
 
 ARG CACHEBUST=1
 
@@ -36,15 +37,22 @@ WORKDIR /ws
 RUN mkdir -p /ws/src
 
 RUN echo "Cache bust: ${CACHEBUST}" && \
-    git clone --depth 1 --branch ${PANTILT_REF} \
-      ${PANTILT_REPO} \
+    git clone --depth 1 --branch "${PANTILT_REF}" \
+      "${PANTILT_REPO}" \
       /tmp/pantilt_repo && \
     cp -r /tmp/pantilt_repo/src/* /ws/src/ && \
     rm -rf /tmp/pantilt_repo
 
-RUN git clone --depth 1 --branch ${FLIR_PTU_DRIVER_REF} \
-      ${FLIR_PTU_DRIVER_REPO} \
-      /ws/src/flir_ptu_driver
+RUN git clone --depth 1 --branch "${FLIR_PTU_DRIVER_REF}" \
+      "${FLIR_PTU_DRIVER_REPO}" \
+      /ws/src/flir_ptu_driver && \
+    cd /ws/src/flir_ptu_driver && \
+    if [ -n "${FLIR_PTU_DRIVER_SHA}" ]; then \
+      git fetch --depth 1 origin "${FLIR_PTU_DRIVER_SHA}" && \
+      git checkout "${FLIR_PTU_DRIVER_SHA}"; \
+    fi && \
+    echo "flir_ptu_driver commit:" && \
+    git rev-parse HEAD
 
 RUN rosdep init 2>/dev/null || true && \
     rosdep update && \

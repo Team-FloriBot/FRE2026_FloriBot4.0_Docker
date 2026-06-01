@@ -1,6 +1,6 @@
 services:
   floribot-base:
-    profiles: ["robot", "base", "ui"]
+    profiles: ["robot"]
     build:
       context: ..
       dockerfile: base/Dockerfile
@@ -47,7 +47,7 @@ services:
     restart: unless-stopped
 
   floribot-sensors:
-    profiles: ["robot", "sensors"]
+    profiles: ["robot"]
     build:
       context: ..
       dockerfile: sensors/Dockerfile
@@ -92,7 +92,7 @@ services:
     restart: unless-stopped
 
   floribot-robosense:
-    profiles: ["robot", "robosense"]
+    profiles: ["robot"]
     build:
       context: ..
       dockerfile: robosense/Dockerfile
@@ -120,7 +120,7 @@ services:
     restart: unless-stopped
 
   floribot-webteleop:
-    profiles: ["webteleop", "ui", "robot"]
+    profiles: ["robot", "stage"]
     build:
       context: ..
       dockerfile: webteleop/Dockerfile
@@ -229,7 +229,7 @@ services:
     restart: unless-stopped
 
   floribot-mapping:
-    profiles: ["sim", "stage", "robot", "mapping"]
+    profiles: ["sim", "stage", "laptop"]
     build:
       context: ..
       dockerfile: mapping/Dockerfile
@@ -249,7 +249,7 @@ services:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
 
   floribot-tasks:
-    profiles: ["sim", "stage", "tasks", "robot"]
+    profiles: ["sim", "stage", "laptop"]
     build:
       context: ..
       dockerfile: tasks/Dockerfile
@@ -271,7 +271,7 @@ services:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
 
   floribot-object-detection:
-    profiles: ["robot", "object-detection"]
+    profiles: ["robot"]
     build:
       context: ..
       dockerfile: object_detection/Dockerfile

@@ -306,19 +306,23 @@ services:
     network_mode: host
     ipc: host
     pid: host
+    privileged: true
     environment:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
       CYCLONEDDS_URI: ${CYCLONEDDS_URI}
 
-      DISPLAY: ${DISPLAY}
-      WAYLAND_DISPLAY: ${WAYLAND_DISPLAY}
-      XDG_RUNTIME_DIR: ${XDG_RUNTIME_DIR}
+      DISPLAY: ${DISPLAY:-:0}
+      WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-}
+      XDG_RUNTIME_DIR: ${XDG_RUNTIME_DIR:-/tmp}
       QT_X11_NO_MITSHM: 1
+
+      LIBGL_DRI3_DISABLE: "1"
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - /mnt/wslg:/mnt/wslg
+      - /mnt:/mnt:rw
+      - /dev:/dev
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
     stdin_open: true
     tty: true

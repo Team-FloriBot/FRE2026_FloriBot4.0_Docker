@@ -101,7 +101,7 @@ services:
         - PANTILT_REPO=${PANTILT_REPO:-https://github.com/Team-FloriBot/PANTILT_ROS2_Jazzy.git}
         - PANTILT_REF=${PANTILT_REF:-main}
         - FLIR_PTU_DRIVER_REPO=${FLIR_PTU_DRIVER_REPO:-https://github.com/vicoslab/flir_ptu_driver.git}
-        - FLIR_PTU_DRIVER_REF=${FLIR_PTU_DRIVER_REF:-master}
+        - FLIR_PTU_DRIVER_REF=${FLIR_PTU_DRIVER_REF:-ros2}
     container_name: floribot-pantilt
     platform: linux/arm64
     network_mode: host

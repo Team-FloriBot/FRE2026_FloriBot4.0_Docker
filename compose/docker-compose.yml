@@ -135,7 +135,7 @@ services:
       args:
         - ROBOSENSE_REF=${ROBOSENSE_REF:-main}
     container_name: floribot-robosense
-    platform: linux/arm64
+    #platform: linux/arm64
     network_mode: host
     ipc: host
     pid: host

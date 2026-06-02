@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 
 ARG ROBOSENSE_REPO=https://github.com/Team-FloriBot/FRE_RoboSenseAIRY.git
-ARG ROBOSENSE_REF=main
+ARG ROBOSENSE_REF=parameter_test_feld
 
 RUN apt-get update && apt-get install -y \
     git \

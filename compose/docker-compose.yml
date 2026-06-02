@@ -309,6 +309,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+      - ../tasks/audio/asound.conf:/etc/asound.conf:ro
 
   floribot-object-detection:
     profiles: ["robot"]

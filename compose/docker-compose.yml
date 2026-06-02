@@ -302,6 +302,10 @@ services:
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
       CYCLONEDDS_URI: ${CYCLONEDDS_URI}
+    devices:
+      - /dev/snd:/dev/snd
+    group_add:
+      - audio
     restart: unless-stopped
     volumes:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro

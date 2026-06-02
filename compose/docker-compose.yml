@@ -133,7 +133,7 @@ services:
       context: ..
       dockerfile: robosense/Dockerfile
       args:
-        - ROBOSENSE_REF=${ROBOSENSE_REF:-main}
+        - ROBOSENSE_REF=${ROBOSENSE_REF:-parameter_test_feld}
     container_name: floribot-robosense
     #platform: linux/arm64
     network_mode: host

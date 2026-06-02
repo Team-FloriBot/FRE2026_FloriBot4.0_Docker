@@ -360,6 +360,9 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /mnt/wslg:/mnt/wslg
+      - /dev/dri:/dev/dri
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+    devices:
+      - /dev/dri:/dev/dri
     stdin_open: true
     tty: true

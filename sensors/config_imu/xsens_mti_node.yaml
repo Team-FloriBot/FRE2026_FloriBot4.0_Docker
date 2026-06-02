@@ -25,7 +25,7 @@
         # or to set it to 921600, send: FA FF 18 01 80 68.
 
         port: '/dev/ttyUSB0' # Uncomment and set your device's port.
-        baudrate: 115200     # Uncomment and set your device's baudrate.
+        baudrate: 2000000     # Uncomment and set your device's baudrate.
 
         # Device Scanning Selection
         # ----------------
@@ -129,32 +129,32 @@
         # Message Publishers, Also the output configurations if enable_deviceConfig is set to true
         # ------------------
         # Enable or disable publication of various sensor data:
-        pub_utctime: true
-        pub_sampletime: true
+        pub_utctime: false
+        pub_sampletime: false
         pub_imu: true
         pub_quaternion: true
-        pub_euler: true
-        pub_free_acceleration: true
+        pub_euler: false
+        pub_free_acceleration: false
         pub_angular_velocity: true
         pub_acceleration: true
         pub_dq: false
         pub_dv: false
-        pub_mag: true
-        pub_temperature: true
-        pub_pressure: true
+        pub_mag: false
+        pub_temperature: false
+        pub_pressure: false
         pub_accelerationhr: false      #High Rate Data Acceleration, when this is true, set enable_high_rate to true as well
         pub_angular_velocity_hr: false #High Rate Data Angular Velocity,  when this is true, set enable_high_rate to true as well
         pub_transform: false
-        pub_status: true
-        pub_twist: true         # For GNSS/INS Version of MTI only
-        pub_gnss: true          # For GNSS/INS Version of MTI only
-        pub_positionLLA: true   # For GNSS/INS Version of MTI only
-        pub_velocity: true      # For GNSS/INS Version of MTI only
-        pub_nmea: true          # For GNSS/INS Version of MTI only
-        pub_gnsspose: true      # For GNSS/INS Version of MTI only
+        pub_status: false
+        pub_twist: false         # For GNSS/INS Version of MTI only
+        pub_gnss: false          # For GNSS/INS Version of MTI only
+        pub_positionLLA: false   # For GNSS/INS Version of MTI only
+        pub_velocity: false      # For GNSS/INS Version of MTI only
+        pub_nmea: false          # For GNSS/INS Version of MTI only
+        pub_gnsspose: false      # For GNSS/INS Version of MTI only
         pub_odometry: false     # For GNSS/INS Version of MTI only
         pub_euler_stddev: false # For Sirius and Avior AHRS/VRU only, this is for setouput config, and value will be published at /imu/data topic.
-        pub_ship_motion: true   # For Sirius and Avior AHRS Only
+        pub_ship_motion: false   # For Sirius and Avior AHRS Only
 
 
 
@@ -171,7 +171,7 @@
         # options for MTi-7/8 series: baro pressure, max 50Hz:1, 2, 5, 10, 25, 50
         # Change 'output_data_rate_lower' if you are using mti-1 series or if you want to change output rate for mag, baro for other product series
         # Change 'output_data_rate_lower' if you want to change the output rate for heave position and heave period
-        output_data_rate_lower: 100
+        output_data_rate_lower: 50
         # Change 'output_data_rate_baro_mtione' if you use mti-7/8 only.
         output_data_rate_baro_mtione: 50
 
@@ -208,7 +208,7 @@
         # Set baudrate
         # ---------------
         #This is necessary if you have hig output rate, and if you see error message of 'data overflow' 
-        enable_setting_baudrate: false
+        enable_setting_baudrate: true
         #options: 115200, 230400, 460800, 921600, 2000000
         set_baudrate_value: 2000000
         #options for MTi-600/Sirius/Avior to enable/disable hardware flow control

@@ -77,7 +77,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash", "-lc", "\
 source /opt/ros/jazzy/setup.bash && \
 source /ws/install/setup.bash && \
-ros2 launch stage_ros2 stage.launch.py world:=maize_field enforce_prefixes:=false one_tf_tree:=false frame_id_base_link:=base_link & \
+ros2 launch stage_ros2 stage.launch.py world:=${STAGE_WORLD:-maize_field} enforce_prefixes:=false one_tf_tree:=false frame_id_base_link:=base_link &
 stage_pid=$! && \
 sleep 5 && \
 ros2 run topic_tools relay /base_scan1 /sensors/scan_front & \

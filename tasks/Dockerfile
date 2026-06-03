@@ -19,6 +19,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-numpy \
     python3-pip \
     python3-rosdep \
+    python3-dev \
+    swig \
     libgl1 \
     libusb-1.0-0 \
     libsm6 \
@@ -34,6 +36,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-visualization-msgs \
     ros-jazzy-tf2-ros \
     ros-jazzy-tf-transformations \
+    ros-jazzy-tf2-geometry-msgs \
+    ros-jazzy-tf2-sensor-msgs \
     ros-jazzy-launch \
     ros-jazzy-launch-ros \
     ros-jazzy-rmw-cyclonedds-cpp \
@@ -42,6 +46,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-cv-bridge \
     ros-jazzy-vision-opencv \
     && rm -rf /var/lib/apt/lists/*
+
+# Fields2Cover wird von task4.coverage_planner importiert.
+RUN git clone https://github.com/Fields2Cover/Fields2Cover.git /tmp/Fields2Cover && \
+    cd /tmp/Fields2Cover && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON=ON .. && \
+    make -j$(nproc) && \
+    make install && \
+    ldconfig && \
+    rm -rf /tmp/Fields2Cover
 
 WORKDIR /ws
 RUN mkdir -p /ws/src
@@ -58,7 +72,9 @@ RUN echo "Cache bust: ${CACHEBUST}" && \
     git sparse-checkout set \
       src/maize_navigation \
       src/fre2026_tasks_interfaces \
-      src/fre2026_audio_feedback
+      src/fre2026_audio_feedback \
+      src/task4 \
+      src/path_tracking_controller
 
 RUN git clone \
       --depth 1 \
@@ -85,6 +101,8 @@ RUN source /opt/ros/jazzy/setup.bash && \
         fre2026_task_interfaces \
         maize_navigation \
         fre2026_audio_feedback \
+        task4 \
+        path_tracking_controller \
         ros2_detection_interfaces \
         ros2_detection_client
 

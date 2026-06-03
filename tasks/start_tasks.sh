@@ -10,13 +10,15 @@ fi
 cleanup() {
     echo "Beende Tasks-Nodes..."
 
-    if [ -n "${AUDIO_PID:-}" ]; then
-        kill "${AUDIO_PID}" 2>/dev/null || true
-    fi
-
-    if [ -n "${NAVIGATION_PID:-}" ]; then
-        kill "${NAVIGATION_PID}" 2>/dev/null || true
-    fi
+    for pid in \
+        "${AUDIO_PID:-}" \
+        "${NAVIGATION_PID:-}" \
+        "${TASK4_PID:-}" \
+        "${PATH_TRACKING_PID:-}"; do
+        if [ -n "$pid" ]; then
+            kill "$pid" 2>/dev/null || true
+        fi
+    done
 
     wait 2>/dev/null || true
 }
@@ -31,4 +33,16 @@ echo "Starte Maize Navigation..."
 ros2 launch maize_navigation maize_navigation.launch.py &
 NAVIGATION_PID=$!
 
-wait -n "${AUDIO_PID}" "${NAVIGATION_PID}"
+echo "Starte Task 4 Coverage Planner..."
+ros2 launch task4 task4.launch.py &
+TASK4_PID=$!
+
+echo "Starte Path Tracking Controller..."
+ros2 launch path_tracking_controller path_tracking_controller.launch.py &
+PATH_TRACKING_PID=$!
+
+wait -n \
+    "$AUDIO_PID" \
+    "$NAVIGATION_PID" \
+    "$TASK4_PID" \
+    "$PATH_TRACKING_PID"

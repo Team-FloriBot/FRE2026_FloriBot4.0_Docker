@@ -188,6 +188,7 @@ services:
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
       DISPLAY: ${DISPLAY}
       QT_X11_NO_MITSHM: 1
+      STAGE_WORLD: ${STAGE_WORLD:-maize_field}
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     restart: unless-stopped

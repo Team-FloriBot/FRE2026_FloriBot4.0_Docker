@@ -12,7 +12,10 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     libpcl-dev \
     python3-colcon-common-extensions \
+    ros-jazzy-rclpy \
     ros-jazzy-ament-cmake-auto \
+    ros-jazzy-rosidl-default-generators \
+    ros-jazzy-rosidl-default-runtime \
     ros-jazzy-rclcpp \
     ros-jazzy-rclcpp-components \
     ros-jazzy-message-filters \
@@ -32,7 +35,8 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /ws
 
-RUN mkdir -p /ws/src && \
+RUN echo "Cache bust: ${CACHEBUST}" && \
+    mkdir -p /ws/src && \
     git clone \
       --depth 1 \
       --filter=blob:none \
@@ -42,11 +46,17 @@ RUN mkdir -p /ws/src && \
       /ws/src/FRE2026_Tasks && \
     cd /ws/src/FRE2026_Tasks && \
     git sparse-checkout set \
+      src/fre2026_tasks_interfaces \
+      src/floribot_scan_mux \
       src/laser_scan_merger \
       src/slam_toolbox
 
 RUN source /opt/ros/jazzy/setup.bash && \
-    colcon build --packages-select laser_scan_merger
+    colcon build \
+      --packages-select \
+        fre2026_task_interfaces \
+        floribot_scan_mux \
+        laser_scan_merger
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /etc/bash.bashrc && \
     echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /etc/bash.bashrc

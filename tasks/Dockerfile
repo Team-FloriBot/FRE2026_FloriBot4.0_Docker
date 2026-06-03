@@ -15,16 +15,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     build-essential \
     cmake \
+    g++ \
+    ca-certificates \
+    doxygen \
+    lcov \
     python3-colcon-common-extensions \
     python3-numpy \
     python3-pip \
     python3-rosdep \
     python3-dev \
+    python3-matplotlib \
+    python3-tk \
     swig \
     libgl1 \
     libusb-1.0-0 \
     libsm6 \
     libxext6 \
+    libeigen3-dev \
+    libgdal-dev \
+    gdal-bin \
+    libgeos-dev \
+    libtbb-dev \
+    libtinyxml2-dev \
+    nlohmann-json3-dev \
     espeak-ng \
     alsa-utils \
     ros-jazzy-rclpy \

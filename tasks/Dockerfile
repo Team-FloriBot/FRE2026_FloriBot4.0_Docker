@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 
 ARG FRE2026_TASKS_REPO=https://github.com/Team-FloriBot/FRE2026_Tasks.git
-ARG FRE2026_TASKS_REF=main
+ARG FRE2026_TASKS_REF=spline_waypoint_navigation
 
 ARG FRE_DETECTION_REPO=https://github.com/Team-FloriBot/FRE_object_detection.git
 ARG FRE_DETECTION_REF=docker_ros2_client
@@ -112,7 +112,7 @@ RUN source /opt/ros/jazzy/setup.bash && \
     colcon build \
       --symlink-install \
       --packages-select \
-        fre2026_task_interfaces \
+        fre2026_tasks_interfaces \
         maize_navigation_interfaces \
         maize_navigation \
         fre2026_audio_feedback \

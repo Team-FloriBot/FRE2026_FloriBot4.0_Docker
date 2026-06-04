@@ -65,7 +65,7 @@ RUN python3 -m pip install --no-cache-dir --break-system-packages \
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build --symlink-install \
     --packages-select \
-        fre2026_task_interfaces \
+        fre2026_tasks_interfaces \
         web_teleop \
         cmd_vel_selector
 

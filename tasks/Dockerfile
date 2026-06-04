@@ -85,6 +85,8 @@ RUN echo "Cache bust: ${CACHEBUST}" && \
     git sparse-checkout set \
       src/maize_navigation \
       src/maize_navigation_interfaces \
+      src/fre2026_detection_client \
+      src/fre2026_detection_interfaces \
       src/fre2026_tasks_interfaces \
       src/fre2026_audio_feedback \
       src/task4 \
@@ -112,8 +114,10 @@ RUN source /opt/ros/jazzy/setup.bash && \
     colcon build \
       --symlink-install \
       --packages-select \
+        fre2026_detection_interfaces \
         fre2026_tasks_interfaces \
         maize_navigation_interfaces \
+        fre2026_detection_client \
         maize_navigation \
         fre2026_audio_feedback \
         task4 \

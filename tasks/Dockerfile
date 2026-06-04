@@ -84,6 +84,7 @@ RUN echo "Cache bust: ${CACHEBUST}" && \
     cd /ws/src/FRE2026_Tasks && \
     git sparse-checkout set \
       src/maize_navigation \
+      src/maize_navigation_interfaces \
       src/fre2026_tasks_interfaces \
       src/fre2026_audio_feedback \
       src/task4 \
@@ -112,6 +113,7 @@ RUN source /opt/ros/jazzy/setup.bash && \
       --symlink-install \
       --packages-select \
         fre2026_task_interfaces \
+        maize_navigation_interfaces \
         maize_navigation \
         fre2026_audio_feedback \
         task4 \

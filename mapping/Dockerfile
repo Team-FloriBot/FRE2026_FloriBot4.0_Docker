@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 
 ARG FRE2026_TASKS_REPO=https://github.com/Team-FloriBot/FRE2026_Tasks.git
-ARG FRE2026_TASKS_REF=spline_waypoint_navigation
+ARG FRE2026_TASKS_REF=main
 ARG CACHEBUST=1
 
 RUN apt-get update && apt-get install -y \

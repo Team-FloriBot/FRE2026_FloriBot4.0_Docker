@@ -53,8 +53,9 @@ RUN git clone \
       ${FRE2026_TASKS_REPO} \
       /tmp/fre2026_tasks && \
     cd /tmp/fre2026_tasks && \
-    git sparse-checkout set src/fre2026_tasks_interfaces && \
+    git sparse-checkout set src/fre2026_tasks_interfaces src/maize_navigation_interfaces && \
     cp -r /tmp/fre2026_tasks/src/fre2026_tasks_interfaces /ws/src/ && \
+    cp -r /tmp/fre2026_tasks/src/maize_navigation_interfaces /ws/src/ && \
     rm -rf /tmp/fre2026_tasks
 WORKDIR /ws
 
@@ -66,6 +67,7 @@ RUN source /opt/ros/jazzy/setup.bash && \
     colcon build --symlink-install \
     --packages-select \
         fre2026_tasks_interfaces \
+        maize_navigation_interfaces \
         web_teleop \
         cmd_vel_selector
 

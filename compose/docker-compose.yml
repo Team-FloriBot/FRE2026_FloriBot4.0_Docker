@@ -128,7 +128,7 @@ services:
     restart: unless-stopped
 
   floribot-robosense:
-    profiles: ["robot"]
+    profiles: ["laptop"]
     build:
       context: ..
       dockerfile: robosense/Dockerfile

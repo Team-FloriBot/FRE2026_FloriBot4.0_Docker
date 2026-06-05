@@ -247,7 +247,7 @@
         magnetic_field_stddev: [0.20, 0.20, 0.20]     # [Tesla] Standard deviation for magnetic field
         # [rad]   Standard deviation for orientation,  
         # for Sirius/Avior, if the pub_euler_stddev is true, will use that value from the sensor and igore this value.
-        orientation_stddev: [0.0, 0.0, 0.0]        
+        orientation_stddev: [0.10, 0.10, 0.20]        
         
 
 

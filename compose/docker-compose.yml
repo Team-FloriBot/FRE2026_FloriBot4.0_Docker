@@ -155,6 +155,43 @@ services:
       - /start_robosense.sh
     restart: unless-stopped
 
+  floribot-gps:
+    profiles: ["laptop"]
+    build:
+      context: ..
+      dockerfile: gps/Dockerfile
+    container_name: floribot-gps
+    network_mode: host
+    ipc: host
+    pid: host
+    privileged: true
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      CYCLONEDDS_URI: ${CYCLONEDDS_URI}
+
+      GPS_PORT: ${GPS_PORT:-auto}
+      GPS_BAUD: ${GPS_BAUD:-auto}
+      GPS_BAUD_CANDIDATES: ${GPS_BAUD_CANDIDATES:-38400 115200 9600 57600}
+      GPS_FRAME_ID: ${GPS_FRAME_ID:-gps_link}
+
+      GPS_FIX_TOPIC: ${GPS_FIX_TOPIC:-/sensors/gps/fix}
+      GPS_VEL_TOPIC: ${GPS_VEL_TOPIC:-/sensors/gps/vel}
+      GPS_TIME_REF_TOPIC: ${GPS_TIME_REF_TOPIC:-/sensors/gps/time_reference}
+      GPS_HEADING_TOPIC: ${GPS_HEADING_TOPIC:-/sensors/gps/heading}
+
+      GPS_SCAN_INTERVAL_SEC: ${GPS_SCAN_INTERVAL_SEC:-2}
+      GPS_SCAN_TIMEOUT_SEC: ${GPS_SCAN_TIMEOUT_SEC:-5}
+    volumes:
+      - /dev:/dev
+      - /dev/bus/usb:/dev/bus/usb
+      - /run/udev:/run/udev:ro
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+    command:
+      - /start_gps.sh
+    restart: unless-stopped
+
   floribot-webteleop:
     profiles: ["robot", "stage"]
     build:

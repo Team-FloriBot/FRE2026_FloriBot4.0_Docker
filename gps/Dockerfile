@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     usbutils \
     ros-jazzy-rmw-cyclonedds-cpp \
     ros-jazzy-nmea-navsat-driver \
+    ros-jazzy-robot-localization \
     && rm -rf /var/lib/apt/lists/*
 
 COPY gps/entrypoint.sh /entrypoint.sh

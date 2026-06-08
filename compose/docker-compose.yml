@@ -106,7 +106,6 @@ services:
         - FLIR_PTU_DRIVER_REF=${FLIR_PTU_DRIVER_REF:-ros2}
         - FLIR_PTU_DRIVER_SHA=${FLIR_PTU_DRIVER_SHA:-69bdda85a52eac2f16a34ec2f390671f0596412f}
     container_name: floribot-pantilt
-    platform: linux/arm64
     network_mode: host
     ipc: host
     pid: host

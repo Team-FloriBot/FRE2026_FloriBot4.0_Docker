@@ -59,10 +59,10 @@ RUN git clone --branch ${FLORIBOT_BASE_REF} --depth 1 \
     ${FLORIBOT_BASE_REPO} /tmp/floribot_base
 
 # Bestehende Base-Pakete übernehmen. EKF-Konfiguration wird per Volume eingebunden.
-RUN mkdir -p /ws/src /ws/config/localization && \
-    cp -r /tmp/floribot_base/src/base /ws/src/ && \
-    cp -r /tmp/floribot_base/src/plc_connection /ws/src/ && \
-    cp -r /tmp/floribot_base/src/robot_description /ws/src/
+RUN mkdir -p /ws/src /ws/config/localization
+RUN cp -r /tmp/floribot_base/src/base /ws/src/
+RUN cp -r /tmp/floribot_base/src/plc_connection /ws/src/
+RUN cp -r /tmp/floribot_base/src/robot_description /ws/src/
 
 # robot_localization mit identischem Commit wie im Dev-Container laden
 RUN git clone ${ROBOT_LOCALIZATION_REPO} /ws/src/robot_localization && \

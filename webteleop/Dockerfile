@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-geometry-msgs \
     ros-jazzy-std-msgs \
     ros-jazzy-std-srvs \
+    ros-jazzy-slam-toolbox \
     ros-jazzy-rosidl-default-generators \
     ros-jazzy-rosidl-default-runtime \
     ros-jazzy-ament-index-python \

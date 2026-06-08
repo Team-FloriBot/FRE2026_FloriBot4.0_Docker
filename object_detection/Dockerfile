@@ -107,8 +107,7 @@ RUN apt-get update && \
 
 # CUDA-fähiges PyTorch, torchvision und OpenCV stammen bereits aus dem
 # Jetson-Basisimage und dürfen nicht durch generische pip-Wheels ersetzt werden.
-RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 -m pip install \
+RUN python3 -m pip install \
         --timeout 600 \
         --retries 10 \
         --prefer-binary \

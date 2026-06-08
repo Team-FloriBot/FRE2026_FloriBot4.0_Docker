@@ -26,15 +26,16 @@ RUN mkdir -p /ws/src \
         "${UBLOX_REPOSITORY}" \
         /ws/src/ublox
 
-RUN source /opt/ros/jazzy/setup.bash \
+RUN apt-get update \
+    && source /opt/ros/jazzy/setup.bash \
     && rosdep update \
     && rosdep install \
         --from-paths /ws/src \
         --ignore-src \
         --rosdistro jazzy \
-        --as-root apt:false \
         -r \
-        -y
+        -y \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN source /opt/ros/jazzy/setup.bash \
     && colcon build \

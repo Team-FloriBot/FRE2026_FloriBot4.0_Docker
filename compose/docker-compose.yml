@@ -1,3 +1,4 @@
+```yaml
 services:
   floribot-base:
     profiles: ["robot"]
@@ -162,6 +163,9 @@ services:
     build:
       context: ..
       dockerfile: gps/Dockerfile
+      args:
+        - UBLOX_REPOSITORY=${UBLOX_REPOSITORY:-https://github.com/KumarRobotics/ublox.git}
+        - UBLOX_BRANCH=${UBLOX_BRANCH:-ros2}
     container_name: floribot-gps
     network_mode: host
     ipc: host
@@ -174,17 +178,39 @@ services:
       CYCLONEDDS_URI: ${CYCLONEDDS_URI}
 
       GPS_PORT: ${GPS_PORT:-auto}
-      GPS_BAUD: ${GPS_BAUD:-auto}
-      GPS_BAUD_CANDIDATES: ${GPS_BAUD_CANDIDATES:-38400 115200 9600 57600}
+      GPS_DEVICE_PATTERN: ${GPS_DEVICE_PATTERN:-u-blox|ublox|ardusimple|zed|f9p|gnss|gps}
+      GPS_CONFIG_FILE: ${GPS_CONFIG_FILE:-/etc/floribot/gps/zed_f9p_rover.yaml}
+
+      GPS_NODE_NAME: ${GPS_NODE_NAME:-ublox_gps_node}
       GPS_FRAME_ID: ${GPS_FRAME_ID:-gps_link}
+      GPS_RATE: ${GPS_RATE:-10.0}
+      GPS_NAV_RATE: ${GPS_NAV_RATE:-1}
+      GPS_DYNAMIC_MODEL: ${GPS_DYNAMIC_MODEL:-automotive}
 
       GPS_FIX_TOPIC: ${GPS_FIX_TOPIC:-/sensors/gps/fix}
-      GPS_VEL_TOPIC: ${GPS_VEL_TOPIC:-/sensors/gps/vel}
-      GPS_TIME_REF_TOPIC: ${GPS_TIME_REF_TOPIC:-/sensors/gps/time_reference}
-      GPS_HEADING_TOPIC: ${GPS_HEADING_TOPIC:-/sensors/gps/heading}
+      GPS_VEL_TOPIC: ${GPS_VEL_TOPIC:-/sensors/gps/fix_velocity}
 
       GPS_SCAN_INTERVAL_SEC: ${GPS_SCAN_INTERVAL_SEC:-2}
-      GPS_SCAN_TIMEOUT_SEC: ${GPS_SCAN_TIMEOUT_SEC:-5}
+      GPS_RESTART_DELAY_SEC: ${GPS_RESTART_DELAY_SEC:-2}
+
+      NAVSAT_ENABLE: ${NAVSAT_ENABLE:-false}
+      NAVSAT_FREQUENCY: ${NAVSAT_FREQUENCY:-30.0}
+      NAVSAT_DELAY: ${NAVSAT_DELAY:-1.0}
+      NAVSAT_MAGNETIC_DECLINATION_RAD: ${NAVSAT_MAGNETIC_DECLINATION_RAD:-0.0}
+      NAVSAT_YAW_OFFSET_RAD: ${NAVSAT_YAW_OFFSET_RAD:-0.0}
+      NAVSAT_ZERO_ALTITUDE: ${NAVSAT_ZERO_ALTITUDE:-true}
+      NAVSAT_PUBLISH_FILTERED_GPS: ${NAVSAT_PUBLISH_FILTERED_GPS:-true}
+      NAVSAT_USE_ODOMETRY_YAW: ${NAVSAT_USE_ODOMETRY_YAW:-false}
+      NAVSAT_WAIT_FOR_DATUM: ${NAVSAT_WAIT_FOR_DATUM:-false}
+      NAVSAT_BROADCAST_UTM_TRANSFORM: ${NAVSAT_BROADCAST_UTM_TRANSFORM:-false}
+      NAVSAT_BROADCAST_UTM_TRANSFORM_AS_PARENT_FRAME: ${NAVSAT_BROADCAST_UTM_TRANSFORM_AS_PARENT_FRAME:-false}
+      NAVSAT_TRANSFORM_TIMEOUT: ${NAVSAT_TRANSFORM_TIMEOUT:-0.2}
+
+      NAVSAT_IMU_TOPIC: ${NAVSAT_IMU_TOPIC:-/imu/data}
+      NAVSAT_ODOM_FILTERED_TOPIC: ${NAVSAT_ODOM_FILTERED_TOPIC:-/odometry/filtered}
+      NAVSAT_ODOM_GPS_TOPIC: ${NAVSAT_ODOM_GPS_TOPIC:-/odometry/gps}
+      NAVSAT_FILTERED_GPS_TOPIC: ${NAVSAT_FILTERED_GPS_TOPIC:-/gps/filtered}
+
     volumes:
       - /dev:/dev
       - /dev/bus/usb:/dev/bus/usb
@@ -406,3 +432,4 @@ services:
       - /dev/dri:/dev/dri
     stdin_open: true
     tty: true
+```

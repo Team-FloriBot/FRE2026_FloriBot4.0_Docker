@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # Object-Detection-Container für NVIDIA Jetson Xavier / JetPack 5.
 #
 # Der Sensors-Container besitzt die RealSense-Hardware und veröffentlicht

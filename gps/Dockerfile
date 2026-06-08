@@ -1,4 +1,3 @@
-```dockerfile
 FROM ros:jazzy
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -61,4 +60,3 @@ RUN chmod +x \
 ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["/start_gps.sh"]
-```

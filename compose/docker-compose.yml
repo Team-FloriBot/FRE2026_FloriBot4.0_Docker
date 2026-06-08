@@ -1,4 +1,3 @@
-```yaml
 services:
   floribot-base:
     profiles: ["robot"]
@@ -432,4 +431,3 @@ services:
       - /dev/dri:/dev/dri
     stdin_open: true
     tty: true
-```

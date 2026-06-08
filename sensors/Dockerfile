@@ -120,8 +120,6 @@ RUN source /opt/ros/jazzy/setup.bash && \
         sick_scan_xd \
       --symlink-install
 
-COPY sensors/config_imu/ /ws/src/xsens_mti_ros2/src/xsens_mti_ros2_driver/param/
-
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build \
       --packages-select \

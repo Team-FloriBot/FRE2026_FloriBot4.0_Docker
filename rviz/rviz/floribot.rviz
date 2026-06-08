@@ -121,7 +121,20 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /coverage_polygon_marker
+        Value: /task4/coverage_polygon_marker
+      Value: true
+
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: Shooting Markers
+      Namespaces:
+        pp_debug: true
+      Topic:
+        Depth: 10
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /task4/shooting_markers
       Value: true
 
     - Class: rviz_default_plugins/MarkerArray

@@ -23,6 +23,7 @@ services:
       - /dev/bus/usb:/dev/bus/usb
       - /run/udev:/run/udev:ro
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+      - ../base/config_ekf/local_ekf.yaml:/ws/config/localization/local_ekf.yaml:ro
     restart: unless-stopped
 
   floribot-base-sim:
@@ -87,6 +88,7 @@ services:
       - /dev/bus/usb:/dev/bus/usb
       - /run/udev:/run/udev:ro
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+      - ../sensors/config_imu/xsens_mti_node.yaml:/ws/install/xsens_mti_ros2_driver/share/xsens_mti_ros2_driver/param/xsens_mti_node.yaml:ro
     command:
       - /start_sensors.sh
     restart: unless-stopped

@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source /opt/ros/jazzy/setup.bash
-
-if [ -f /ws/install/setup.bash ]; then
-  source /ws/install/setup.bash
-fi
-
 GPS_PORT="${GPS_PORT:-auto}"
 GPS_BAUD="${GPS_BAUD:-auto}"
 GPS_BAUD_CANDIDATES="${GPS_BAUD_CANDIDATES:-38400 115200 9600 57600}"
@@ -56,7 +50,9 @@ is_serial_device() {
 
 device_candidates() {
   {
-    find /dev/serial/by-id -maxdepth 1 -type l 2>/dev/null | grep -Ei 'u-blox|ublox|ardusimple|zed|f9p|gnss|gps' || true
+    find /dev/serial/by-id -maxdepth 1 -type l 2>/dev/null |
+      grep -Ei 'u-blox|ublox|ardusimple|zed|f9p|gnss|gps' || true
+
     find /dev/serial/by-id -maxdepth 1 -type l 2>/dev/null || true
     ls /dev/ttyACM* /dev/ttyUSB* 2>/dev/null || true
   } | awk '!seen[$0]++'
@@ -92,6 +88,7 @@ try:
 
         while time.time() < deadline:
             raw = ser.readline()
+
             if not raw:
                 continue
 
@@ -103,7 +100,9 @@ try:
             if not line.startswith("$"):
                 continue
 
-            if len(line) >= 6 and any(marker in line[3:6] for marker in nmea_markers):
+            if len(line) >= 6 and any(
+                marker in line[3:6] for marker in nmea_markers
+            ):
                 print(line)
                 sys.exit(0)
 
@@ -117,7 +116,9 @@ PY
 detect_gps() {
   if [ "$GPS_PORT" != "auto" ]; then
     if ! is_serial_device "$GPS_PORT"; then
-      echo "GPS_PORT ist gesetzt, aber kein gültiges serielles Device: $GPS_PORT" >&2
+      echo \
+        "GPS_PORT ist gesetzt, aber kein gültiges serielles Device: $GPS_PORT" \
+        >&2
       return 1
     fi
 
@@ -128,11 +129,12 @@ detect_gps() {
           return 0
         fi
       done
+
       return 1
-    else
-      echo "$GPS_PORT $GPS_BAUD"
-      return 0
     fi
+
+    echo "$GPS_PORT $GPS_BAUD"
+    return 0
   fi
 
   while IFS= read -r dev; do
@@ -141,6 +143,7 @@ detect_gps() {
     if [ "$GPS_BAUD" = "auto" ]; then
       for baud in $GPS_BAUD_CANDIDATES; do
         echo "Teste GNSS/NMEA: $dev @ $baud" >&2
+
         if probe_nmea "$dev" "$baud" >/dev/null 2>&1; then
           echo "$dev $baud"
           return 0
@@ -148,6 +151,7 @@ detect_gps() {
       done
     else
       echo "Teste GNSS/NMEA: $dev @ $GPS_BAUD" >&2
+
       if probe_nmea "$dev" "$GPS_BAUD" >/dev/null 2>&1; then
         echo "$dev $GPS_BAUD"
         return 0
@@ -160,16 +164,17 @@ detect_gps() {
 
 cleanup_children() {
   local pids=("$@")
+  local pid
 
   for pid in "${pids[@]}"; do
-    if [ -n "${pid}" ] && kill -0 "${pid}" 2>/dev/null; then
-      kill "${pid}" 2>/dev/null || true
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      kill "$pid" 2>/dev/null || true
     fi
   done
 
   for pid in "${pids[@]}"; do
-    if [ -n "${pid}" ]; then
-      wait "${pid}" 2>/dev/null || true
+    if [ -n "$pid" ]; then
+      wait "$pid" 2>/dev/null || true
     fi
   done
 }
@@ -201,7 +206,7 @@ while true; do
 
     NMEA_PID=$!
 
-    if [ "${NAVSAT_ENABLE}" = "true" ]; then
+    if [ "$NAVSAT_ENABLE" = "true" ]; then
       echo "Starte navsat_transform_node:"
       echo "  gps/fix:           ${GPS_FIX_TOPIC}"
       echo "  imu:               ${NAVSAT_IMU_TOPIC}"
@@ -230,24 +235,33 @@ while true; do
 
       NAVSAT_PID=$!
 
-      trap 'cleanup_children "${NMEA_PID}" "${NAVSAT_PID}"' INT TERM EXIT
+      trap \
+        'cleanup_children "${NMEA_PID:-}" "${NAVSAT_PID:-}"' \
+        INT TERM EXIT
 
-      wait -n "${NMEA_PID}" "${NAVSAT_PID}" || true
+      wait -n "$NMEA_PID" "$NAVSAT_PID" || true
 
-      echo "GPS- oder NAVSAT-Node wurde beendet. Stoppe verbleibende Prozesse und starte Autodetect neu." >&2
-      cleanup_children "${NMEA_PID}" "${NAVSAT_PID}"
+      echo \
+        "GPS- oder NAVSAT-Node wurde beendet. Stoppe verbleibende Prozesse und starte Autodetect neu." \
+        >&2
+
+      cleanup_children "$NMEA_PID" "$NAVSAT_PID"
       trap - INT TERM EXIT
     else
-      trap 'cleanup_children "${NMEA_PID}"' INT TERM EXIT
+      trap 'cleanup_children "${NMEA_PID:-}"' INT TERM EXIT
 
-      wait "${NMEA_PID}" || true
+      wait "$NMEA_PID" || true
 
       echo "GPS-Node wurde beendet. Starte Autodetect neu." >&2
-      cleanup_children "${NMEA_PID}"
+
+      cleanup_children "$NMEA_PID"
       trap - INT TERM EXIT
     fi
   fi
 
-  echo "Kein GNSS/NMEA-Gerät gefunden. Neuer Scan in ${SCAN_INTERVAL_SEC}s." >&2
+  echo \
+    "Kein GNSS/NMEA-Gerät gefunden. Neuer Scan in ${SCAN_INTERVAL_SEC}s." \
+    >&2
+
   sleep "$SCAN_INTERVAL_SEC"
 done

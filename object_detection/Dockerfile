@@ -37,7 +37,7 @@ ARG VISION_OPENCV_REF=humble
 
 # Required for the RGBD ROS message definition.
 ARG REALSENSE_MSGS_REPO=https://github.com/realsenseai/realsense-ros.git
-ARG REALSENSE_MSGS_REF=ros2-master
+ARG REALSENSE_MSGS_REF=6d87b071dcfef15f2a0407e1e78945256add70d0
 
 # Required by ros2_detection because detection_model_selection.py imports
 # pyrealsense2 and constructs RealSense processing filter objects.

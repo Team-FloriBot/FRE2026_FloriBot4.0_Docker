@@ -1,3 +1,4 @@
+```dockerfile
 FROM ros:jazzy
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7,14 +8,15 @@ SHELL ["/bin/bash", "-c"]
 ARG UBLOX_REPOSITORY=https://github.com/KumarRobotics/ublox.git
 ARG UBLOX_BRANCH=ros2
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    python3-colcon-common-extensions \
-    python3-rosdep \
-    udev \
-    usbutils \
-    ros-jazzy-rmw-cyclonedds-cpp \
-    ros-jazzy-robot-localization \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        git \
+        python3-colcon-common-extensions \
+        python3-rosdep \
+        udev \
+        usbutils \
+        ros-jazzy-rmw-cyclonedds-cpp \
+        ros-jazzy-robot-localization \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ws
@@ -38,11 +40,12 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN source /opt/ros/jazzy/setup.bash \
-    && colcon build \
+    && colcon \
+        --log-base /ws/log \
+        build \
         --base-paths /ws/src \
         --build-base /ws/build \
         --install-base /ws/install \
-        --log-base /ws/log \
         --merge-install \
         --cmake-args \
             -DCMAKE_BUILD_TYPE=Release
@@ -58,3 +61,4 @@ RUN chmod +x \
 ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["/start_gps.sh"]
+```

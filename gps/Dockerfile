@@ -57,6 +57,11 @@ RUN chmod +x \
     /entrypoint.sh \
     /start_gps.sh
 
+RUN printf '%s\n' \
+    'source /opt/ros/jazzy/setup.bash' \
+    '[ -f /ws/install/setup.bash ] && source /ws/install/setup.bash' \
+    >> /root/.bashrc
+
 ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["/start_gps.sh"]

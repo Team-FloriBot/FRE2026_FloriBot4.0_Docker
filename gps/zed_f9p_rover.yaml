@@ -15,7 +15,7 @@ ublox_gps_node:
 
     # FloriBot ist eine bodengebundene mobile Plattform.
     dynamic_model: automotive
-    fix_mode: both
+    fix_mode: auto
 
     # Kein stationärer Base-/Survey-In-Modus.
     # 0 = disabled

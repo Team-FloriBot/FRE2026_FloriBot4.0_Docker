@@ -1,0 +1,53 @@
+ublox_gps_node:
+  ros__parameters:
+    debug: 0
+
+    # Wird in start_gps.sh nochmals per Kommandozeile überschrieben.
+    device: /dev/ttyACM0
+    frame_id: gps_link
+
+    # Empfänger beim Start über UBX konfigurieren.
+    config_on_startup: true
+
+    # GNSS-Messrate in Hz.
+    rate: 10.0
+    nav_rate: 1
+
+    # FloriBot ist eine bodengebundene mobile Plattform.
+    dynamic_model: automotive
+    fix_mode: both
+
+    # Kein stationärer Base-/Survey-In-Modus.
+    # 0 = disabled
+    tmode3: 0
+
+    enable_ppp: false
+    save_on_shutdown: false
+    clear_bbr: false
+
+    inf:
+      all: false
+      debug: false
+      error: true
+      notice: false
+      test: false
+      warning: true
+
+    # Nicht sämtliche UBX-Nachrichten publizieren.
+    publish:
+      all: false
+
+      nav:
+        all: false
+        pvt: true
+        status: true
+        sat: true
+        relposned: true
+
+      rxm:
+        all: false
+        rtcm: true
+
+      mon:
+        all: false
+        hw: true

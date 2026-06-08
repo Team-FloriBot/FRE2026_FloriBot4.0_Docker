@@ -399,6 +399,7 @@ services:
       YOLO_CONFIG_DIR: /tmp
     volumes:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+      - ../FRE_object_detection-docker_ros2/model:/ws/model:ro
     command:
       - /start_object_detection.sh
     restart: unless-stopped

@@ -6,7 +6,7 @@ SHELL ["/bin/bash", "-c"]
 ARG ROBOSENSE_REPO=https://github.com/Team-FloriBot/FRE_RoboSenseAIRY.git
 ARG ROBOSENSE_REF=parameter_test_feld
 
-ARG ROBOSENSE_REPO_TORSTEM=https://github.com/norikaschneider/Robosense_Torsten.git
+ARG ROBOSENSE_REPO_TORSTEN=https://github.com/norikaschneider/Robosense_Torsten.git
 ARG ROBOSENSE_TORSTEN_REF=main
 
 RUN apt-get update && apt-get install -y \
@@ -37,7 +37,14 @@ RUN git clone --branch "${ROBOSENSE_REF}" --depth 1 \
     "${ROBOSENSE_REPO}" FRE_RoboSenseAIRY
 
 RUN git clone --branch "${ROBOSENSE_TORSTEN_REF}" --depth 1 \
-    "${ROBOSENSE_REPO_TORSTEM}" Robosense_Torsten
+    "${ROBOSENSE_REPO_TORSTEN}" Robosense_Torsten
+
+COPY robosense/config/pcl2laserscan.yaml /tmp/pcl2laserscan.yaml
+
+RUN mkdir -p /ws/src/Robosense_Torsten/src/pointcloud_to_laserscan-rolling/config && \
+    cp /tmp/pcl2laserscan.yaml \
+      /ws/src/Robosense_Torsten/src/pointcloud_to_laserscan-rolling/config/pcl2laserscan.yaml && \
+    python3 -c "from pathlib import Path; p=Path('/ws/src/Robosense_Torsten/src/pointcloud_to_laserscan-rolling/CMakeLists.txt'); s=p.read_text(); block='install(DIRECTORY config\\n  DESTINATION share/\${PROJECT_NAME}\\n)\\n\\n'; p.write_text(s if 'install(DIRECTORY config' in s else s.replace('if(BUILD_TESTING)', block + 'if(BUILD_TESTING)'))"
 
 WORKDIR /ws
 
@@ -51,6 +58,7 @@ RUN apt-get update && \
         /ws/src/FRE_RoboSenseAIRY/rslidar_msg \
         /ws/src/FRE_RoboSenseAIRY/rslidar_sdk \
         /ws/src/FRE_RoboSenseAIRY/ground_segmentation \
+        /ws/src/Robosense_Torsten/src/pointcloud_to_laserscan-rolling \
       --rosdistro jazzy \
       -r -y && \
     rm -rf /var/lib/apt/lists/*
@@ -61,7 +69,7 @@ RUN source /opt/ros/jazzy/setup.bash && \
         rslidar_msg \
         rslidar_sdk \
         ground_segmentation \
-        pointcloud_to_laserscan-rolling \
+        pointcloud_to_laserscan \
       --symlink-install \
       --cmake-args \
         -DCMAKE_BUILD_TYPE=Release

@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Some scikit-learn wheels bundle their own OpenMP runtime. Locate it for the
-# active Python version instead of assuming a Python 3.8 installation path.
-SKLEARN_LIBGOMP="$(python3 - <<'PYCODE'
+# active Python version instead of using a hard-coded site-packages path.
+SKLEARN_LIBGOMP="$(python - <<'PYCODE'
 import glob
 import site
 
@@ -29,14 +29,14 @@ else
     echo "No bundled scikit-learn OpenMP runtime found; using the system runtime."
 fi
 
-python3 - <<'PYCODE'
+python - <<'PYCODE'
 import cv2
-import pyrealsense2
 import torch
 import torchvision
 from sklearn.neighbors import NearestNeighbors
 from ultralytics import YOLO
 
+print("ROS distribution: Jazzy")
 print("CUDA available:", torch.cuda.is_available())
 print("PyTorch:", torch.__version__)
 print("Torchvision:", torchvision.__version__)

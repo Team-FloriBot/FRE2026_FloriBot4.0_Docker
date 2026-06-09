@@ -124,11 +124,11 @@ RUN set -eux; \
     rm -rf /tmp/fre-object-detection
 
 # Do not enable nounset while sourcing ROS setup files. Some generated setup
-# scripts reference optional variables that may not exist yet.
+# scripts reference optional variables that may not exist yet. A regular install
+# is used because the package does not support setuptools editable installs.
 RUN set -ex; \
     source /opt/ros/jazzy/setup.bash; \
     /opt/venv/bin/python3 -m colcon build \
-        --symlink-install \
         --packages-select \
             realsense2_camera_msgs \
             ros2_detection_interfaces \

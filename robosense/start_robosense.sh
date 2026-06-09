@@ -4,51 +4,86 @@ set -eo pipefail
 source /opt/ros/jazzy/setup.bash
 source /ws/install/setup.bash
 
-RSLIDAR_CONFIG="${RSLIDAR_CONFIG:-/ws/install/rslidar_sdk/share/rslidar_sdk/config/config.yaml}"
-GROUND_SEGMENTATION_ENABLE="${GROUND_SEGMENTATION_ENABLE:-true}"
-GROUND_SEGMENTATION_LAUNCH="${GROUND_SEGMENTATION_LAUNCH:-ground_segmentation_headless.launch.py}"
-POINTCLOUD_TO_LASERSCAN_LAUNCH="${POINTCLOUD_TO_LASERSCAN_LAUNCH:-pointcloud_to_laserscan_launch.py}"
+FRONT_IP="${ROBOSENSE_FRONT_IP:-192.168.0.200}"
+REAR_IP="${ROBOSENSE_REAR_IP:-192.168.0.201}"
 
-# Robosense must not contribute transforms to the robot-wide TF tree.
-# The headless launch file applies the same /tf and /tf_static remappings.
+FRONT_CONFIG="${RSLIDAR_FRONT_CONFIG:-/etc/floribot/robosense/rslidar_front.yaml}"
+REAR_CONFIG="${RSLIDAR_REAR_CONFIG:-/etc/floribot/robosense/rslidar_rear.yaml}"
+
+GROUND_SEGMENTATION_ENABLE="${GROUND_SEGMENTATION_ENABLE:-true}"
+POINTCLOUD_TO_LASERSCAN_ENABLE="${POINTCLOUD_TO_LASERSCAN_ENABLE:-true}"
 
 PIDS=()
 
 shutdown() {
-  echo "[start_robosense] Shutting down child processes..."
+  echo "[start_robosense] Stopping child processes..."
+
   for pid in "${PIDS[@]}"; do
-    if kill -0 "${pid}" 2>/dev/null; then
-      kill "${pid}" 2>/dev/null || true
-    fi
+    kill "$pid" 2>/dev/null || true
   done
+
   wait || true
 }
 
 trap shutdown EXIT INT TERM
 
-if [ "${GROUND_SEGMENTATION_ENABLE}" = "true" ] || \
-   [ "${GROUND_SEGMENTATION_ENABLE}" = "1" ]; then
+start_driver() {
+  local position="$1"
+  local config="$2"
+  local ip="$3"
 
-  echo "[start_robosense] Starting RoboSense + ground segmentation via launch file: ${GROUND_SEGMENTATION_LAUNCH}"
-  echo "[start_robosense] RSLIDAR_CONFIG=${RSLIDAR_CONFIG}"
+  echo "[start_robosense] Starting AIRY ${position}: device_ip=${ip}, config=${config}"
 
-  ros2 launch ground_segmentation "${GROUND_SEGMENTATION_LAUNCH}" \
-    rslidar_config:="${RSLIDAR_CONFIG}" &
-  PIDS+=("$!")
-else
-  echo "[start_robosense] Starting RoboSense only. Ground segmentation disabled."
-  echo "[start_robosense] RSLIDAR_CONFIG=${RSLIDAR_CONFIG}"
-
-  ros2 run rslidar_sdk rslidar_sdk_node \
-    --ros-args \
-    -p config_path:="${RSLIDAR_CONFIG}" \
+  ros2 run rslidar_sdk rslidar_sdk_node --ros-args \
+    -r __node:="robosense_${position}_driver" \
+    -r __ns:="/sensors/robosense/${position}" \
+    -p config_path:="${config}" \
     -r /tf:=/robosense/blocked_tf \
     -r /tf_static:=/robosense/blocked_tf_static &
+
   PIDS+=("$!")
+}
+
+start_ground_segmentation() {
+  local position="$1"
+  local config="/etc/floribot/robosense/ground_segmentation_${position}.yaml"
+
+  ros2 run ground_segmentation ground_segmentation_node --ros-args \
+    -r __node:="robosense_${position}_ground_segmentation" \
+    -r __ns:="/sensors/robosense/${position}" \
+    --params-file "${config}" \
+    -r /tf:=/robosense/blocked_tf \
+    -r /tf_static:=/robosense/blocked_tf_static &
+
+  PIDS+=("$!")
+}
+
+start_laserscan() {
+  local position="$1"
+  local config="/etc/floribot/robosense/pcl2laserscan_${position}.yaml"
+
+  ros2 run pointcloud_to_laserscan pointcloud_to_laserscan_node --ros-args \
+    -r __node:="robosense_${position}_pointcloud_to_laserscan" \
+    -r __ns:="/sensors/robosense/${position}" \
+    --params-file "${config}" \
+    -r cloud_in:="/sensors/robosense/${position}/points" \
+    -r scan:="/sensors/robosense/${position}/scan" \
+    -r debug_pcl:="/sensors/robosense/${position}/debug_points" &
+
+  PIDS+=("$!")
+}
+
+start_driver front "${FRONT_CONFIG}" "${FRONT_IP}"
+start_driver rear "${REAR_CONFIG}" "${REAR_IP}"
+
+if [[ "${GROUND_SEGMENTATION_ENABLE}" =~ ^(true|1)$ ]]; then
+  start_ground_segmentation front
+  start_ground_segmentation rear
 fi
 
-echo "[start_robosense] Starting Robosense_Torsten launch file: ${POINTCLOUD_TO_LASERSCAN_LAUNCH}"
-ros2 launch pointcloud_to_laserscan "${POINTCLOUD_TO_LASERSCAN_LAUNCH}" &
-PIDS+=("$!")
+if [[ "${POINTCLOUD_TO_LASERSCAN_ENABLE}" =~ ^(true|1)$ ]]; then
+  start_laserscan front
+  start_laserscan rear
+fi
 
 wait -n "${PIDS[@]}"

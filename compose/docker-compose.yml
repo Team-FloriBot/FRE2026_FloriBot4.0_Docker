@@ -376,16 +376,15 @@ services:
       - ../tasks/audio/asound.conf:/etc/asound.conf:ro
 
   floribot-object-detection:
-    profiles: ["robot"]
+    profiles: ["laptop"]
     build:
       context: ..
       dockerfile: object_detection/Dockerfile
     container_name: floribot-object-detection
-    platform: linux/arm64
     network_mode: host
     ipc: host
     pid: host
-    runtime: nvidia
+    gpus: all
     environment:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}

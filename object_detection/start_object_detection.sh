@@ -94,8 +94,8 @@ find "${MODEL_DIRECTORY}" \
     -printf '%f\n' \
     | sort
 
-exec ros2 launch \
+exec ros2 run \
     ros2_detection \
-    detector.launch.py \
+    detector_node \
     --ros-args \
     -p model_directory:="${MODEL_DIRECTORY}"

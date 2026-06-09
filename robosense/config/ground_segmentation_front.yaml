@@ -1,0 +1,12 @@
+/**:
+  ros__parameters:
+    input_topic: /sensors/robosense/front/points
+
+    aligned_topic: /sensors/robosense/front/aligned_points
+    ground_topic: /sensors/robosense/front/ground_points
+    nonground_topic: /sensors/robosense/front/nonground_points
+    crop_topic: /sensors/robosense/front/crop_points
+    obstacle_topic: /sensors/robosense/front/obstacle_points
+
+    parent_frame: base_link
+    sensor_frame: robosense_front_link

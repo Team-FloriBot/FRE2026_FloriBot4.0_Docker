@@ -146,13 +146,15 @@ services:
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
       CYCLONEDDS_URI: ${CYCLONEDDS_URI}
 
-      RSLIDAR_CONFIG: ${RSLIDAR_CONFIG:-/ws/install/rslidar_sdk/share/rslidar_sdk/config/config.yaml}
-      GROUND_SEGMENTATION_CONFIG: ${GROUND_SEGMENTATION_CONFIG:-/ws/install/ground_segmentation/share/ground_segmentation/config/ground_segmentation.yaml}
+      ROBOSENSE_FRONT_IP: ${ROBOSENSE_FRONT_IP:-192.168.0.200}
+      ROBOSENSE_REAR_IP: ${ROBOSENSE_REAR_IP:-192.168.0.201}
+      RSLIDAR_FRONT_CONFIG: ${RSLIDAR_FRONT_CONFIG:-/etc/floribot/robosense/rslidar_front.yaml}
+      RSLIDAR_REAR_CONFIG: ${RSLIDAR_REAR_CONFIG:-/etc/floribot/robosense/rslidar_rear.yaml}
       GROUND_SEGMENTATION_ENABLE: ${GROUND_SEGMENTATION_ENABLE:-true}
+      POINTCLOUD_TO_LASERSCAN_ENABLE: ${POINTCLOUD_TO_LASERSCAN_ENABLE:-true}
 
     volumes:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
-      - ../robosense/config/pcl2laserscan.yaml:/ws/install/pointcloud_to_laserscan/share/pointcloud_to_laserscan/config/pcl2laserscan.yaml:ro
 
     command:
       - /start_robosense.sh

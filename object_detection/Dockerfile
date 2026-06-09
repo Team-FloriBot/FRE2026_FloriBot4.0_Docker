@@ -3,7 +3,7 @@
 # receives the camera data through ROS 2 messages and therefore does not need
 # pyrealsense2 or direct USB access.
 
-ARG CUDA_IMAGE=nvidia/cuda:12.4.1-cudnn-devel-ubuntu24.04
+ARG CUDA_IMAGE=nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
 FROM ${CUDA_IMAGE}
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]

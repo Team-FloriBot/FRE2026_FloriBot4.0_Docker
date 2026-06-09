@@ -1,0 +1,37 @@
+common:
+  msg_source: 1
+  send_packet_ros: false
+  send_point_cloud_ros: true
+
+lidar:
+  - driver:
+      lidar_type: RSAIRY
+
+      # RoboSense AIRY Heck
+      # Geräte-IP: 192.168.0.201
+      #
+      # Diese Ports müssen ebenfalls in der Weboberfläche des
+      # hinteren AIRY als UDP-Zielports konfiguriert werden.
+      msop_port: 6700
+      difop_port: 7789
+      imu_port: 6689
+
+      min_distance: 0.2
+      max_distance: 200.0
+
+      use_lidar_clock: false
+      dense_points: false
+      ts_first_point: true
+
+      start_angle: 90
+      end_angle: 270
+
+    ros:
+      ros_frame_id: robosense_rear_link
+
+      ros_recv_packet_topic: /sensors/robosense/rear/packets
+      ros_send_packet_topic: /sensors/robosense/rear/packets
+      ros_send_imu_data_topic: /sensors/robosense/rear/imu
+      ros_send_point_cloud_topic: /sensors/robosense/rear/points
+
+      ros_queue_length: 100

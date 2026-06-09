@@ -81,7 +81,7 @@ RUN python3 -m pip install --upgrade pip && \
         psutil \
         matplotlib \
         polars \
-        pyrealsense2==2.57.7.12974 \
+        pyrealsense2==2.57.7.10387 \
         ultralytics-thop && \
     python3 -m pip install \
         --no-deps \

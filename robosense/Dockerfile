@@ -39,7 +39,7 @@ RUN git clone --branch "${ROBOSENSE_REF}" --depth 1 \
 RUN git clone --branch "${ROBOSENSE_TORSTEN_REF}" --depth 1 \
     "${ROBOSENSE_REPO_TORSTEN}" Robosense_Torsten
 
-COPY robosense/config/pcl2laserscan.yaml /tmp/pcl2laserscan.yaml
+COPY robosense/config/pcl2laserscan_front.yaml /tmp/pcl2laserscan.yaml
 
 RUN mkdir -p /ws/src/Robosense_Torsten/src/pointcloud_to_laserscan-rolling/config && \
     cp /tmp/pcl2laserscan.yaml \
@@ -74,6 +74,7 @@ RUN source /opt/ros/jazzy/setup.bash && \
       --cmake-args \
         -DCMAKE_BUILD_TYPE=Release
 
+COPY robosense/config/ /etc/floribot/robosense/
 COPY robosense/entrypoint.sh /entrypoint.sh
 COPY robosense/start_robosense.sh /start_robosense.sh
 

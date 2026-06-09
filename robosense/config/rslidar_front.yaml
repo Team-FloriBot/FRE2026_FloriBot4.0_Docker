@@ -1,0 +1,38 @@
+common:
+  msg_source: 1
+  send_packet_ros: false
+  send_point_cloud_ros: true
+
+lidar:
+  - driver:
+      lidar_type: RSAIRY
+
+      # RoboSense AIRY Front
+      # Geräte-IP: 192.168.0.200
+      #
+      # Die Trennung mehrerer LiDARs erfolgt beim RoboSense-Treiber
+      # über unterschiedliche UDP-Zielports und nicht anhand der
+      # Absender-IP des Sensors.
+      msop_port: 6699
+      difop_port: 7788
+      imu_port: 6688
+
+      min_distance: 0.2
+      max_distance: 200.0
+
+      use_lidar_clock: false
+      dense_points: false
+      ts_first_point: true
+
+      start_angle: 270
+      end_angle: 90
+
+    ros:
+      ros_frame_id: robosense_front_link
+
+      ros_recv_packet_topic: /sensors/robosense/front/packets
+      ros_send_packet_topic: /sensors/robosense/front/packets
+      ros_send_imu_data_topic: /sensors/robosense/front/imu
+      ros_send_point_cloud_topic: /sensors/robosense/front/points
+
+      ros_queue_length: 100

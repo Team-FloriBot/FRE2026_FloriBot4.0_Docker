@@ -29,3 +29,7 @@ exec ros2 run rslidar_sdk rslidar_sdk_node \
   -p config_path:="${RSLIDAR_CONFIG}" \
   -r /tf:=/robosense/blocked_tf \
   -r /tf_static:=/robosense/blocked_tf_static
+
+echo "Starte Robosense_Torsten"
+exec ros2 launch pointcloud_to_laserscan pointcloud_to_laserscan_launch.py
+

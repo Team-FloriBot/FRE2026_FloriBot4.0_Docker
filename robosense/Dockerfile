@@ -6,6 +6,9 @@ SHELL ["/bin/bash", "-c"]
 ARG ROBOSENSE_REPO=https://github.com/Team-FloriBot/FRE_RoboSenseAIRY.git
 ARG ROBOSENSE_REF=parameter_test_feld
 
+ARG ROBOSENSE_REPO_TORSTEM=https://github.com/norikaschneider/Robosense_Torsten.git
+ARG ROBOSENSE_TORSTEN_REF=main
+
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \
@@ -33,6 +36,9 @@ WORKDIR /ws/src
 RUN git clone --branch "${ROBOSENSE_REF}" --depth 1 \
     "${ROBOSENSE_REPO}" FRE_RoboSenseAIRY
 
+RUN git clone --branch "${ROBOSENSE_TORSTEN_REF}" --depth 1 \
+    "${ROBOSENSE_REPO_TORSTEM}" Robosense_Torsten
+
 WORKDIR /ws
 
 RUN rosdep init 2>/dev/null || true && \
@@ -55,6 +61,7 @@ RUN source /opt/ros/jazzy/setup.bash && \
         rslidar_msg \
         rslidar_sdk \
         ground_segmentation \
+        pointcloud_to_laserscan-rolling \
       --symlink-install \
       --cmake-args \
         -DCMAKE_BUILD_TYPE=Release

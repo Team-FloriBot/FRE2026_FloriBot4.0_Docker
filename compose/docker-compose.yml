@@ -152,6 +152,8 @@ services:
 
     volumes:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+      - ../robosense/config/pcl2laserscan.yaml:/ws/src/pcl2laserscan/src/config/pcl2laserscan.yaml:ro
+
     command:
       - /start_robosense.sh
     restart: unless-stopped

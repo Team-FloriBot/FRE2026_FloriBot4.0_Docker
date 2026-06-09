@@ -1,7 +1,7 @@
 # Object detection container for x86_64 systems with an NVIDIA GPU.
 # The RealSense camera is handled by the sensors container. This container
 # receives the camera data through ROS 2 messages and therefore does not need
-# pyrealsense2 or direct USB access.
+# pyrealsense2 is required by detection_model_selection.py.
 
 ARG CUDA_IMAGE=nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
 FROM ${CUDA_IMAGE}
@@ -91,6 +91,7 @@ RUN python3 -m venv --system-site-packages "${VIRTUAL_ENV}" && \
         psutil \
         matplotlib \
         polars \
+        pyrealsense2==2.58.1.10581 \
         ultralytics-thop && \
     python -m pip install \
         --no-deps \
@@ -138,7 +139,7 @@ RUN set -ex; \
     source /ws/install/setup.bash; \
     test "$(head -n 1 /ws/install/ros2_detection/lib/ros2_detection/detector_node)" = "#!/opt/venv/bin/python3"; \
     ros2 interface show realsense2_camera_msgs/msg/RGBD; \
-    python -c "import cv2, torch, sklearn, ultralytics; \
+    python -c "import cv2, torch, sklearn, ultralytics, pyrealsense2; \
 print('Python environment: Jazzy / Python 3.12'); \
 print('Torch:', torch.__version__, 'CUDA build:', torch.version.cuda); \
 print('OpenCV:', cv2.__version__); \

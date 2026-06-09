@@ -148,6 +148,13 @@ print('Ultralytics:', ultralytics.__version__)"
 ENV ROS_DOMAIN_ID=0 \
     RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
+# Automatically source ROS 2 and the workspace in interactive Bash shells,
+# including shells started with: docker exec -it <container> bash
+RUN printf '%s\n' \
+        'source /opt/ros/${ROS_DISTRO:-jazzy}/setup.bash' \
+        '[ -f /ws/install/setup.bash ] && source /ws/install/setup.bash' \
+        >> /root/.bashrc
+
 COPY object_detection/entrypoint.sh /entrypoint.sh
 COPY object_detection/start_object_detection.sh /start_object_detection.sh
 

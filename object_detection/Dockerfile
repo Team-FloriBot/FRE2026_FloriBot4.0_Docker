@@ -113,7 +113,7 @@ RUN set -eux; \
     cp -a /tmp/fre-object-detection/model/. /ws/model/; \
     rm -rf /tmp/fre-object-detection
 
-RUN set -eux; \
+RUN set -ex; \
     source /opt/ros/humble/setup.bash; \
     colcon build \
         --symlink-install \

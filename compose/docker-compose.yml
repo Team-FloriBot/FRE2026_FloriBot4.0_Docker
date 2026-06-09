@@ -399,6 +399,7 @@ services:
       YOLO_CONFIG_DIR: /tmp
     volumes:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+      - ../object_detection/model:/models
     command:
       - /start_object_detection.sh
     restart: unless-stopped

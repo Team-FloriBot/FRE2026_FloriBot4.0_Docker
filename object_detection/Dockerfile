@@ -23,7 +23,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
     PIP_DEFAULT_TIMEOUT=600 \
     PIP_RETRIES=10 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    MODEL_DIRECTORY=/models \
+    DEFAULT_MODEL_DIRECTORY=/opt/default_models
 
 WORKDIR /ws
 
@@ -31,8 +33,10 @@ WORKDIR /ws
 # DDS type support for realsense2_camera_msgs can become incompatible.
 ARG REALSENSE_MSGS_REPO=https://github.com/realsenseai/realsense-ros.git
 ARG REALSENSE_MSGS_SHA=6d87b071dcfef15f2a0407e1e78945256add70d0
+
 ARG OBJECT_DETECTION_REPO=https://github.com/Team-FloriBot/FRE_object_detection.git
 ARG OBJECT_DETECTION_REF=docker_ros2
+
 ARG PYTORCH_CUDA_INDEX=https://download.pytorch.org/whl/cu124
 
 # ROS 2 Jazzy and build/runtime dependencies for Ubuntu 24.04.
@@ -46,9 +50,11 @@ RUN set -eux; \
         software-properties-common; \
     locale-gen en_US.UTF-8; \
     add-apt-repository universe; \
-    curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+    curl -fsSL \
+        https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
         -o /usr/share/keyrings/ros-archive-keyring.gpg; \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo ${UBUNTU_CODENAME}) main" \
+    echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo "${UBUNTU_CODENAME}") main" \
         > /etc/apt/sources.list.d/ros2.list; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -77,8 +83,14 @@ RUN set -eux; \
 # Use a virtual environment to avoid Ubuntu 24.04's externally-managed Python
 # restriction. --system-site-packages keeps ROS Python modules and cv_bridge
 # from /opt/ros/jazzy visible inside the environment.
-RUN python3 -m venv --system-site-packages "${VIRTUAL_ENV}" && \
-    python -m pip install --upgrade pip setuptools wheel && \
+RUN python3 -m venv \
+        --system-site-packages \
+        "${VIRTUAL_ENV}" && \
+    python -m pip install \
+        --upgrade \
+        pip \
+        setuptools \
+        wheel && \
     python -m pip install \
         --index-url "${PYTORCH_CUDA_INDEX}" \
         torch==2.5.1 \
@@ -100,36 +112,71 @@ RUN python3 -m venv --system-site-packages "${VIRTUAL_ENV}" && \
         --no-deps \
         "ultralytics==8.4.48"
 
-RUN mkdir -p /ws/src /tmp/ultralytics
+RUN mkdir -p \
+        /ws/src \
+        /tmp/ultralytics \
+        /opt/default_models
 
 # Build the exact RealSense message definitions used by the Jazzy sensors
 # container. Only the message package is copied; the camera driver is not.
 RUN set -eux; \
-    git clone --no-checkout \
+    git clone \
+        --no-checkout \
         "${REALSENSE_MSGS_REPO}" \
         /tmp/realsense-ros; \
     cd /tmp/realsense-ros; \
-    git fetch --depth 1 origin "${REALSENSE_MSGS_SHA}"; \
-    git checkout --detach FETCH_HEAD; \
+    git fetch \
+        --depth 1 \
+        origin \
+        "${REALSENSE_MSGS_SHA}"; \
+    git checkout \
+        --detach \
+        FETCH_HEAD; \
     test "$(git rev-parse HEAD)" = "${REALSENSE_MSGS_SHA}"; \
-    cp -a realsense2_camera_msgs /ws/src/; \
-    rm -rf /tmp/realsense-ros
+    cp -a \
+        realsense2_camera_msgs \
+        /ws/src/; \
+    rm -rf \
+        /tmp/realsense-ros
 
 # Clone the object-detection repository.
-# Model files are not copied into the image. They are mounted at runtime
-# through the Docker Compose volume at /models.
+#
+# The repository models are copied into /opt/default_models inside the image.
+# At runtime, start_object_detection.sh copies missing models from there into
+# the writable bind mount /models.
 RUN set -eux; \
     git clone \
         --depth 1 \
         --branch "${OBJECT_DETECTION_REF}" \
         "${OBJECT_DETECTION_REPO}" \
-        /tmp/fre-object-detection
+        /tmp/fre-object-detection; \
+    test -d /tmp/fre-object-detection/model; \
+    find /tmp/fre-object-detection/model \
+        -maxdepth 1 \
+        -type f \
+        \( \
+            -iname '*.pt' \
+            -o -iname '*.pth' \
+            -o -iname '*.onnx' \
+            -o -iname '*.engine' \
+        \) \
+        -exec cp -v {} /opt/default_models/ \;; \
+    echo "Models copied from object-detection repository:"; \
+    find /opt/default_models \
+        -maxdepth 1 \
+        -type f \
+        -printf '%f\n' \
+        | sort
 
 # Patch detector_node.py before the ROS workspace is built.
-# The detector scans the neutral model directory /models and publishes
-# absolute model paths on /detector/available_models.
+#
+# The detector:
+# - uses /models as neutral model directory,
+# - reads the directory from the model_directory ROS parameter,
+# - publishes absolute model paths on /detector/available_models.
 RUN python3 - <<'PYCODE'
 from pathlib import Path
+
 
 detector_node = Path(
     "/tmp/fre-object-detection/"
@@ -138,47 +185,36 @@ detector_node = Path(
 
 text = detector_node.read_text(encoding="utf-8")
 
-old_parameter_declaration = (
-    '        self.declare_parameter("model_path", "")\n'
+
+def replace_once(old: str, new: str, description: str) -> None:
+    global text
+
+    if old not in text:
+        raise RuntimeError(
+            f"Could not patch {description}: expected source was not found "
+            f"in {detector_node}"
+        )
+
+    text = text.replace(old, new, 1)
+
+
+replace_once(
+    '        self.declare_parameter("model_path", "")\n',
+    (
+        '        self.declare_parameter("model_path", "")\n'
+        '        self.declare_parameter("model_directory", "/models")\n'
+    ),
+    "model_directory parameter declaration",
 )
 
-new_parameter_declaration = (
-    '        self.declare_parameter("model_path", "")\n'
-    '        self.declare_parameter("model_directory", "/models")\n'
-)
-
-if old_parameter_declaration not in text:
-    raise RuntimeError(
-        "Could not find the model_path parameter declaration in "
-        f"{detector_node}"
-    )
-
-text = text.replace(
-    old_parameter_declaration,
-    new_parameter_declaration,
-    1,
-)
-
-old_parameter_mapping = (
-    '            "model_path": self.get_parameter("model_path").value,\n'
-)
-
-new_parameter_mapping = (
-    '            "model_path": self.get_parameter("model_path").value,\n'
-    '            "model_directory": '
-    'self.get_parameter("model_directory").value,\n'
-)
-
-if old_parameter_mapping not in text:
-    raise RuntimeError(
-        "Could not find the model_path node_params entry in "
-        f"{detector_node}"
-    )
-
-text = text.replace(
-    old_parameter_mapping,
-    new_parameter_mapping,
-    1,
+replace_once(
+    '            "model_path": self.get_parameter("model_path").value,\n',
+    (
+        '            "model_path": self.get_parameter("model_path").value,\n'
+        '            "model_directory": '
+        'self.get_parameter("model_directory").value,\n'
+    ),
+    "model_directory parameter mapping",
 )
 
 old_model_scan = '''    def _get_available_model_paths(self) -> List[str]:
@@ -220,8 +256,14 @@ new_model_scan = '''    def _get_available_model_paths(self) -> List[str]:
             )
             return []
 
-        supported_extensions = {".pt", ".pth", ".onnx", ".engine"}
-        model_paths = []
+        supported_extensions = {
+            ".pt",
+            ".pth",
+            ".onnx",
+            ".engine",
+        }
+
+        model_paths: List[str] = []
 
         for filename in sorted(os.listdir(model_dir)):
             full_path = os.path.join(model_dir, filename)
@@ -229,9 +271,9 @@ new_model_scan = '''    def _get_available_model_paths(self) -> List[str]:
             if not os.path.isfile(full_path):
                 continue
 
-            _, extension = os.path.splitext(filename)
+            extension = os.path.splitext(filename)[1].lower()
 
-            if extension.lower() not in supported_extensions:
+            if extension not in supported_extensions:
                 continue
 
             model_paths.append(full_path)
@@ -239,16 +281,10 @@ new_model_scan = '''    def _get_available_model_paths(self) -> List[str]:
         return model_paths
 '''
 
-if old_model_scan not in text:
-    raise RuntimeError(
-        "Could not find the expected _get_available_model_paths() "
-        f"implementation in {detector_node}"
-    )
-
-text = text.replace(
+replace_once(
     old_model_scan,
     new_model_scan,
-    1,
+    "_get_available_model_paths",
 )
 
 detector_node.write_text(text, encoding="utf-8")
@@ -264,11 +300,13 @@ RUN set -eux; \
     cp -a \
         /tmp/fre-object-detection/ros2_detection_interfaces \
         /ws/src/; \
-    rm -rf /tmp/fre-object-detection
+    rm -rf \
+        /tmp/fre-object-detection
 
+# Build the ROS workspace.
+#
 # Do not enable nounset while sourcing ROS setup files. Some generated setup
-# scripts reference optional variables that may not exist yet. A regular install
-# is used because the package does not support setuptools editable installs.
+# scripts reference optional variables that may not exist yet.
 RUN set -ex; \
     source /opt/ros/jazzy/setup.bash; \
     /opt/venv/bin/python3 -m colcon build \
@@ -279,9 +317,17 @@ RUN set -ex; \
         --cmake-args \
             -DCMAKE_BUILD_TYPE=Release; \
     source /ws/install/setup.bash; \
-    test "$(head -n 1 /ws/install/ros2_detection/lib/ros2_detection/detector_node)" = "#!/opt/venv/bin/python3"; \
-    ros2 interface show realsense2_camera_msgs/msg/RGBD; \
-    python -c "import cv2, torch, sklearn, ultralytics, pyrealsense2; \
+    test \
+        "$(head -n 1 /ws/install/ros2_detection/lib/ros2_detection/detector_node)" \
+        = "#!/opt/venv/bin/python3"; \
+    ros2 interface show \
+        realsense2_camera_msgs/msg/RGBD; \
+    python -c "\
+import cv2; \
+import pyrealsense2; \
+import sklearn; \
+import torch; \
+import ultralytics; \
 print('Python environment: Jazzy / Python 3.12'); \
 print('Torch:', torch.__version__, 'CUDA build:', torch.version.cuda); \
 print('OpenCV:', cv2.__version__); \
@@ -291,18 +337,24 @@ ENV ROS_DOMAIN_ID=0 \
     RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 # Automatically source ROS 2 and the workspace in interactive Bash shells,
-# including shells started with: docker exec -it <container> bash
+# including shells started with:
+#
+# docker exec -it floribot-object-detection bash
 RUN printf '%s\n' \
         'source /opt/ros/${ROS_DISTRO:-jazzy}/setup.bash' \
         '[ -f /ws/install/setup.bash ] && source /ws/install/setup.bash' \
         >> /root/.bashrc
 
-COPY object_detection/entrypoint.sh /entrypoint.sh
-COPY object_detection/start_object_detection.sh /start_object_detection.sh
+COPY object_detection/entrypoint.sh \
+    /entrypoint.sh
+
+COPY object_detection/start_object_detection.sh \
+    /start_object_detection.sh
 
 RUN chmod +x \
     /entrypoint.sh \
     /start_object_detection.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
+
 CMD ["/start_object_detection.sh"]

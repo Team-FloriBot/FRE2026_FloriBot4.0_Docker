@@ -127,7 +127,7 @@ RUN set -eux; \
 # scripts reference optional variables that may not exist yet.
 RUN set -ex; \
     source /opt/ros/jazzy/setup.bash; \
-    colcon build \
+    /opt/venv/bin/python3 -m colcon build \
         --symlink-install \
         --packages-select \
             realsense2_camera_msgs \
@@ -136,6 +136,7 @@ RUN set -ex; \
         --cmake-args \
             -DCMAKE_BUILD_TYPE=Release; \
     source /ws/install/setup.bash; \
+    test "$(head -n 1 /ws/install/ros2_detection/lib/ros2_detection/detector_node)" = "#!/opt/venv/bin/python3"; \
     ros2 interface show realsense2_camera_msgs/msg/RGBD; \
     python -c "import cv2, torch, sklearn, ultralytics; \
 print('Python environment: Jazzy / Python 3.12'); \

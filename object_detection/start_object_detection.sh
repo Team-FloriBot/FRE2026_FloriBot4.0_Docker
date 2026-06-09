@@ -44,4 +44,22 @@ print("OpenCV:", cv2.__version__)
 print("Python dependency import test: OK")
 PYCODE
 
+if [ ! -d /models ]; then
+    echo "ERROR: Model directory /models does not exist." >&2
+    exit 1
+fi
+
+echo "Available object-detection models:"
+find /models \
+    -maxdepth 1 \
+    -type f \
+    \( \
+        -iname '*.pt' \
+        -o -iname '*.pth' \
+        -o -iname '*.onnx' \
+        -o -iname '*.engine' \
+    \) \
+    -print \
+    | sort
+
 exec ros2 launch ros2_detection detector.launch.py

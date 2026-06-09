@@ -1,6 +1,9 @@
+# syntax=docker/dockerfile:1.7
+
 # Object detection container for x86_64 systems with an NVIDIA GPU.
 # The RealSense camera is handled by the sensors container. This container
 # receives the camera data through ROS 2 messages and therefore does not need
+# direct access to the camera hardware.
 # pyrealsense2 is required by detection_model_selection.py.
 
 ARG CUDA_IMAGE=nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
@@ -97,7 +100,7 @@ RUN python3 -m venv --system-site-packages "${VIRTUAL_ENV}" && \
         --no-deps \
         "ultralytics==8.4.48"
 
-RUN mkdir -p /ws/src /ws/model /tmp/ultralytics
+RUN mkdir -p /ws/src /tmp/ultralytics
 
 # Build the exact RealSense message definitions used by the Jazzy sensors
 # container. Only the message package is copied; the camera driver is not.
@@ -112,16 +115,155 @@ RUN set -eux; \
     cp -a realsense2_camera_msgs /ws/src/; \
     rm -rf /tmp/realsense-ros
 
-# Add the detection packages and default model files to the image.
+# Clone the object-detection repository.
+# Model files are not copied into the image. They are mounted at runtime
+# through the Docker Compose volume at /models.
 RUN set -eux; \
     git clone \
         --depth 1 \
         --branch "${OBJECT_DETECTION_REF}" \
         "${OBJECT_DETECTION_REPO}" \
-        /tmp/fre-object-detection; \
-    cp -a /tmp/fre-object-detection/ros2_detection /ws/src/; \
-    cp -a /tmp/fre-object-detection/ros2_detection_interfaces /ws/src/; \
-    cp -a /tmp/fre-object-detection/model/. /ws/model/; \
+        /tmp/fre-object-detection
+
+# Patch detector_node.py before the ROS workspace is built.
+# The detector scans the neutral model directory /models and publishes
+# absolute model paths on /detector/available_models.
+RUN python3 - <<'PYCODE'
+from pathlib import Path
+
+detector_node = Path(
+    "/tmp/fre-object-detection/"
+    "ros2_detection/ros2_detection/detector_node.py"
+)
+
+text = detector_node.read_text(encoding="utf-8")
+
+old_parameter_declaration = (
+    '        self.declare_parameter("model_path", "")\n'
+)
+
+new_parameter_declaration = (
+    '        self.declare_parameter("model_path", "")\n'
+    '        self.declare_parameter("model_directory", "/models")\n'
+)
+
+if old_parameter_declaration not in text:
+    raise RuntimeError(
+        "Could not find the model_path parameter declaration in "
+        f"{detector_node}"
+    )
+
+text = text.replace(
+    old_parameter_declaration,
+    new_parameter_declaration,
+    1,
+)
+
+old_parameter_mapping = (
+    '            "model_path": self.get_parameter("model_path").value,\n'
+)
+
+new_parameter_mapping = (
+    '            "model_path": self.get_parameter("model_path").value,\n'
+    '            "model_directory": '
+    'self.get_parameter("model_directory").value,\n'
+)
+
+if old_parameter_mapping not in text:
+    raise RuntimeError(
+        "Could not find the model_path node_params entry in "
+        f"{detector_node}"
+    )
+
+text = text.replace(
+    old_parameter_mapping,
+    new_parameter_mapping,
+    1,
+)
+
+old_model_scan = '''    def _get_available_model_paths(self) -> List[str]:
+        """Return model files as relative paths matching the init request format."""
+        module_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        repo_root = os.path.dirname(module_root)
+        model_dir = os.path.join(repo_root, "model")
+
+        if not os.path.isdir(model_dir):
+            return []
+
+        supported_extensions = {".pt", ".pth", ".onnx", ".engine"}
+        model_paths = []
+        for filename in sorted(os.listdir(model_dir)):
+            full_path = os.path.join(model_dir, filename)
+            if not os.path.isfile(full_path):
+                continue
+
+            _, extension = os.path.splitext(filename)
+            if extension.lower() not in supported_extensions:
+                continue
+
+            model_paths.append(os.path.join("model", filename))
+
+        return model_paths
+'''
+
+new_model_scan = '''    def _get_available_model_paths(self) -> List[str]:
+        """Return absolute model paths from the configured model directory."""
+        model_dir = os.path.abspath(
+            os.path.expanduser(
+                str(self.node_params.get("model_directory", "/models"))
+            )
+        )
+
+        if not os.path.isdir(model_dir):
+            self.get_logger().warning(
+                f"Configured model directory does not exist: {model_dir}"
+            )
+            return []
+
+        supported_extensions = {".pt", ".pth", ".onnx", ".engine"}
+        model_paths = []
+
+        for filename in sorted(os.listdir(model_dir)):
+            full_path = os.path.join(model_dir, filename)
+
+            if not os.path.isfile(full_path):
+                continue
+
+            _, extension = os.path.splitext(filename)
+
+            if extension.lower() not in supported_extensions:
+                continue
+
+            model_paths.append(full_path)
+
+        return model_paths
+'''
+
+if old_model_scan not in text:
+    raise RuntimeError(
+        "Could not find the expected _get_available_model_paths() "
+        f"implementation in {detector_node}"
+    )
+
+text = text.replace(
+    old_model_scan,
+    new_model_scan,
+    1,
+)
+
+detector_node.write_text(text, encoding="utf-8")
+
+print(f"Patched model directory handling in {detector_node}")
+PYCODE
+
+# Copy the patched ROS packages into the workspace.
+RUN set -eux; \
+    cp -a \
+        /tmp/fre-object-detection/ros2_detection \
+        /ws/src/; \
+    cp -a \
+        /tmp/fre-object-detection/ros2_detection_interfaces \
+        /ws/src/; \
     rm -rf /tmp/fre-object-detection
 
 # Do not enable nounset while sourcing ROS setup files. Some generated setup

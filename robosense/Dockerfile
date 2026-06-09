@@ -6,7 +6,7 @@ SHELL ["/bin/bash", "-c"]
 ARG ROBOSENSE_REPO=https://github.com/Team-FloriBot/FRE_RoboSenseAIRY.git
 ARG ROBOSENSE_REF=parameter_test_feld
 
-ARG ROBOSENSE_REPO_TORSTEN=https://github.com/norikaschneider/Robosense_Torsten.git
+ARG ROBOSENSE_REPO_TORSTEN=https://github.com/Team-FloriBot/Robosense_Torsten.git
 ARG ROBOSENSE_TORSTEN_REF=main
 
 RUN apt-get update && apt-get install -y \

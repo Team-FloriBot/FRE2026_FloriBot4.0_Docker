@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -Eeuo pipefail
 
@@ -145,4 +144,3 @@ set -e
 echo "[pantilt] Ein Prozess wurde mit Code ${EXIT_CODE} beendet."
 
 exit "${EXIT_CODE}"
-```

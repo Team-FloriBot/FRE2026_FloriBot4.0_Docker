@@ -2,9 +2,12 @@
 
 # Object detection container for x86_64 systems with an NVIDIA GPU.
 # The RealSense camera is handled by the sensors container. This container
-# receives the camera data through ROS 2 messages and therefore does not need
-# direct access to the camera hardware.
-# pyrealsense2 is required by detection_model_selection.py.
+# receives camera data through ROS 2 messages and does not need direct access
+# to the camera hardware.
+#
+# Models are taken from the FRE_object_detection repository during the image
+# build and stored under /opt/default_models. At container startup, missing
+# models are copied into the writable bind mount /models.
 
 ARG CUDA_IMAGE=nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
 FROM ${CUDA_IMAGE}
@@ -80,7 +83,7 @@ RUN set -eux; \
         libxext6; \
     rm -rf /var/lib/apt/lists/*
 
-# Use a virtual environment to avoid Ubuntu 24.04's externally-managed Python
+# Use a virtual environment to avoid Ubuntu 24.04's externally managed Python
 # restriction. --system-site-packages keeps ROS Python modules and cv_bridge
 # from /opt/ros/jazzy visible inside the environment.
 RUN python3 -m venv \
@@ -141,9 +144,9 @@ RUN set -eux; \
 
 # Clone the object-detection repository.
 #
-# The repository models are copied into /opt/default_models inside the image.
-# At runtime, start_object_detection.sh copies missing models from there into
-# the writable bind mount /models.
+# Repository models are copied into /opt/default_models. They remain part of
+# the image and are copied into /models by start_object_detection.sh when they
+# are missing from the mounted model directory.
 RUN set -eux; \
     git clone \
         --depth 1 \
@@ -166,14 +169,16 @@ RUN set -eux; \
         -maxdepth 1 \
         -type f \
         -printf '%f\n' \
-        | sort
+        | sort; \
+    test -n "$(find /opt/default_models -maxdepth 1 -type f -print -quit)"
 
 # Patch detector_node.py before the ROS workspace is built.
 #
 # The detector:
 # - uses /models as neutral model directory,
 # - reads the directory from the model_directory ROS parameter,
-# - publishes absolute model paths on /detector/available_models.
+# - publishes absolute model paths on /detector/available_models,
+# - uses transient-local QoS so late subscribers receive the last model list.
 RUN python3 - <<'PYCODE'
 from pathlib import Path
 
@@ -199,6 +204,20 @@ def replace_once(old: str, new: str, description: str) -> None:
 
 
 replace_once(
+    "from rclpy.node import Node\n",
+    (
+        "from rclpy.node import Node\n"
+        "from rclpy.qos import (\n"
+        "    DurabilityPolicy,\n"
+        "    HistoryPolicy,\n"
+        "    QoSProfile,\n"
+        "    ReliabilityPolicy,\n"
+        ")\n"
+    ),
+    "QoS imports",
+)
+
+replace_once(
     '        self.declare_parameter("model_path", "")\n',
     (
         '        self.declare_parameter("model_path", "")\n'
@@ -216,6 +235,40 @@ replace_once(
     ),
     "model_directory parameter mapping",
 )
+
+old_publisher = '''        self.available_models_pub = self.create_publisher(
+            String,
+            self.node_params.get(
+                "available_models_topic",
+                "/detector/available_models",
+            ),
+            10,
+        )
+'''
+
+new_publisher = '''        available_models_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            reliability=ReliabilityPolicy.RELIABLE,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL,
+        )
+
+        self.available_models_pub = self.create_publisher(
+            String,
+            self.node_params.get(
+                "available_models_topic",
+                "/detector/available_models",
+            ),
+            available_models_qos,
+        )
+'''
+
+if old_publisher in text:
+    replace_once(
+        old_publisher,
+        new_publisher,
+        "available_models publisher QoS",
+    )
 
 old_model_scan = '''    def _get_available_model_paths(self) -> List[str]:
         """Return model files as relative paths matching the init request format."""
@@ -336,10 +389,7 @@ print('Ultralytics:', ultralytics.__version__)"
 ENV ROS_DOMAIN_ID=0 \
     RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
-# Automatically source ROS 2 and the workspace in interactive Bash shells,
-# including shells started with:
-#
-# docker exec -it floribot-object-detection bash
+# Automatically source ROS 2 and the workspace in interactive Bash shells.
 RUN printf '%s\n' \
         'source /opt/ros/${ROS_DISTRO:-jazzy}/setup.bash' \
         '[ -f /ws/install/setup.bash ] && source /ws/install/setup.bash' \

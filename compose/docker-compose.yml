@@ -258,3 +258,198 @@ services:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
 
     restart: unless-stopped
+
+  floribot-stage:
+    profiles: ["stage"]
+    build:
+      context: ..
+      dockerfile: stage/Dockerfile
+    container_name: floribot-stage
+    network_mode: host
+    ipc: host
+    pid: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
+      STAGE_WORLD: ${STAGE_WORLD:-maize_field}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    restart: unless-stopped
+
+  floribot-gazebo:
+    profiles: ["sim"]
+    build:
+      context: ..
+      dockerfile: gazebo/Dockerfile
+    container_name: floribot-gazebo
+    network_mode: host
+    ipc: host
+    pid: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
+
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+      __GLX_VENDOR_LIBRARY_NAME: nvidia
+
+      GZ_SIM_RESOURCE_PATH: /ws/src/floribot_gz_description:/ws/src/floribot_gz_description/meshes:/ws/src/robot_description:/ws/src/robot_description/meshes
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  floribot-sim-backend:
+    profiles: ["sim"]
+    build:
+      context: ..
+      dockerfile: gazebo/Dockerfile
+    container_name: floribot-sim-backend
+    network_mode: host
+    ipc: host
+    pid: host
+    depends_on:
+      - floribot-base-sim
+      - floribot-gazebo
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
+      GZ_SIM_RESOURCE_PATH: /ws/src/floribot_gz_description:/ws/src/floribot_gz_description/meshes
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command:
+      - bash
+      - -lc
+      - |
+          source /ws/install/setup.bash
+
+          ros2 run ros_gz_bridge parameter_bridge \
+            /sim/joint_frontLeft/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
+            /sim/joint_frontRight/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
+            /sim/joint_rearLeft/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
+            /sim/joint_rearRight/cmd_vel@std_msgs/msg/Float64@gz.msgs.Double \
+            /sensors/scan_front@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan \
+            /sensors/scan_rear@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan \
+            /sensors/realsense_front/color/image_raw@sensor_msgs/msg/Image@gz.msgs.Image \
+            /sensors/realsense_rear/color/image_raw@sensor_msgs/msg/Image@gz.msgs.Image &
+
+          exec ros2 run sim_backend sim_backend_node
+    restart: unless-stopped
+
+  floribot-mapping:
+    profiles: ["sim", "stage", "laptop"]
+    build:
+      context: ..
+      dockerfile: mapping/Dockerfile
+      args:
+        - CACHEBUST=${BUILD_DATE:-1}
+    container_name: floribot-mapping
+    network_mode: host
+    ipc: host
+    pid: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      CYCLONEDDS_URI: ${CYCLONEDDS_URI}
+    restart: unless-stopped
+    volumes:
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+
+  floribot-tasks:
+    profiles: ["sim", "stage", "laptop"]
+    build:
+      context: ..
+      dockerfile: tasks/Dockerfile
+      args:
+        - CACHEBUST=${BUILD_DATE:-1}
+    container_name: floribot-tasks
+    network_mode: host
+    ipc: host
+    pid: host
+    depends_on:
+      - floribot-mapping
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      CYCLONEDDS_URI: ${CYCLONEDDS_URI}
+    devices:
+      - /dev/snd:/dev/snd
+    group_add:
+      - audio
+    restart: unless-stopped
+    volumes:
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+      - ../tasks/audio/asound.conf:/etc/asound.conf:ro
+
+  floribot-object-detection:
+    profiles: ["laptop"]
+    build:
+      context: ..
+      dockerfile: object_detection/Dockerfile
+    container_name: floribot-object-detection
+    network_mode: host
+    ipc: host
+    pid: host
+    gpus: all
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      CYCLONEDDS_URI: ${CYCLONEDDS_URI}
+
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      ULTRALYTICS_CONFIG_DIR: /tmp
+      YOLO_CONFIG_DIR: /tmp
+    volumes:
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+      - ../object_detection/model:/models
+    command:
+      - /start_object_detection.sh
+    restart: unless-stopped
+
+  floribot-rviz:
+    profiles: ["rviz"]
+    build:
+      context: ..
+      dockerfile: rviz/Dockerfile
+    container_name: floribot-rviz
+    network_mode: host
+    ipc: host
+    pid: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
+      CYCLONEDDS_URI: ${CYCLONEDDS_URI}
+
+      DISPLAY: ${DISPLAY}
+      WAYLAND_DISPLAY: ${WAYLAND_DISPLAY}
+      XDG_RUNTIME_DIR: ${XDG_RUNTIME_DIR}
+      QT_X11_NO_MITSHM: 1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /mnt/wslg:/mnt/wslg
+      - /dev/dri:/dev/dri
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+    devices:
+      - /dev/dri:/dev/dri
+    stdin_open: true
+    tty: true

@@ -5,64 +5,110 @@ SHELL ["/bin/bash", "-c"]
 
 ARG SICK_SCAN_REPO=https://github.com/SICKAG/sick_scan_xd.git
 ARG SICK_SCAN_XD_SHA=2d4796699158762cfee78ece05bf8d7c2ceb68d0
+
 ARG REALSENSE_ROS_REPO=https://github.com/realsenseai/realsense-ros.git
 ARG REALSENSE_ROS_SHA=6d87b071dcfef15f2a0407e1e78945256add70d0
+
 ARG LIBREALSENSE_REPO=https://github.com/IntelRealSense/librealsense.git
 ARG LIBREALSENSE_REF=v2.57.7
+
 ARG XSENS_MTI_ROS2_REPO=https://github.com/xsenssupport/Xsens_MTi_ROS_Driver_and_Ntrip_Client.git
 ARG XSENS_MTI_ROS2_SHA=d6b87ecf63297b814a4084b95a7b5daf0713be62
 
-RUN apt-get update && apt-get install -y \
-    git \
-    build-essential \
-    cmake \
-    pkg-config \
-    python3-colcon-common-extensions \
-    python3-pip \
-    python3-rosdep \
-    python3-vcstool \
-    python3-numpy \
-    usbutils \
-    udev \
-    libusb-1.0-0-dev \
-    libgl1-mesa-dev \
-    libglu1-mesa-dev \
-    libudev-dev \
-    libx11-dev \
-    libglfw3-dev \
-    libopencv-dev \
-    ros-jazzy-cv-bridge \
-    ros-jazzy-image-transport \
-    ros-jazzy-rclcpp \
-    ros-jazzy-rclpy \
-    ros-jazzy-std-msgs \
-    ros-jazzy-sensor-msgs \
-    ros-jazzy-sensor-msgs-py \
-    ros-jazzy-nmea-msgs \
-    ros-jazzy-geometry-msgs \
-    ros-jazzy-diagnostic-updater \
-    ros-jazzy-tf2 \
-    ros-jazzy-tf2-ros \
-    ros-jazzy-tf2-geometry-msgs \
-    ros-jazzy-tf2-sensor-msgs \
-    ros-jazzy-laser-geometry \
-    ros-jazzy-xacro \
-    ros-jazzy-urdf \
-    ros-jazzy-rmw-cyclonedds-cpp \
-    netcat-openbsd \
-    && rm -rf /var/lib/apt/lists/*
+
+# Ubuntu-Paketquellen auf HTTPS umstellen.
+# Der Jetson kann ports.ubuntu.com über HTTPS erreichen, während HTTP
+# während des Docker-Builds wiederholt mit Timeouts abgebrochen ist.
+RUN if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then \
+      sed -i \
+        's|http://ports.ubuntu.com/ubuntu-ports|https://ports.ubuntu.com/ubuntu-ports|g' \
+        /etc/apt/sources.list.d/ubuntu.sources; \
+    fi && \
+    if [ -f /etc/apt/sources.list ]; then \
+      sed -i \
+        's|http://ports.ubuntu.com/ubuntu-ports|https://ports.ubuntu.com/ubuntu-ports|g' \
+        /etc/apt/sources.list; \
+    fi && \
+    grep -R "ports.ubuntu.com" \
+      /etc/apt/sources.list \
+      /etc/apt/sources.list.d 2>/dev/null || true
+
+
+# APT-Konfiguration für instabile Netzwerkverbindungen.
+RUN printf '%s\n' \
+      'Acquire::ForceIPv4 "true";' \
+      'Acquire::Retries "10";' \
+      'Acquire::http::Timeout "60";' \
+      'Acquire::https::Timeout "60";' \
+      'Acquire::Queue-Mode "access";' \
+      > /etc/apt/apt.conf.d/80-floribot-network
+
+
+RUN rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /var/lib/apt/lists/partial && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+      git \
+      build-essential \
+      cmake \
+      pkg-config \
+      python3-colcon-common-extensions \
+      python3-pip \
+      python3-rosdep \
+      python3-vcstool \
+      python3-numpy \
+      usbutils \
+      udev \
+      libusb-1.0-0-dev \
+      libgl1-mesa-dev \
+      libglu1-mesa-dev \
+      libudev-dev \
+      libx11-dev \
+      libglfw3-dev \
+      libopencv-dev \
+      ros-jazzy-cv-bridge \
+      ros-jazzy-image-transport \
+      ros-jazzy-rclcpp \
+      ros-jazzy-rclpy \
+      ros-jazzy-std-msgs \
+      ros-jazzy-sensor-msgs \
+      ros-jazzy-sensor-msgs-py \
+      ros-jazzy-nmea-msgs \
+      ros-jazzy-geometry-msgs \
+      ros-jazzy-diagnostic-updater \
+      ros-jazzy-tf2 \
+      ros-jazzy-tf2-ros \
+      ros-jazzy-tf2-geometry-msgs \
+      ros-jazzy-tf2-sensor-msgs \
+      ros-jazzy-laser-geometry \
+      ros-jazzy-xacro \
+      ros-jazzy-urdf \
+      ros-jazzy-rmw-cyclonedds-cpp \
+      netcat-openbsd && \
+    rm -rf /var/lib/apt/lists/*
+
 
 ENV CMAKE_PREFIX_PATH=/usr/local:${CMAKE_PREFIX_PATH}
 ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}
 ENV LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
 
-RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
-    echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" >> /root/.bashrc
 
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
+    echo "if [ -f /ws/install/setup.bash ]; then source /ws/install/setup.bash; fi" \
+      >> /root/.bashrc
+
+
+# Intel Librealsense aus dem festgelegten Release bauen.
 WORKDIR /opt
-RUN git clone --branch ${LIBREALSENSE_REF} --depth 1 ${LIBREALSENSE_REPO} librealsense && \
+
+RUN git clone \
+      --branch "${LIBREALSENSE_REF}" \
+      --depth 1 \
+      "${LIBREALSENSE_REPO}" \
+      librealsense && \
     cd librealsense && \
-    mkdir -p build && cd build && \
+    mkdir -p build && \
+    cd build && \
     cmake .. \
       -DCMAKE_BUILD_TYPE=Release \
       -DBUILD_EXAMPLES=false \
@@ -72,35 +118,67 @@ RUN git clone --branch ${LIBREALSENSE_REF} --depth 1 ${LIBREALSENSE_REPO} librea
     make -j"$(nproc)" && \
     make install && \
     ldconfig && \
-    cd / && rm -rf /opt/librealsense
+    cd / && \
+    rm -rf /opt/librealsense
 
+
+# ROS-2-Sensorpakete mit reproduzierbaren Commit-Ständen auschecken.
 WORKDIR /ws/src
-RUN git clone --no-checkout ${SICK_SCAN_REPO} sick_scan_xd && \
-    cd sick_scan_xd && git fetch --depth 1 origin ${SICK_SCAN_XD_SHA} && git checkout --detach FETCH_HEAD && \
+
+RUN git clone --no-checkout \
+      "${SICK_SCAN_REPO}" \
+      sick_scan_xd && \
+    cd sick_scan_xd && \
+    git fetch --depth 1 origin "${SICK_SCAN_XD_SHA}" && \
+    git checkout --detach FETCH_HEAD && \
+    \
     cd /ws/src && \
-    git clone --no-checkout ${REALSENSE_ROS_REPO} realsense-ros && \
-    cd realsense-ros && git fetch --depth 1 origin ${REALSENSE_ROS_SHA} && git checkout --detach FETCH_HEAD && \
+    git clone --no-checkout \
+      "${REALSENSE_ROS_REPO}" \
+      realsense-ros && \
+    cd realsense-ros && \
+    git fetch --depth 1 origin "${REALSENSE_ROS_SHA}" && \
+    git checkout --detach FETCH_HEAD && \
+    \
     cd /ws/src && \
-    git clone --no-checkout ${XSENS_MTI_ROS2_REPO} xsens_mti_ros2 && \
-    cd xsens_mti_ros2 && git fetch --depth 1 origin ${XSENS_MTI_ROS2_SHA} && git checkout --detach FETCH_HEAD
+    git clone --no-checkout \
+      "${XSENS_MTI_ROS2_REPO}" \
+      xsens_mti_ros2 && \
+    cd xsens_mti_ros2 && \
+    git fetch --depth 1 origin "${XSENS_MTI_ROS2_SHA}" && \
+    git checkout --detach FETCH_HEAD
+
 
 WORKDIR /ws
 
+
 RUN rosdep init 2>/dev/null || true
+
 RUN rosdep update || true
 
-RUN apt-get update && \
+
+# Abhängigkeiten der ausgecheckten ROS-Pakete installieren.
+# Auch dieser spätere APT-Aufruf verwendet HTTPS, IPv4 und Retries über
+# /etc/apt/apt.conf.d/80-floribot-network.
+RUN rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /var/lib/apt/lists/partial && \
+    apt-get update && \
     source /opt/ros/jazzy/setup.bash && \
-    rosdep install -i \
+    rosdep install \
       --from-paths \
         /ws/src/sick_scan_xd \
         /ws/src/realsense-ros \
         /ws/src/xsens_mti_ros2/src/xsens_mti_ros2_driver \
+      --ignore-src \
       --rosdistro jazzy \
       --skip-keys "librealsense2" \
-      -r -y && \
+      --reinstall \
+      -r \
+      -y && \
     rm -rf /var/lib/apt/lists/*
 
+
+# RealSense-ROS-Wrapper bauen.
 RUN source /opt/ros/jazzy/setup.bash && \
     colcon build \
       --packages-select \
@@ -109,29 +187,41 @@ RUN source /opt/ros/jazzy/setup.bash && \
         realsense2_description \
       --symlink-install
 
+
 ARG CACHEBUST=1
 
+
+# Roboterspezifische Launchdateien in die Quellpakete kopieren.
 COPY sensors/launch_lasers/ /ws/src/sick_scan_xd/launch/
 COPY sensors/launch_imu/ /ws/src/xsens_mti_ros2/src/xsens_mti_ros2_driver/launch/
 
+
+# SICK-Lidar-Treiber bauen.
 RUN source /opt/ros/jazzy/setup.bash && \
+    source /ws/install/setup.bash && \
     colcon build \
       --packages-select \
         sick_scan_xd \
       --symlink-install
 
+
+# Xsens-IMU-Treiber bauen.
 RUN source /opt/ros/jazzy/setup.bash && \
+    source /ws/install/setup.bash && \
     colcon build \
       --packages-select \
         xsens_mti_ros2_driver \
       --symlink-install
 
+
 COPY sensors/entrypoint.sh /entrypoint.sh
 COPY sensors/start_sensors.sh /start_sensors.sh
 
 
+RUN chmod +x \
+      /entrypoint.sh \
+      /start_sensors.sh
 
-RUN chmod +x /entrypoint.sh /start_sensors.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/start_sensors.sh"]

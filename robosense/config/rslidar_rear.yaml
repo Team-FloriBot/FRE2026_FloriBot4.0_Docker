@@ -23,8 +23,8 @@ lidar:
       dense_points: false
       ts_first_point: true
 
-      start_angle: 90
-      end_angle: 270
+      start_angle: 270
+      end_angle: 90
 
     ros:
       ros_frame_id: robosense_rear_link

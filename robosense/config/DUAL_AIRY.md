@@ -2,8 +2,8 @@
 
 | Position | Device IP | MSOP | DIFOP | IMU | Frame |
 |---|---:|---:|---:|---:|---|
-| Front | 192.168.0.200 | 6699 | 7788 | 6688 | robosense_front_link |
-| Rear | 192.168.0.201 | 6700 | 7789 | 6689 | robosense_rear_link |
+| Front | 192.168.1.200 | 6699 | 7788 | 6688 | robosense_front_link |
+| Rear | 192.168.2.201 | 6700 | 7789 | 6689 | robosense_rear_link |
 
 The RoboSense SDK does not select a lidar by its device/sender IP.
 It binds UDP destination ports.

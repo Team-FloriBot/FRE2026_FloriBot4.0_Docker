@@ -7,6 +7,11 @@
     nonground_topic: /sensors/robosense/rear/nonground_points
     crop_topic: /sensors/robosense/rear/crop_points
     obstacle_topic: /sensors/robosense/rear/obstacle_points
+    aligned2d_topic: /sensors/robosense/rear/aligned_points_2d
+    ground2d_topic: /sensors/robosense/rear/ground_points_2d
+    nonground2d_topic: /sensors/robosense/rear/nonground_points_2d
+    crop2d_topic: /sensors/robosense/rear/crop_points_2d
+    obstacle2d_topic: /sensors/robosense/rear/obstacle_points_2d
 
     parent_frame: base_link
     sensor_frame: robosense_rear_link

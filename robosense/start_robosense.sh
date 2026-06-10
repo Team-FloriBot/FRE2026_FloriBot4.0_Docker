@@ -66,7 +66,6 @@ start_laserscan() {
     -r __node:="robosense_${position}_pointcloud_to_laserscan" \
     -r __ns:="/sensors/robosense/${position}" \
     --params-file "${config}" \
-    -r cloud_in:="/sensors/robosense/${position}/points" \
     -r scan:="/sensors/robosense/${position}/scan" \
     -r debug_pcl:="/sensors/robosense/${position}/debug_points" &
 

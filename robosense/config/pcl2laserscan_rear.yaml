@@ -1,5 +1,7 @@
 /**:
   ros__parameters:
+    input_topic: /sensors/robosense/rear/points
+
     target_frame: base_footprint
     transform_tolerance: 0.01
 

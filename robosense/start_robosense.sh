@@ -4,8 +4,8 @@ set -eo pipefail
 source /opt/ros/jazzy/setup.bash
 source /ws/install/setup.bash
 
-FRONT_IP="${ROBOSENSE_FRONT_IP:-192.168.0.200}"
-REAR_IP="${ROBOSENSE_REAR_IP:-192.168.0.201}"
+FRONT_IP="${ROBOSENSE_FRONT_IP:-192.168.1.200}"
+REAR_IP="${ROBOSENSE_REAR_IP:-192.168.2.201}"
 
 FRONT_CONFIG="${RSLIDAR_FRONT_CONFIG:-/etc/floribot/robosense/rslidar_front.yaml}"
 REAR_CONFIG="${RSLIDAR_REAR_CONFIG:-/etc/floribot/robosense/rslidar_rear.yaml}"

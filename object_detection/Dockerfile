@@ -193,7 +193,8 @@ RUN set -eux; \
 # - uses /models as neutral model directory,
 # - reads the directory from the model_directory ROS parameter,
 # - publishes absolute model paths on /detector/available_models,
-# - uses transient-local QoS so late subscribers receive the last model list.
+# - uses transient-local QoS so late subscribers receive the last model list,
+# - declares classes explicitly as a string array so classes: [] in YAML works.
 RUN python3 - <<'PYCODE'
 from pathlib import Path
 
@@ -222,6 +223,7 @@ replace_once(
     "from rclpy.node import Node\n",
     (
         "from rclpy.node import Node\n"
+        "from rcl_interfaces.msg import ParameterDescriptor, ParameterType\n"
         "from rclpy.qos import (\n"
         "    DurabilityPolicy,\n"
         "    HistoryPolicy,\n"
@@ -229,7 +231,21 @@ replace_once(
         "    ReliabilityPolicy,\n"
         ")\n"
     ),
-    "QoS imports",
+    "QoS and parameter descriptor imports",
+)
+
+replace_once(
+    '        self.declare_parameter("classes", [])\n',
+    (
+        '        self.declare_parameter(\n'
+        '            "classes",\n'
+        '            [""],\n'
+        '            ParameterDescriptor(\n'
+        '                type=ParameterType.PARAMETER_STRING_ARRAY\n'
+        '            ),\n'
+        '        )\n'
+    ),
+    "classes parameter declaration",
 )
 
 replace_once(
@@ -239,6 +255,18 @@ replace_once(
         '        self.declare_parameter("model_directory", "/models")\n'
     ),
     "model_directory parameter declaration",
+)
+
+replace_once(
+    '            "classes": self.get_parameter("classes").value,\n',
+    (
+        '            "classes": [\n'
+        '                class_name\n'
+        '                for class_name in self.get_parameter("classes").value\n'
+        '                if str(class_name).strip()\n'
+        '            ],\n'
+    ),
+    "classes parameter normalization",
 )
 
 replace_once(

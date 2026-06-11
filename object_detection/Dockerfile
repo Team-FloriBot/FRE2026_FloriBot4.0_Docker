@@ -8,6 +8,10 @@
 # Models are taken from the FRE_object_detection repository during the image
 # build and stored under /opt/default_models. At container startup, missing
 # models are copied into the writable bind mount /models.
+#
+# The detector configuration is also taken from the FRE_object_detection
+# repository during the image build and installed under
+# /etc/floribot/object_detection/detector_params.yaml.
 
 ARG CUDA_IMAGE=nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
 FROM ${CUDA_IMAGE}
@@ -28,7 +32,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_RETRIES=10 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     MODEL_DIRECTORY=/models \
-    DEFAULT_MODEL_DIRECTORY=/opt/default_models
+    DEFAULT_MODEL_DIRECTORY=/opt/default_models \
+    DETECTOR_CONFIG_FILE=/etc/floribot/object_detection/detector_params.yaml
 
 WORKDIR /ws
 
@@ -118,7 +123,8 @@ RUN python3 -m venv \
 RUN mkdir -p \
         /ws/src \
         /tmp/ultralytics \
-        /opt/default_models
+        /opt/default_models \
+        /etc/floribot/object_detection
 
 # Build the exact RealSense message definitions used by the Jazzy sensors
 # container. Only the message package is copied; the camera driver is not.
@@ -147,6 +153,9 @@ RUN set -eux; \
 # Repository models are copied into /opt/default_models. They remain part of
 # the image and are copied into /models by start_object_detection.sh when they
 # are missing from the mounted model directory.
+#
+# The detector parameter file is copied into /etc/floribot/object_detection
+# so the container does not depend on a host-side bind mount for the config.
 RUN set -eux; \
     git clone \
         --depth 1 \
@@ -154,6 +163,10 @@ RUN set -eux; \
         "${OBJECT_DETECTION_REPO}" \
         /tmp/fre-object-detection; \
     test -d /tmp/fre-object-detection/model; \
+    test -f /tmp/fre-object-detection/ros2_detection/params/detector_params.yaml; \
+    cp -v \
+        /tmp/fre-object-detection/ros2_detection/params/detector_params.yaml \
+        /etc/floribot/object_detection/detector_params.yaml; \
     find /tmp/fre-object-detection/model \
         -maxdepth 1 \
         -type f \
@@ -164,6 +177,8 @@ RUN set -eux; \
             -o -iname '*.engine' \
         \) \
         -exec cp -v {} /opt/default_models/ \;; \
+    echo "Detector config copied from object-detection repository:"; \
+    ls -l /etc/floribot/object_detection/detector_params.yaml; \
     echo "Models copied from object-detection repository:"; \
     find /opt/default_models \
         -maxdepth 1 \
@@ -490,6 +505,7 @@ RUN set -ex; \
     test \
         "$(head -n 1 /ws/install/ros2_detection/lib/ros2_detection/detector_node)" \
         = "#!/opt/venv/bin/python3"; \
+    test -f /etc/floribot/object_detection/detector_params.yaml; \
     ros2 interface show \
         realsense2_camera_msgs/msg/RGBD; \
     python -c "\

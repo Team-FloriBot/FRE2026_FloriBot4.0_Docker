@@ -15,3 +15,4 @@
 
     parent_frame: axesRear_footprint
     sensor_frame: robosense_rear_link
+    mount_z: 0.955

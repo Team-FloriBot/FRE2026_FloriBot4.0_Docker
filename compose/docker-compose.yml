@@ -75,7 +75,7 @@ services:
 
       RS_FRONT_SERIAL: ${RS_FRONT_SERIAL:-}
       RS_REAR_SERIAL: ${RS_REAR_SERIAL:-}
-      RS_FRONT_CONFIG_FILE: ${RS_FRONT_CONFIG_FILE:-/etc/floribot/realsense/realsense_front.yaml}
+      RS_FRONT_CONFIG_FILE: ${RS_FRONT_CONFIG_FILE:-/etc/floribot/object_detection/realsense_front.yaml}
 
       XSENS_ENABLE: ${XSENS_ENABLE:-true}
       XSENS_SCAN_FOR_DEVICES: ${XSENS_SCAN_FOR_DEVICES:-true}

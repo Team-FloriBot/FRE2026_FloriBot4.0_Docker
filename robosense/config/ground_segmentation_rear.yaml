@@ -13,5 +13,5 @@
     crop2d_topic: /sensors/robosense/rear/crop_points_2d
     obstacle2d_topic: /sensors/robosense/rear/obstacle_points_2d
 
-    parent_frame: base_link
+    parent_frame: axesRear_footprint
     sensor_frame: robosense_rear_link

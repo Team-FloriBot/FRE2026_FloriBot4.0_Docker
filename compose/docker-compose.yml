@@ -75,7 +75,7 @@ services:
 
       RS_FRONT_SERIAL: ${RS_FRONT_SERIAL:-}
       RS_REAR_SERIAL: ${RS_REAR_SERIAL:-}
-      RS_FRONT_CONFIG_FILE: ${RS_FRONT_CONFIG_FILE:-/etc/floribot/object_detection/realsense_front.yaml}
+      RS_FRONT_CONFIG_FILE: ${RS_FRONT_CONFIG_FILE:-/etc/floribot/realsense/realsense_front.yaml}
 
       XSENS_ENABLE: ${XSENS_ENABLE:-true}
       XSENS_SCAN_FOR_DEVICES: ${XSENS_SCAN_FOR_DEVICES:-true}
@@ -95,7 +95,7 @@ services:
       - ../sensors/config_imu/xsens_mti_node.yaml:/ws/install/xsens_mti_ros2_driver/share/xsens_mti_ros2_driver/param/xsens_mti_node.yaml:ro
 
 
-      - ../sensors/config_realsense/realsense_front.yaml:/opt/install/librealsense/realsense_front.yaml:ro
+      - ../sensors/config_realsense/realsense_front.yaml:/etc/floribot/realsense/realsense_front.yaml:ro
 
 
     command:

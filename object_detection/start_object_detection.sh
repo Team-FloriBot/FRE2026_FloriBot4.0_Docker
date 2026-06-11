@@ -3,6 +3,8 @@ set -euo pipefail
 
 MODEL_DIRECTORY="${MODEL_DIRECTORY:-/models}"
 DEFAULT_MODEL_DIRECTORY="${DEFAULT_MODEL_DIRECTORY:-/opt/default_models}"
+DETECTOR_CONFIG_FILE="${DETECTOR_CONFIG_FILE:-/etc/floribot/object_detection/detector_params.yaml}"
+DETECTOR_RGBD_TOPIC="${DETECTOR_RGBD_TOPIC:-/sensors/realsense_front/rgbd}"
 
 SKLEARN_LIBGOMP="$(
 python - <<'PYCODE'
@@ -94,8 +96,16 @@ find "${MODEL_DIRECTORY}" \
     -printf '%f\n' \
     | sort
 
+if [ ! -f "${DETECTOR_CONFIG_FILE}" ]; then
+    echo "Detector config file not found: ${DETECTOR_CONFIG_FILE}" >&2
+    exit 1
+fi
+
 exec ros2 run \
     ros2_detection \
     detector_node \
     --ros-args \
-    -p model_directory:="${MODEL_DIRECTORY}"
+    --params-file "${DETECTOR_CONFIG_FILE}" \
+    -p model_directory:="${MODEL_DIRECTORY}" \
+    -p use_realsense_ros_wrapper:=true \
+    -p rgbd_topic:="${DETECTOR_RGBD_TOPIC}"

@@ -15,7 +15,7 @@ SICK_REAR_FRAME="${SICK_REAR_FRAME:-sick_rear_link}"
 RS_FRONT_SERIAL="${RS_FRONT_SERIAL:-}"
 RS_REAR_SERIAL="${RS_REAR_SERIAL:-}"
 
-RS_FRONT_CONFIG_FILE="${RS_FRONT_CONFIG_FILE:-/etc/floribot/object_detection/detector_params.yaml}"
+RS_FRONT_CONFIG_FILE="${RS_FRONT_CONFIG_FILE:-/etc/floribot/object_detection/realsense_front.yaml}"
 
 XSENS_ENABLE="${XSENS_ENABLE:-true}"
 XSENS_SCAN_FOR_DEVICES="${XSENS_SCAN_FOR_DEVICES:-true}"

@@ -75,7 +75,7 @@ services:
 
       RS_FRONT_SERIAL: ${RS_FRONT_SERIAL:-}
       RS_REAR_SERIAL: ${RS_REAR_SERIAL:-}
-      RS_FRONT_CONFIG_FILE: ${RS_FRONT_CONFIG_FILE:-/etc/floribot/object_detection/detector_params.yaml}
+      RS_FRONT_CONFIG_FILE: ${RS_FRONT_CONFIG_FILE:-/etc/floribot/object_detection/realsense_front.yaml}
 
       XSENS_ENABLE: ${XSENS_ENABLE:-true}
       XSENS_SCAN_FOR_DEVICES: ${XSENS_SCAN_FOR_DEVICES:-true}
@@ -94,7 +94,9 @@ services:
 
       - ../sensors/config_imu/xsens_mti_node.yaml:/ws/install/xsens_mti_ros2_driver/share/xsens_mti_ros2_driver/param/xsens_mti_node.yaml:ro
 
+
       - ../sensors/config_realsense/realsense_front.yaml:/etc/floribot/object_detection/detector_params.yaml:ro
+
 
     command:
       - /start_sensors.sh
@@ -296,32 +298,37 @@ services:
       QT_X11_NO_MITSHM: 1
 
       NVIDIA_VISIBLE_DEVICES: all
-      NVIDIA_DRIVER_CAPABILITIES: all
-      __GLX_VENDOR_LIBRARY_NAME: nvidia
+      NVIDIA_DRIVER_CAPABILITIES: compute,graphics,utility
 
-      GZ_SIM_RESOURCE_PATH: /ws/src/floribot_gz_description:/ws/src/floribot_gz_description/meshes:/ws/src/robot_description:/ws/src/robot_description/meshes
+      GZ_SIM_SYSTEM_PLUGIN_PATH: /opt/ros/jazzy/lib
+      GZ_SIM_RESOURCE_PATH: /ws/src/floribot_gz_description:/ws/src/floribot_gz_description/meshes
+
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+      - ../gazebo/worlds:/ws/worlds:ro
+
+    command:
+      - bash
+      - -lc
+      - |
+          source /ws/install/setup.bash
+
+          ros2 launch ros_gz_sim gz_sim.launch.py \
+            gz_args:="/ws/worlds/maize_field.sdf -r" &
+
+          exec ros2 launch floribot_gz_description spawn_robot.launch.py
     restart: unless-stopped
 
-  floribot-sim-backend:
+  floribot-gazebo-bridge:
     profiles: ["sim"]
     build:
       context: ..
       dockerfile: gazebo/Dockerfile
-    container_name: floribot-sim-backend
+    container_name: floribot-gazebo-bridge
     network_mode: host
     ipc: host
     pid: host
     depends_on:
-      - floribot-base-sim
       - floribot-gazebo
     environment:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
@@ -418,9 +425,12 @@ services:
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
       ULTRALYTICS_CONFIG_DIR: /tmp
       YOLO_CONFIG_DIR: /tmp
+      DETECTOR_CONFIG_FILE: ${DETECTOR_CONFIG_FILE:-/etc/floribot/object_detection/detector_params.yaml}
+      DETECTOR_RGBD_TOPIC: ${DETECTOR_RGBD_TOPIC:-/sensors/realsense_front/rgbd}
     volumes:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
       - ../object_detection/model:/models
+      - ../../FRE_object_detection-docker_ros2/ros2_detection/params/detector_params.yaml:/etc/floribot/object_detection/detector_params.yaml:ro
     command:
       - /start_object_detection.sh
     restart: unless-stopped

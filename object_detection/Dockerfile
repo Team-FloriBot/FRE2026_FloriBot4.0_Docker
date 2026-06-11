@@ -345,6 +345,123 @@ detector_node.write_text(text, encoding="utf-8")
 print(f"Patched model directory handling in {detector_node}")
 PYCODE
 
+# Enforce the intended camera ownership model.
+# The RealSense pipeline is owned by the sensors container. The detector only
+# consumes RGBD ROS messages and must not open the USB camera directly.
+RUN python3 - <<'PYCODE'
+from pathlib import Path
+
+node = Path(
+    "/tmp/fre-object-detection/"
+    "ros2_detection/ros2_detection/detector_node.py"
+)
+text = node.read_text(encoding="utf-8")
+
+
+def replace_once(old: str, new: str, description: str) -> None:
+    global text
+    if old not in text:
+        raise RuntimeError(f"Could not patch {description}: source not found")
+    text = text.replace(old, new, 1)
+
+replace_once(
+    '        self.declare_parameter("use_realsense_ros_wrapper", True)\n',
+    (
+        '        self.declare_parameter("use_realsense_ros_wrapper", True)\n'
+        '        self.declare_parameter("rgbd_topic", "/sensors/realsense_front/rgbd")\n'
+    ),
+    "rgbd_topic parameter declaration",
+)
+
+replace_once(
+    '            "use_realsense_ros_wrapper": bool(self.get_parameter("use_realsense_ros_wrapper").value),\n',
+    (
+        '            "use_realsense_ros_wrapper": bool(self.get_parameter("use_realsense_ros_wrapper").value),\n'
+        '            "rgbd_topic": self.get_parameter("rgbd_topic").value,\n'
+    ),
+    "rgbd_topic parameter mapping",
+)
+
+replace_once(
+    '''        self.sub = self.create_subscription(
+            RGBD,
+            "/sensors/realsense_front/rgbd",
+            self.realsense_callback,
+            10
+        )
+''',
+    '''        self.rgbd_topic = str(self.node_params.get("rgbd_topic", "/sensors/realsense_front/rgbd"))
+        self.sub = self.create_subscription(
+            RGBD,
+            self.rgbd_topic,
+            self.realsense_callback,
+            10,
+        )
+''',
+    "RGBD subscription topic",
+)
+
+replace_once(
+    '        self._publish_status("ready", "Detector node started. Waiting for /detector/init.")\n',
+    '        self._publish_status("ready", f"Detector node started. Subscribed to {self.rgbd_topic}. Waiting for /detector/init.")\n',
+    "startup status",
+)
+
+replace_once(
+    '                        self._publish_status("ready", "Waiting for RGBD frames on /camera/rgbd/image.")\n',
+    '                        self._publish_status("ready", f"Waiting for RGBD frames on {self.rgbd_topic}.")\n',
+    "waiting-frame status",
+)
+
+replace_once(
+    '            camera_use_wrapper = bool(request.use_realsense_ros_wrapper) if hasattr(request, "use_realsense_ros_wrapper") else bool(self.node_params.get("use_realsense_ros_wrapper", True))\n',
+    (
+        '            camera_use_wrapper = bool(request.use_realsense_ros_wrapper) if hasattr(request, "use_realsense_ros_wrapper") else bool(self.node_params.get("use_realsense_ros_wrapper", True))\n'
+        '            if not camera_use_wrapper:\n'
+        '                response.success = False\n'
+        '                response.message = "Direct RealSense USB access is disabled in this container. Use the RGBD topic from the sensors container."\n'
+        '                return response\n'
+    ),
+    "disable direct RealSense access in init",
+)
+
+node.write_text(text, encoding="utf-8")
+
+model = Path(
+    "/tmp/fre-object-detection/"
+    "ros2_detection/ros2_detection/detection_model_selection.py"
+)
+text = model.read_text(encoding="utf-8")
+old = '''        if self.get_realsense_images is not None:
+            # start realsense node if not already done?
+            self.is_initialized = True
+            
+        else:
+            """
+            Initialises the RealSense pipeline and starts streaming.
+            """
+'''
+new = '''        if self.get_realsense_images is not None:
+            self.is_initialized = True
+            return
+
+        raise RuntimeError(
+            "Direct RealSense pipeline access is disabled in the object-detection container. "
+            "Start realsense2_camera in the sensors container and provide get_realsense_images."
+        )
+
+        # Unreachable fallback kept below for upstream diff stability.
+        if False:
+            """
+            Initialises the RealSense pipeline and starts streaming.
+            """
+'''
+if old not in text:
+    raise RuntimeError("Could not patch direct RealSense fallback")
+model.write_text(text.replace(old, new, 1), encoding="utf-8")
+print("Patched detector to subscribe only to RGBD ROS messages")
+PYCODE
+
 # Copy the patched ROS packages into the workspace.
 RUN set -eux; \
     cp -a \

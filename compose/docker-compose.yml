@@ -96,6 +96,7 @@ services:
 
 
       - ../sensors/config_realsense/realsense_front.yaml:/etc/floribot/realsense/realsense_front.yaml:ro
+      - ../sensors/config_realsense/realsense_front.yaml:/etc/floribot/object_detection/realsense_front.yaml:ro
 
 
     command:

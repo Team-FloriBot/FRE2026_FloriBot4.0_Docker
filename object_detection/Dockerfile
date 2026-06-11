@@ -193,7 +193,8 @@ RUN set -eux; \
 # - uses /models as neutral model directory,
 # - reads the directory from the model_directory ROS parameter,
 # - publishes absolute model paths on /detector/available_models,
-# - uses transient-local QoS so late subscribers receive the last model list.
+# - uses transient-local QoS so late subscribers receive the last model list,
+# - treats classes: [] in YAML as an empty class filter instead of failing.
 RUN python3 - <<'PYCODE'
 from pathlib import Path
 
@@ -222,6 +223,7 @@ replace_once(
     "from rclpy.node import Node\n",
     (
         "from rclpy.node import Node\n"
+        "from rclpy.exceptions import ParameterUninitializedException\n"
         "from rclpy.qos import (\n"
         "    DurabilityPolicy,\n"
         "    HistoryPolicy,\n"
@@ -229,7 +231,7 @@ replace_once(
         "    ReliabilityPolicy,\n"
         ")\n"
     ),
-    "QoS imports",
+    "QoS and parameter exception imports",
 )
 
 replace_once(
@@ -239,6 +241,34 @@ replace_once(
         '        self.declare_parameter("model_directory", "/models")\n'
     ),
     "model_directory parameter declaration",
+)
+
+replace_once(
+    '        self.node_params = {\n',
+    (
+        '        try:\n'
+        '            configured_classes = self.get_parameter("classes").value\n'
+        '        except ParameterUninitializedException:\n'
+        '            configured_classes = []\n'
+        '\n'
+        '        if configured_classes is None:\n'
+        '            configured_classes = []\n'
+        '\n'
+        '        configured_classes = [\n'
+        '            str(class_name).strip()\n'
+        '            for class_name in configured_classes\n'
+        '            if str(class_name).strip()\n'
+        '        ]\n'
+        '\n'
+        '        self.node_params = {\n'
+    ),
+    "robust classes parameter read",
+)
+
+replace_once(
+    '            "classes": self.get_parameter("classes").value,\n',
+    '            "classes": configured_classes,\n',
+    "classes parameter mapping",
 )
 
 replace_once(
@@ -506,6 +536,8 @@ RUN set -ex; \
         "$(head -n 1 /ws/install/ros2_detection/lib/ros2_detection/detector_node)" \
         = "#!/opt/venv/bin/python3"; \
     test -f /etc/floribot/object_detection/detector_params.yaml; \
+    grep -q "configured_classes" \
+        /ws/install/ros2_detection/lib/python3.12/site-packages/ros2_detection/detector_node.py; \
     ros2 interface show \
         realsense2_camera_msgs/msg/RGBD; \
     python -c "\

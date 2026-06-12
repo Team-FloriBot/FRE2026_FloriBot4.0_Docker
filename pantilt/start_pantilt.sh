@@ -1,8 +1,12 @@
 #!/bin/bash
 set -Eeuo pipefail
 
+# ROS/ament setup files are not safe with bash nounset (-u).
+# Keep strict mode for the script itself, but disable nounset while sourcing ROS.
+set +u
 source /opt/ros/jazzy/setup.bash
 source /ws/install/setup.bash
+set -u
 
 PANTILT_LAUNCH_FILE="${PANTILT_LAUNCH_FILE:-aim_and_fire.launch.py}"
 PANTILT_DRIVER_ENABLE="${PANTILT_DRIVER_ENABLE:-true}"

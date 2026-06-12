@@ -86,10 +86,7 @@ if [ -n "${RS_REAR_SERIAL}" ]; then
     camera_namespace:=sensors \
     camera_name:=realsense_rear \
     serial_no:="'${RS_REAR_SERIAL}'" \
-    enable_color:=true \
-    enable_depth:=true \
-    publish_tf:=false \
-    align_depth.enable:=true &
+    config_file:="${RS_FRONT_CONFIG_FILE}" &
 
   pids+=($!)
 else

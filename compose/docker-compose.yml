@@ -417,6 +417,7 @@ services:
     network_mode: host
     ipc: host
     pid: host
+    privileged: true
     gpus: all
     environment:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
@@ -430,6 +431,7 @@ services:
       YOLO_CONFIG_DIR: /tmp
       DETECTOR_CONFIG_FILE: ${DETECTOR_CONFIG_FILE:-/etc/floribot/object_detection/detector_params.yaml}
       DETECTOR_RGBD_TOPIC: ${DETECTOR_RGBD_TOPIC:-/sensors/realsense_front/rgbd}
+      DETECTOR_USE_REALSENSE_ROS_WRAPPER: ${DETECTOR_USE_REALSENSE_ROS_WRAPPER:-false}
     volumes:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
       - ../object_detection/model:/models

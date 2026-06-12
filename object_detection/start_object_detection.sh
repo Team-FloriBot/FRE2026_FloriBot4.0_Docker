@@ -5,6 +5,7 @@ MODEL_DIRECTORY="${MODEL_DIRECTORY:-/models}"
 DEFAULT_MODEL_DIRECTORY="${DEFAULT_MODEL_DIRECTORY:-/opt/default_models}"
 DETECTOR_CONFIG_FILE="${DETECTOR_CONFIG_FILE:-/etc/floribot/object_detection/detector_params.yaml}"
 DETECTOR_RGBD_TOPIC="${DETECTOR_RGBD_TOPIC:-/sensors/realsense_front/rgbd}"
+DETECTOR_USE_REALSENSE_ROS_WRAPPER="${DETECTOR_USE_REALSENSE_ROS_WRAPPER:-false}"
 
 SKLEARN_LIBGOMP="$(
 python - <<'PYCODE'
@@ -107,5 +108,5 @@ exec ros2 run \
     --ros-args \
     --params-file "${DETECTOR_CONFIG_FILE}" \
     -p model_directory:="${MODEL_DIRECTORY}" \
-    -p use_realsense_ros_wrapper:=true \
+    -p use_realsense_ros_wrapper:="${DETECTOR_USE_REALSENSE_ROS_WRAPPER}" \
     -p rgbd_topic:="${DETECTOR_RGBD_TOPIC}"

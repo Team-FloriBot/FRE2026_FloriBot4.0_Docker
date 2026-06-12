@@ -1,0 +1,22 @@
+/**:
+  ros__parameters:
+    input_topic: /sensors/robosense/front/points
+    output_topic: /sensors/robosense/front/aaron_nonground_points
+    scan_topic: /sensors/robosense/front/aaron_nonground_points_2d
+
+    azimuth_fov_deg: 100.0
+    ransac_iterations: 90
+    distance_threshold: 0.05
+    cell_size: 0.25
+    use_ransac_filter: true
+
+    max_slope_deg: 35.0
+    slope_ring_width: 0.10
+
+    scan_angle_increment_deg: 0.5
+    scan_range_min: 0.05
+    scan_range_max: 100.0
+
+    bag_play_enabled: false
+    bag_file: ""
+    bag_loop: true

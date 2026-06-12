@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     cmake \
     pkg-config \
     python3-colcon-common-extensions \
+    python3-numpy \
     python3-rosdep \
     libpcap-dev \
     libyaml-cpp-dev \
@@ -22,6 +23,7 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-rclcpp \
     ros-jazzy-std-msgs \
     ros-jazzy-sensor-msgs \
+    ros-jazzy-sensor-msgs-py \
     ros-jazzy-pcl-conversions \
     ros-jazzy-tf2 \
     ros-jazzy-tf2-ros \
@@ -58,6 +60,7 @@ RUN apt-get update && \
         /ws/src/FRE_RoboSenseAIRY/rslidar_msg \
         /ws/src/FRE_RoboSenseAIRY/rslidar_sdk \
         /ws/src/FRE_RoboSenseAIRY/ground_segmentation \
+        /ws/src/FRE_RoboSenseAIRY/ground_filter_aaron \
         /ws/src/Robosense_Torsten/src/pointcloud_to_laserscan-rolling \
       --rosdistro jazzy \
       -r -y && \
@@ -69,6 +72,7 @@ RUN source /opt/ros/jazzy/setup.bash && \
         rslidar_msg \
         rslidar_sdk \
         ground_segmentation \
+        ground_filter_aaron \
         pointcloud_to_laserscan \
       --symlink-install \
       --cmake-args \

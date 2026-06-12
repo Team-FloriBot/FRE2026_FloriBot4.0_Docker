@@ -84,6 +84,8 @@ RUN set -eux; \
         ros-jazzy-rmw-cyclonedds-cpp \
         libgl1 \
         libglib2.0-0 \
+        libusb-1.0-0 \
+        udev \
         libsm6 \
         libxext6; \
     rm -rf /var/lib/apt/lists/*
@@ -393,43 +395,43 @@ PYCODE
 # Enforce the intended camera ownership model.
 # The RealSense pipeline is owned by the sensors container. The detector only
 # consumes RGBD ROS messages and must not open the USB camera directly.
-RUN python3 - <<'PYCODE'
-from pathlib import Path
+#RUN python3 - <<'PYCODE'
+#from pathlib import Path
 
-model = Path(
-    "/tmp/fre-object-detection/"
-    "ros2_detection/ros2_detection/detection_model_selection.py"
-)
-text = model.read_text(encoding="utf-8")
-old = '''        if self.get_realsense_images is not None:
-            # start realsense node if not already done?
-            self.is_initialized = True
-            
-        else:
-            """
-            Initialises the RealSense pipeline and starts streaming.
-            """
-'''
-new = '''        if self.get_realsense_images is not None:
-            self.is_initialized = True
-            return
-
-        raise RuntimeError(
-            "Direct RealSense pipeline access is disabled in the object-detection container. "
-            "Start realsense2_camera in the sensors container and provide get_realsense_images."
-        )
-
-        # Unreachable fallback kept below for upstream diff stability.
-        if False:
-            """
-            Initialises the RealSense pipeline and starts streaming.
-            """
-'''
-if old not in text:
-    raise RuntimeError("Could not patch direct RealSense fallback")
-model.write_text(text.replace(old, new, 1), encoding="utf-8")
-print("Patched detector to subscribe only to RGBD ROS messages")
-PYCODE
+#model = Path(
+#    "/tmp/fre-object-detection/"
+#    "ros2_detection/ros2_detection/detection_model_selection.py"
+#)
+#text = model.read_text(encoding="utf-8")
+#old = '''        if self.get_realsense_images is not None:
+#            # start realsense node if not already done?
+#            self.is_initialized = True
+#            
+#        else:
+#            """
+#            Initialises the RealSense pipeline and starts streaming.
+#            """
+#'''
+#new = '''        if self.get_realsense_images is not None:
+#            self.is_initialized = True
+#            return
+#
+#        raise RuntimeError(
+#            "Direct RealSense pipeline access is disabled in the object-detection container. "
+#            "Start realsense2_camera in the sensors container and provide get_realsense_images."
+#        )
+#
+#        # Unreachable fallback kept below for upstream diff stability.
+#        if False:
+#            """
+#            Initialises the RealSense pipeline and starts streaming.
+#            """
+#'''
+#if old not in text:
+#    raise RuntimeError("Could not patch direct RealSense fallback")
+#model.write_text(text.replace(old, new, 1), encoding="utf-8")
+#print("Patched detector to subscribe only to RGBD ROS messages")
+#PYCODE
 
 # Copy the patched ROS packages into the workspace.
 RUN set -eux; \

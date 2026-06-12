@@ -3,6 +3,8 @@ FROM ros:jazzy
 ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 
+ARG APT_UPDATE_OPTS="-o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o APT::Update::Error-Mode=any"
+
 ARG FLORIBOT_BASE_REPO=https://github.com/Team-FloriBot/FloriBot4.0_ROS2_Jazzy_Base.git
 ARG FLORIBOT_BASE_REF=main
 
@@ -12,7 +14,7 @@ ARG ROBOT_LOCALIZATION_SHA=3efa714fb9c1ff40966327b7bed7053b2570be4d
 RUN [[ "${ROBOT_LOCALIZATION_SHA}" =~ ^[0-9a-f]{40}$ ]] || \
     (echo "ROBOT_LOCALIZATION_SHA must be a 40-character git commit hash" && exit 1)
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get ${APT_UPDATE_OPTS} update && apt-get install -y \
     git \
     build-essential \
     cmake \
@@ -74,7 +76,7 @@ RUN rm -rf /tmp/floribot_base
 RUN rosdep init 2>/dev/null || true
 RUN rosdep update || true
 
-RUN apt-get update && \
+RUN apt-get ${APT_UPDATE_OPTS} update && \
     source /opt/ros/jazzy/setup.bash && \
     rosdep install --from-paths /ws/src --ignore-src -r -y && \
     rm -rf /var/lib/apt/lists/*

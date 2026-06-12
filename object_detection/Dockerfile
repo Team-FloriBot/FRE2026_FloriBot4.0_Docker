@@ -394,7 +394,7 @@ PYCODE
 # The RealSense pipeline is owned by the sensors container. The detector only
 # consumes RGBD ROS messages and must not open the USB camera directly.
 RUN python3 - <<'PYCODE'
-
+from pathlib import Path
 
 model = Path(
     "/tmp/fre-object-detection/"

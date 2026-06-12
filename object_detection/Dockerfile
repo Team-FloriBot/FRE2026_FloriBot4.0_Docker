@@ -394,7 +394,6 @@ PYCODE
 # The RealSense pipeline is owned by the sensors container. The detector only
 # consumes RGBD ROS messages and must not open the USB camera directly.
 RUN python3 - <<'PYCODE'
-import re
 from pathlib import Path
 
 node = Path(
@@ -409,34 +408,6 @@ def replace_once(old: str, new: str, description: str) -> None:
     if old not in text:
         raise RuntimeError(f"Could not patch {description}: source not found")
     text = text.replace(old, new, 1)
-
-
-def replace_rgbd_subscription_topic() -> None:
-    global text
-
-    pattern = re.compile(
-        r'(?P<indent>[ \t]*)self\.sub = self\.create_subscription\(\n'
-        r'(?P=indent)[ \t]+RGBD,\n'
-        r'(?P=indent)[ \t]+["\'][^"\']+["\'],\n'
-        r'(?P=indent)[ \t]+self\.realsense_callback,\n'
-        r'(?P=indent)[ \t]+10,?\n'
-        r'(?P=indent)\)\n',
-        re.MULTILINE,
-    )
-
-    replacement = (
-        '        self.rgbd_topic = str(self.node_params.get("rgbd_topic", "/sensors/realsense_front/rgbd"))\n'
-        '        self.sub = self.create_subscription(\n'
-        '            RGBD,\n'
-        '            self.rgbd_topic,\n'
-        '            self.realsense_callback,\n'
-        '            10,\n'
-        '        )\n'
-    )
-
-    text, count = pattern.subn(replacement, text, count=1)
-    if count != 1:
-        raise RuntimeError("Could not patch RGBD subscription topic: source not found")
 
 replace_once(
     '        self.declare_parameter("use_realsense_ros_wrapper", True)\n',
@@ -456,7 +427,24 @@ replace_once(
     "rgbd_topic parameter mapping",
 )
 
-replace_rgbd_subscription_topic()
+replace_once(
+    '''        self.sub = self.create_subscription(
+            RGBD,
+            "/sensors/realsense_front/rgbd",
+            self.realsense_callback,
+            10
+        )
+''',
+    '''        self.rgbd_topic = str(self.node_params.get("rgbd_topic", "/sensors/realsense_front/rgbd"))
+        self.sub = self.create_subscription(
+            RGBD,
+            self.rgbd_topic,
+            self.realsense_callback,
+            10,
+        )
+''',
+    "RGBD subscription topic",
+)
 
 replace_once(
     '        self._publish_status("ready", "Detector node started. Waiting for /detector/init.")\n',

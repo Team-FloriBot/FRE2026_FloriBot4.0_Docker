@@ -14,6 +14,12 @@ ARG ROBOT_LOCALIZATION_SHA=3efa714fb9c1ff40966327b7bed7053b2570be4d
 RUN [[ "${ROBOT_LOCALIZATION_SHA}" =~ ^[0-9a-f]{40}$ ]] || \
     (echo "ROBOT_LOCALIZATION_SHA must be a 40-character git commit hash" && exit 1)
 
+RUN grep -rl 'http://ports.ubuntu.com\|http://packages.ros.org' \
+        /etc/apt/sources.list /etc/apt/sources.list.d 2>/dev/null | \
+    xargs -r sed -i \
+        -e 's|http://ports.ubuntu.com|https://ports.ubuntu.com|g' \
+        -e 's|http://packages.ros.org|https://packages.ros.org|g'
+
 RUN apt-get ${APT_UPDATE_OPTS} update && apt-get install -y \
     git \
     build-essential \

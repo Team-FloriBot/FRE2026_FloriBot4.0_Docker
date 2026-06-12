@@ -48,6 +48,7 @@ RUN rm -rf /var/lib/apt/lists/* && \
     ros-jazzy-geometry-msgs \
     ros-jazzy-sensor-msgs \
     ros-jazzy-std-msgs \
+    ros-jazzy-std-srvs \
     ros-jazzy-launch \
     ros-jazzy-launch-ros \
     ros-jazzy-rmw-cyclonedds-cpp \
@@ -74,6 +75,37 @@ RUN git clone --depth 1 --branch "${FLIR_PTU_DRIVER_REF}" \
     fi && \
     echo "flir_ptu_driver commit:" && \
     git rev-parse HEAD
+
+# Lokale Patches für den externen FLIR-Treiber:
+# - Python-3-Fix für asynchrone Bytes im RX-Puffer
+# - /ptu/reference direkt im ptu_node, damit nur ein Prozess /dev/ttyUSB0 benutzt
+RUN python3 - <<'PATCH_FLIR_PTU'
+from pathlib import Path
+
+ptu_driver = Path('/ws/src/flir_ptu_driver/scripts/ptu_driver.py')
+s = ptu_driver.read_text()
+s = s.replace(
+    "warn('Device asynchronously displayed: ' + contents.encode(), category=RuntimeWarning)",
+    "warn('Device asynchronously displayed: ' + contents.decode(errors='replace'), category=RuntimeWarning)",
+)
+ptu_driver.write_text(s)
+
+ptu_node = Path('/ws/src/flir_ptu_driver/scripts/ptu_node.py')
+s = ptu_node.read_text()
+s = s.replace(
+    'from sensor_msgs.msg import JointState\n',
+    'from sensor_msgs.msg import JointState\nfrom std_srvs.srv import Trigger\n',
+)
+s = s.replace(
+    "        self.cmd_sub = self.create_subscription(\n            JointState,\n            'ptu/cmd',\n            self.cmd_callback,\n            10\n        )\n",
+    "        self.cmd_sub = self.create_subscription(\n            JointState,\n            'ptu/cmd',\n            self.cmd_callback,\n            10\n        )\n        self.reference_srv = self.create_service(\n            Trigger,\n            '/ptu/reference',\n            self.reference_callback\n        )\n",
+)
+s = s.replace(
+    "    def cleanup(self):\n",
+    "    def reference_callback(self, request, response):\n        \"\"\"Trigger PTU reference/homing through the existing serial connection.\"\"\"\n        del request\n        try:\n            with self.ptu_lock:\n                self.ptu.send(b'R ')\n            response.success = True\n            response.message = 'PTU-Referenzfahrt ausgelöst.'\n        except Exception as e:\n            response.success = False\n            response.message = f'PTU-Referenzfahrt fehlgeschlagen: {str(e)}'\n        return response\n\n    def cleanup(self):\n",
+)
+ptu_node.write_text(s)
+PATCH_FLIR_PTU
 
 RUN rosdep init 2>/dev/null || true && \
     rosdep update && \

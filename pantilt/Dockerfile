@@ -12,7 +12,28 @@ ARG FLIR_PTU_DRIVER_SHA=69bdda85a52eac2f16a34ec2f390671f0596412f
 
 ARG CACHEBUST=1
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Paketquellen auf HTTPS umstellen und APT robuster gegen instabile Verbindungen machen.
+RUN set -eux; \
+    for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do \
+      [ -e "$f" ] || continue; \
+      sed -i \
+        -e 's|http://ports.ubuntu.com/ubuntu-ports|https://ports.ubuntu.com/ubuntu-ports|g' \
+        -e 's|http://archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' \
+        -e 's|http://security.ubuntu.com/ubuntu|https://security.ubuntu.com/ubuntu|g' \
+        "$f"; \
+    done && \
+    printf '%s\n' \
+      'Acquire::ForceIPv4 "true";' \
+      'Acquire::Retries "10";' \
+      'Acquire::http::Timeout "60";' \
+      'Acquire::https::Timeout "60";' \
+      'Acquire::Queue-Mode "access";' \
+      > /etc/apt/apt.conf.d/80-floribot-network
+
+RUN rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /var/lib/apt/lists/partial && \
+    apt-get -o APT::Update::Error-Mode=any update && \
+    apt-get install -y --no-install-recommends \
     git \
     build-essential \
     cmake \
@@ -56,7 +77,9 @@ RUN git clone --depth 1 --branch "${FLIR_PTU_DRIVER_REF}" \
 
 RUN rosdep init 2>/dev/null || true && \
     rosdep update && \
-    apt-get update && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /var/lib/apt/lists/partial && \
+    apt-get -o APT::Update::Error-Mode=any update && \
     source /opt/ros/jazzy/setup.bash && \
     rosdep install \
       --from-paths /ws/src \

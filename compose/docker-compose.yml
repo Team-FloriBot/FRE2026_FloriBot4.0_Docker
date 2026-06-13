@@ -105,7 +105,7 @@ services:
     restart: unless-stopped
 
   floribot-pantilt:
-    profiles: ["laptop"]
+    profiles: ["pi"]
     build:
       context: ..
       dockerfile: pantilt/Dockerfile
@@ -144,7 +144,7 @@ services:
     restart: unless-stopped
 
   floribot-robosense:
-    profiles: ["robot"]
+    profiles: ["laptop"]
     build:
       context: ..
       dockerfile: robosense/Dockerfile
@@ -362,7 +362,7 @@ services:
     restart: unless-stopped
 
   floribot-mapping:
-    profiles: ["sim", "stage", "laptop"]
+    profiles: ["sim", "stage", "robot"]
     build:
       context: ..
       dockerfile: mapping/Dockerfile

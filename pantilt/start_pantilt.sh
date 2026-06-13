@@ -10,7 +10,6 @@ set -u
 
 PANTILT_LAUNCH_FILE="${PANTILT_LAUNCH_FILE:-aim_and_fire.launch.py}"
 PANTILT_DRIVER_ENABLE="${PANTILT_DRIVER_ENABLE:-true}"
-PTU_REFERENCE_ENABLE="${PTU_REFERENCE_ENABLE:-true}"
 
 PTU_PORT="${PTU_PORT:-/dev/ttyUSB0}"
 PTU_BAUD="${PTU_BAUD:-9600}"
@@ -18,7 +17,6 @@ PTU_PUBLISHING_RATE="${PTU_PUBLISHING_RATE:-5.0}"
 
 DRIVER_PID=""
 APP_PID=""
-REFERENCE_PID=""
 
 cleanup()
 {
@@ -28,10 +26,6 @@ cleanup()
 
     echo "[pantilt] Beende Prozesse ..."
 
-    if [ -n "${REFERENCE_PID}" ] && kill -0 "${REFERENCE_PID}" 2>/dev/null; then
-        echo "[pantilt] Beende PTU-Referenz-Service ..."
-        kill -TERM "${REFERENCE_PID}" 2>/dev/null || true
-    fi
 
     if [ -n "${APP_PID}" ] && kill -0 "${APP_PID}" 2>/dev/null; then
         echo "[pantilt] Beende aim_and_fire ..."
@@ -43,7 +37,6 @@ cleanup()
         kill -TERM "${DRIVER_PID}" 2>/dev/null || true
     fi
 
-    wait "${REFERENCE_PID}" 2>/dev/null || true
     wait "${APP_PID}" 2>/dev/null || true
     wait "${DRIVER_PID}" 2>/dev/null || true
 
@@ -85,7 +78,7 @@ echo "[pantilt]   PTU-Port:           ${PTU_PORT}"
 echo "[pantilt]   PTU-Baudrate:       ${PTU_BAUD}"
 echo "[pantilt]   Publishing-Rate:     ${PTU_PUBLISHING_RATE}"
 echo "[pantilt]   FLIR-Treiber:        ${PANTILT_DRIVER_ENABLE}"
-echo "[pantilt]   Referenz-Service:    ${PTU_REFERENCE_ENABLE}"
+echo "[pantilt]   Referenz-Service:    integriert in flir_ptu_driver (/ptu/reference)"
 
 if [ ! -e "${PTU_PORT}" ]; then
     echo "[pantilt] Warnung: PTU-Port ${PTU_PORT} existiert nicht."
@@ -120,23 +113,6 @@ sleep 2
 check_process "aim_and_fire" "${APP_PID}"
 
 echo "[pantilt] aim_and_fire gestartet, PID ${APP_PID}."
-
-if [ "${PTU_REFERENCE_ENABLE}" = "true" ]; then
-    echo "[pantilt] Starte PTU-Referenz-Service ..."
-
-    ros2 run aim_and_fire ptu_reference \
-        --ros-args \
-        -p port:="${PTU_PORT}" &
-
-    REFERENCE_PID=$!
-
-    sleep 1
-    check_process "PTU-Referenz-Service" "${REFERENCE_PID}"
-
-    echo "[pantilt] PTU-Referenz-Service gestartet, PID ${REFERENCE_PID}."
-else
-    echo "[pantilt] PTU-Referenz-Service ist deaktiviert."
-fi
 
 echo "[pantilt] Alle aktivierten Prozesse laufen."
 

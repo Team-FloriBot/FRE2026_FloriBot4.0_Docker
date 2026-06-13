@@ -641,12 +641,17 @@ Jetson:
 sed -i 's/^CYCLONEDDS_CONFIG=.*/CYCLONEDDS_CONFIG=eth0/' compose/.env
 ```
 
-WLAN:
+WLAN-PC:
 
 ```bash
 sed -i 's/^CYCLONEDDS_CONFIG=.*/CYCLONEDDS_CONFIG=wlp9s0/' compose/.env
 ```
 
+Raspberry PI:
+
+```bash
+sed -i 's/^CYCLONEDDS_CONFIG=.*/CYCLONEDDS_CONFIG=eth0pi/' compose/.env
+```
 ---
 
 ## Sensor- und Hardwarekonfiguration

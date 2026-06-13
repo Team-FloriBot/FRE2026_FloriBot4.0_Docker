@@ -392,8 +392,6 @@ services:
     network_mode: host
     ipc: host
     pid: host
-    depends_on:
-      - floribot-mapping
     environment:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE}

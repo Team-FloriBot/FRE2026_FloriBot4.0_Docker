@@ -4,8 +4,9 @@ set -euo pipefail
 MODEL_DIRECTORY="${MODEL_DIRECTORY:-/models}"
 DEFAULT_MODEL_DIRECTORY="${DEFAULT_MODEL_DIRECTORY:-/opt/default_models}"
 DETECTOR_CONFIG_FILE="${DETECTOR_CONFIG_FILE:-/etc/floribot/object_detection/detector_params.yaml}"
-DETECTOR_RGBD_TOPIC="${DETECTOR_RGBD_TOPIC:-/sensors/realsense_front/rgbd}"
+DETECTOR_RGBD_TOPIC="${DETECTOR_RGBD_TOPIC:-/sensors/realsense_rear/rgbd}"
 DETECTOR_USE_REALSENSE_ROS_WRAPPER="${DETECTOR_USE_REALSENSE_ROS_WRAPPER:-false}"
+DETECTOR_CAMERA_FRAME_ID="${DETECTOR_CAMERA_FRAME_ID:-realsense_rear_link}"
 
 SKLEARN_LIBGOMP="$(
 python - <<'PYCODE'
@@ -102,6 +103,13 @@ if [ ! -f "${DETECTOR_CONFIG_FILE}" ]; then
     exit 1
 fi
 
+echo "Object detection configuration:"
+echo "  Model directory:                 ${MODEL_DIRECTORY}"
+echo "  Detector config file:            ${DETECTOR_CONFIG_FILE}"
+echo "  RGBD topic:                      ${DETECTOR_RGBD_TOPIC}"
+echo "  Use RealSense ROS wrapper:       ${DETECTOR_USE_REALSENSE_ROS_WRAPPER}"
+echo "  Camera frame id:                 ${DETECTOR_CAMERA_FRAME_ID}"
+
 exec ros2 run \
     ros2_detection \
     detector_node \
@@ -109,4 +117,5 @@ exec ros2 run \
     --params-file "${DETECTOR_CONFIG_FILE}" \
     -p model_directory:="${MODEL_DIRECTORY}" \
     -p use_realsense_ros_wrapper:="${DETECTOR_USE_REALSENSE_ROS_WRAPPER}" \
+    -p camera_frame_id:="${DETECTOR_CAMERA_FRAME_ID}" \
     -p rgbd_topic:="${DETECTOR_RGBD_TOPIC}"

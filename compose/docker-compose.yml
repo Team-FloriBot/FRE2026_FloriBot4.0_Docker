@@ -430,6 +430,7 @@ services:
       DETECTOR_CONFIG_FILE: ${DETECTOR_CONFIG_FILE:-/etc/floribot/object_detection/detector_params.yaml}
       DETECTOR_RGBD_TOPIC: ${DETECTOR_RGBD_TOPIC:-/sensors/realsense_front/rgbd}
       DETECTOR_USE_REALSENSE_ROS_WRAPPER: ${DETECTOR_USE_REALSENSE_ROS_WRAPPER:-false}
+      DETECTOR_CAMERA_FRAME_ID: ${DETECTOR_CAMERA_FRAME_ID:-realsense_rear_link}
     volumes:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
       - ../object_detection/model:/models

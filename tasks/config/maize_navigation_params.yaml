@@ -10,8 +10,8 @@ maize_navigator:
     cmd_vel_publish_frequency: 30.0
 
     expected_row_width: 0.75
-    min_lane_width: 0.6
-    max_lane_width: 1.0
+    min_lane_width: 0.7
+    max_lane_width: 0.8
 
     hist_roi_size: 5.0
     # Histogramm-ROI: quer breit fuer mehr Reihen, laengs kompakter.
@@ -27,7 +27,7 @@ maize_navigator:
     # Danach werden beide Reihen bei jedem Kartenupdate von dieser Initialgeraden neu berechnet.
     row_segment_point_count: 7
     row_segment_point_spacing: 0.30
-    row_rectangle_width: 0.6
+    row_rectangle_width: 0.4
     row_point_window_length: 0.30
     row_end_min_points_fields_3_to_5: 2
     row_max_march_steps: 120
@@ -43,7 +43,7 @@ maize_navigator:
     laser_roi_x_min: 0.1
     laser_roi_x_max: 1.7
     laser_roi_length: 1.55
-    laser_roi_width: 0.6
+    laser_roi_width: 0.4
     laser_roi_center_offset_limit: 0.2
     laser_ransac_iterations: 80
     laser_ransac_distance: 0.08
@@ -60,10 +60,10 @@ maize_navigator:
     laser_line_filter_alpha: 0.20
     laser_target_max_lateral_step: 0.05
 
-    follow_speed: 0.3
+    follow_speed: 0.35
     slow_speed: 0.12
-    pure_pursuit_gain: 1.0
-    curve_speed_reduction_gain: 2.5
+    pure_pursuit_gain: 0.8
+    curve_speed_reduction_gain: 1.5
     min_follow_turn_radius: 0.37
     linear_acceleration_limit: 0.18
     linear_deceleration_limit: 0.30
@@ -73,17 +73,17 @@ maize_navigator:
     # Sicherheitsabstand der Wende-Querlinie hinter dem aeussersten relevanten Peak.
     row_exit_extension_distance: 0.40
 
-    follow_max_angular_speed: 0.90
-    angular_rate_limit: 1.2
+    follow_max_angular_speed: 0.80
+    angular_rate_limit: 1.0
 
     lookahead_distance: 2.0
-    turn_lookahead_distance: 0.6
-    lookahead_curvature_gain: 4.5
+    turn_lookahead_distance: 1.0
+    lookahead_curvature_gain: 2.5
     lookahead_curvature_sample_count: 7
     lookahead_curvature_back_distance: 0.5
     lookahead_lateral_error_gain: 1.0
     lookahead_filter_alpha: 0.25
-    lookahead_speed_reduction_gain: 2.5
+    lookahead_speed_reduction_gain: 1.5
 
     # Stopps an getrackten Objekten in den aktuell benachbarten Pflanzenreihen.
     object_stop_enabled: true

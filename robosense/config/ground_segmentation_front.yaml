@@ -30,3 +30,13 @@
     distance_threshold_coeff: 0.01
     negative_outlier_threshold: 0.20
     min_valid_neighbors: 2
+
+    publish_aligned_cloud: false
+    publish_ground_cloud: false
+    publish_ground_scan: true
+    publish_nonground_cloud: true
+    publish_nonground_scan: true
+    publish_crop_cloud: true
+    publish_crop_scan: true
+    publish_obstacle_cloud: false
+    publish_obstacle_scan: false

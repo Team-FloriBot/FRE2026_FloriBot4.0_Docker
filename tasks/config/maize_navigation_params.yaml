@@ -7,7 +7,7 @@ maize_navigator:
     scan_topic: "/sensors/merged_scan"
 
     control_frequency: 30.0
-    cmd_vel_publish_frequency: 20.0
+    cmd_vel_publish_frequency: 30.0
 
     expected_row_width: 0.75
     min_lane_width: 0.6
@@ -25,7 +25,7 @@ maize_navigator:
     # Rechteck-Marching-Reihenerkennung:
     # Die initiale linke/rechte Reihe kommt einmalig aus Histogrammpeaks.
     # Danach werden beide Reihen bei jedem Kartenupdate von dieser Initialgeraden neu berechnet.
-    row_segment_point_count: 5
+    row_segment_point_count: 7
     row_segment_point_spacing: 0.30
     row_rectangle_width: 0.6
     row_point_window_length: 0.30
@@ -60,9 +60,9 @@ maize_navigator:
     laser_line_filter_alpha: 0.20
     laser_target_max_lateral_step: 0.05
 
-    follow_speed: 0.4
+    follow_speed: 0.3
     slow_speed: 0.12
-    pure_pursuit_gain: 1.4
+    pure_pursuit_gain: 1.0
     curve_speed_reduction_gain: 2.5
     min_follow_turn_radius: 0.37
     linear_acceleration_limit: 0.18
@@ -74,10 +74,10 @@ maize_navigator:
     row_exit_extension_distance: 0.40
 
     follow_max_angular_speed: 0.90
-    angular_rate_limit: 1.4
+    angular_rate_limit: 1.2
 
     lookahead_distance: 2.0
-    turn_lookahead_distance: 0.25
+    turn_lookahead_distance: 0.6
     lookahead_curvature_gain: 4.5
     lookahead_curvature_sample_count: 7
     lookahead_curvature_back_distance: 0.5

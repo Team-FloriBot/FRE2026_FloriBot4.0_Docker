@@ -405,6 +405,7 @@ services:
     volumes:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
       - ../tasks/audio/asound.conf:/etc/asound.conf:ro
+      - ../tasks/config/maize_navigation_params.yaml:/ws/install/maize_navigation/share/maize_navigation/config/params.yaml:ro
 
   floribot-object-detection:
     profiles: ["laptop"]

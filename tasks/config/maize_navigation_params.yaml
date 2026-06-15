@@ -1,0 +1,142 @@
+maize_navigator:
+  ros__parameters:
+    cmd_vel_topic: "/cmd_vel/tasks"
+    base_frame: "base_link"
+    map_topic: "/map"
+    map_frame: "map"
+    scan_topic: "/sensors/merged_scan"
+
+    control_frequency: 30.0
+    cmd_vel_publish_frequency: 20.0
+
+    expected_row_width: 0.75
+    min_lane_width: 0.6
+    max_lane_width: 1.0
+
+    hist_roi_size: 5.0
+    # Histogramm-ROI: quer breit fuer mehr Reihen, laengs kompakter.
+    # hist_roi_size bleibt als Fallback fuer alte Konfigurationen erhalten.
+    hist_roi_depth: 3.0
+    hist_roi_width: 25.0
+    hist_bin_size: 0.05
+    hist_peak_min_points: 2
+    map_row_occupancy_threshold: 35
+
+    # Rechteck-Marching-Reihenerkennung:
+    # Die initiale linke/rechte Reihe kommt einmalig aus Histogrammpeaks.
+    # Danach werden beide Reihen bei jedem Kartenupdate von dieser Initialgeraden neu berechnet.
+    row_segment_point_count: 5
+    row_segment_point_spacing: 0.30
+    row_rectangle_width: 0.6
+    row_point_window_length: 0.30
+    row_end_min_points_fields_3_to_5: 2
+    row_max_march_steps: 120
+    row_min_fit_points: 3
+    # Bereits passierte Kartenpunkte bis zur aktuellen Roboterhoehe bleiben stabil.
+    # Linke und rechte Kartenreihe werden weiterhin unabhaengig erkannt.
+    row_freeze_behind_distance: 0.0
+
+    # Lokale LaserScan-Feinfuehrung innerhalb der Reihe.
+    # Karte bleibt Prior und Fallback; Reihenende und Vorgewende bleiben kartenbasiert.
+    laser_follow_enabled: true
+    laser_scan_timeout: 0.50
+    laser_roi_x_min: 0.1
+    laser_roi_x_max: 1.7
+    laser_roi_length: 1.55
+    laser_roi_width: 0.6
+    laser_roi_center_offset_limit: 0.2
+    laser_ransac_iterations: 80
+    laser_ransac_distance: 0.08
+    laser_min_inliers: 5
+    laser_min_visible_length: 0.40
+    laser_max_abs_line_slope: 0.90
+    laser_max_angle_to_map: 0.45
+    laser_max_center_offset: 0.40
+    laser_min_confidence: 0.10
+    laser_full_confidence: 0.75
+    laser_max_weight_both_sides: 0.55
+    laser_max_weight_one_side: 0.35
+    laser_tracker_alpha: 0.25
+    laser_line_filter_alpha: 0.20
+    laser_target_max_lateral_step: 0.05
+
+    follow_speed: 0.4
+    slow_speed: 0.12
+    pure_pursuit_gain: 1.4
+    curve_speed_reduction_gain: 2.5
+    min_follow_turn_radius: 0.37
+    linear_acceleration_limit: 0.18
+    linear_deceleration_limit: 0.30
+    target_filter_alpha: 0.30
+    # Ausfahr- und Einfahrziel liegen so weit ausserhalb der Pflanzenenden.
+    row_end_goal_outward_distance: 0.15
+    # Sicherheitsabstand der Wende-Querlinie hinter dem aeussersten relevanten Peak.
+    row_exit_extension_distance: 0.40
+
+    follow_max_angular_speed: 0.90
+    angular_rate_limit: 1.4
+
+    lookahead_distance: 2.0
+    turn_lookahead_distance: 0.25
+    lookahead_curvature_gain: 4.5
+    lookahead_curvature_sample_count: 7
+    lookahead_curvature_back_distance: 0.5
+    lookahead_lateral_error_gain: 1.0
+    lookahead_filter_alpha: 0.25
+    lookahead_speed_reduction_gain: 2.5
+
+    # Stopps an getrackten Objekten in den aktuell benachbarten Pflanzenreihen.
+    object_stop_enabled: true
+    object_row_match_tolerance: 0.35
+    object_stop_duration_sec: 2.0
+    object_stop_xy_tolerance: 0.20
+    object_stop_max_ahead_distance: 4.0
+    object_stop_past_tolerance: 0.20
+    object_stop_final_distance: 0.45
+    object_stop_final_speed: 0.06
+    object_stop_final_lateral_tolerance: 0.12
+    object_stop_final_yaw_tolerance: 0.18
+    object_stop_final_timeout_sec: 2.0
+
+    path_goal_xy_tolerance: 0.25
+    # Fuer Reihenende, Wendepunkt und neue Einfahrt: groessere Pose-Toleranz.
+    maneuver_goal_xy_tolerance: 0.25
+    maneuver_goal_yaw_tolerance: 0.75
+    # Virtueller Fuehrungspunkt hinter der Zielpose verhindert Drehen auf der Stelle.
+    maneuver_heading_lookahead_distance: 0.2
+    # Verrundete, monoton verfolgte Route fuer das Vorgewende.
+    maneuver_speed: 0.5
+    maneuver_slow_speed: 0.10
+    maneuver_lookahead_distance: 1.4
+    maneuver_turn_lookahead_distance: 0.4
+    maneuver_lookahead_curvature_gain: 2.5
+    maneuver_lookahead_lateral_error_gain: 0.5
+    maneuver_lookahead_filter_alpha: 0.25
+    maneuver_lookahead_speed_reduction_gain: 2.0
+    maneuver_route_spacing: 0.08
+    maneuver_corner_radius: 0.50
+    maneuver_entry_extension_distance: 0.80
+    maneuver_max_route_deviation: 0.70
+    maneuver_entry_lateral_tolerance: 0.25
+    maneuver_entry_yaw_tolerance: 0.45
+
+    # Rechteckbasierte Reiheneingang-Erkennung im Vorgewende.
+    entrance_rect_enabled: true
+    entrance_histogram_emergency_enabled: true
+    entrance_rect_max_angle_to_prediction_deg: 20.0
+    entrance_rect_max_angle_to_reference_deg: 40.0
+    entrance_rect_max_position_correction: 0.50
+    entrance_rect_backtrack_steps: 4
+    entrance_rect_retry_until_remaining_distance: 0.60
+    entrance_rect_min_failed_attempts_before_histogram: 5
+
+    pattern: "3L 6R 5R 4R 3R 2R 1R"
+    # Startgasse 1 liegt zwischen Pflanzenreihe 1 und 2.
+    # Die Richtung gilt feldfest relativ zur Blickrichtung beim Missionsstart.
+    starting_lane_number: 1
+    row_numbers_increase_to: "left"
+    row_map_output_directory: "/data/csv"
+    object_positions_output_directory: "/data/csv"
+    slam_reset_service: "/slam_toolbox/reset"
+
+    publish_debug: true

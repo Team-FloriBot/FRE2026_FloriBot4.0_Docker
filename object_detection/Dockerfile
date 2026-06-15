@@ -199,6 +199,7 @@ RUN set -eux; \
 # - treats classes: [] in YAML as an empty class filter instead of failing.
 RUN python3 - <<'PYCODE'
 from pathlib import Path
+import re
 
 
 detector_node = Path(
@@ -207,6 +208,14 @@ detector_node = Path(
 )
 
 text = detector_node.read_text(encoding="utf-8")
+
+
+def ensure_contains(marker: str, description: str) -> None:
+    if marker not in text:
+        raise RuntimeError(
+            f"Could not patch {description}: expected source was not found "
+            f"in {detector_node}"
+        )
 
 
 def replace_once(old: str, new: str, description: str) -> None:
@@ -221,79 +230,92 @@ def replace_once(old: str, new: str, description: str) -> None:
     text = text.replace(old, new, 1)
 
 
-replace_once(
-    "from rclpy.node import Node\n",
-    (
-        "from rclpy.node import Node\n"
-        "from rclpy.exceptions import ParameterUninitializedException\n"
-        "from rclpy.qos import (\n"
-        "    DurabilityPolicy,\n"
-        "    HistoryPolicy,\n"
-        "    QoSProfile,\n"
-        "    ReliabilityPolicy,\n"
-        ")\n"
-    ),
-    "QoS and parameter exception imports",
-)
+def regex_replace_once(pattern: str, new: str, description: str) -> None:
+    global text
 
-replace_once(
-    '        self.declare_parameter("model_path", "")\n',
-    (
-        '        self.declare_parameter("model_path", "")\n'
-        '        self.declare_parameter("model_directory", "/models")\n'
-    ),
-    "model_directory parameter declaration",
-)
+    text_new, count = re.subn(pattern, new, text, count=1, flags=re.DOTALL)
 
-replace_once(
-    '        self.node_params = {\n',
-    (
-        '        try:\n'
-        '            configured_classes = self.get_parameter("classes").value\n'
-        '        except ParameterUninitializedException:\n'
-        '            configured_classes = []\n'
-        '\n'
-        '        if configured_classes is None:\n'
-        '            configured_classes = []\n'
-        '\n'
-        '        configured_classes = [\n'
-        '            str(class_name).strip()\n'
-        '            for class_name in configured_classes\n'
-        '            if str(class_name).strip()\n'
-        '        ]\n'
-        '\n'
-        '        self.node_params = {\n'
-    ),
-    "robust classes parameter read",
-)
+    if count != 1:
+        raise RuntimeError(
+            f"Could not patch {description}: expected source was not found "
+            f"in {detector_node}"
+        )
+
+    text = text_new
+
+
+if "from rclpy.qos import (" not in text:
+    replace_once(
+        "from rclpy.node import Node\n",
+        (
+            "from rclpy.node import Node\n"
+            "from rclpy.exceptions import ParameterUninitializedException\n"
+            "from rclpy.qos import (\n"
+            "    DurabilityPolicy,\n"
+            "    HistoryPolicy,\n"
+            "    QoSProfile,\n"
+            "    ReliabilityPolicy,\n"
+            ")\n"
+        ),
+        "QoS and parameter exception imports",
+    )
+
+if 'self.declare_parameter("model_directory"' not in text:
+    replace_once(
+        '        self.declare_parameter("model_path", "")\n',
+        (
+            '        self.declare_parameter("model_path", "")\n'
+            '        self.declare_parameter("model_directory", "/models")\n'
+        ),
+        "model_directory parameter declaration",
+    )
+
+if "configured_classes = self.get_parameter(\"classes\").value" not in text:
+    replace_once(
+        '        self.node_params = {\n',
+        (
+            '        try:\n'
+            '            configured_classes = self.get_parameter("classes").value\n'
+            '        except ParameterUninitializedException:\n'
+            '            configured_classes = []\n'
+            '\n'
+            '        if configured_classes is None:\n'
+            '            configured_classes = []\n'
+            '\n'
+            '        configured_classes = [\n'
+            '            str(class_name).strip()\n'
+            '            for class_name in configured_classes\n'
+            '            if str(class_name).strip()\n'
+            '        ]\n'
+            '\n'
+            '        self.node_params = {\n'
+        ),
+        "robust classes parameter read",
+    )
 
 replace_once(
     '            "classes": self.get_parameter("classes").value,\n',
     '            "classes": configured_classes,\n',
     "classes parameter mapping",
+) if '            "classes": self.get_parameter("classes").value,\n' in text else ensure_contains(
+    '            "classes": configured_classes,\n',
+    "classes parameter mapping",
 )
 
-replace_once(
-    '            "model_path": self.get_parameter("model_path").value,\n',
-    (
-        '            "model_path": self.get_parameter("model_path").value,\n'
-        '            "model_directory": '
-        'self.get_parameter("model_directory").value,\n'
-    ),
-    "model_directory parameter mapping",
-)
+if '            "model_directory": self.get_parameter("model_directory").value,\n' not in text:
+    replace_once(
+        '            "model_path": self.get_parameter("model_path").value,\n',
+        (
+            '            "model_path": self.get_parameter("model_path").value,\n'
+            '            "model_directory": self.get_parameter("model_directory").value,\n'
+        ),
+        "model_directory parameter mapping",
+    )
 
-old_publisher = '''        self.available_models_pub = self.create_publisher(
-            String,
-            self.node_params.get(
-                "available_models_topic",
-                "/detector/available_models",
-            ),
-            10,
-        )
-'''
+if "available_models_qos = QoSProfile(" not in text:
+    publisher_pattern = r'''        self\.available_models_pub = self\.create_publisher\(\n            String,\n            self\.node_params\.get\(.*?\),\n            10,\n        \)\n'''
 
-new_publisher = '''        available_models_qos = QoSProfile(
+    publisher_replacement = '''        available_models_qos = QoSProfile(
             history=HistoryPolicy.KEEP_LAST,
             depth=1,
             reliability=ReliabilityPolicy.RELIABLE,
@@ -302,47 +324,20 @@ new_publisher = '''        available_models_qos = QoSProfile(
 
         self.available_models_pub = self.create_publisher(
             String,
-            self.node_params.get(
-                "available_models_topic",
-                "/detector/available_models",
-            ),
+            self.node_params.get("available_models_topic", "/detector/available_models"),
             available_models_qos,
         )
 '''
 
-if old_publisher in text:
-    replace_once(
-        old_publisher,
-        new_publisher,
+    regex_replace_once(
+        publisher_pattern,
+        publisher_replacement,
         "available_models publisher QoS",
     )
 
-old_model_scan = '''    def _get_available_model_paths(self) -> List[str]:
-        """Return model files as relative paths matching the init request format."""
-        module_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        repo_root = os.path.dirname(module_root)
-        model_dir = os.path.join(repo_root, "model")
+model_scan_pattern = r'''    def _get_available_model_paths\(self\) -> List\[str\]:\n        """Return model files as relative paths matching the init request format\."""\n.*?\n        return model_paths\n'''
 
-        if not os.path.isdir(model_dir):
-            return []
-
-        supported_extensions = {".pt", ".pth", ".onnx", ".engine"}
-        model_paths = []
-        for filename in sorted(os.listdir(model_dir)):
-            full_path = os.path.join(model_dir, filename)
-            if not os.path.isfile(full_path):
-                continue
-
-            _, extension = os.path.splitext(filename)
-            if extension.lower() not in supported_extensions:
-                continue
-
-            model_paths.append(os.path.join("model", filename))
-
-        return model_paths
-'''
-
-new_model_scan = '''    def _get_available_model_paths(self) -> List[str]:
+model_scan_replacement = '''    def _get_available_model_paths(self) -> List[str]:
         """Return absolute model paths from the configured model directory."""
         model_dir = os.path.abspath(
             os.path.expanduser(
@@ -381,11 +376,12 @@ new_model_scan = '''    def _get_available_model_paths(self) -> List[str]:
         return model_paths
 '''
 
-replace_once(
-    old_model_scan,
-    new_model_scan,
-    "_get_available_model_paths",
-)
+if 'Return absolute model paths from the configured model directory.' not in text:
+    regex_replace_once(
+        model_scan_pattern,
+        model_scan_replacement,
+        "_get_available_model_paths",
+    )
 
 detector_node.write_text(text, encoding="utf-8")
 

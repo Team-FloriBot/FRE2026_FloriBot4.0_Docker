@@ -9,8 +9,6 @@ ARG FRE2026_TASKS_REF=main
 ARG FRE_DETECTION_REPO=https://github.com/Team-FloriBot/FRE_object_detection.git
 ARG FRE_DETECTION_REF=docker_ros2_client
 
-ARG CACHEBUST=1
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     build-essential \
@@ -73,6 +71,7 @@ RUN git clone https://github.com/Fields2Cover/Fields2Cover.git /tmp/Fields2Cover
 WORKDIR /ws
 RUN mkdir -p /ws/src
 
+ARG CACHEBUST=1
 RUN echo "Cache bust: ${CACHEBUST}" && \
     git clone \
       --depth 1 \

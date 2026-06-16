@@ -664,7 +664,12 @@ Der Sensorcontainer startet `sick_scan_xd` über:
 ros2 launch sick_scan_xd laser.launch.py
 ```
 
-Die Launch-Konfiguration wird aus `sensors/launch_lasers/` in den Container kopiert.
+Die Launch-Konfiguration liegt in `sensors/launch_lasers/` und wird vom
+Sensorcontainer read-only nach
+`/ws/install/sick_scan_xd/share/sick_scan_xd/launch` gemountet. Änderungen an
+`laser.launch.py`, `front_laser_config.launch` oder `rear_laser_config.launch`
+brauchen deshalb keinen neuen Image-Build; ein Neustart des Sensorcontainers
+reicht.
 
 Konfiguration in `compose/.env`:
 

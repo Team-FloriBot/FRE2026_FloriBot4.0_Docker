@@ -94,6 +94,8 @@ services:
 
       - ../sensors/config_imu/xsens_mti_node.yaml:/ws/install/xsens_mti_ros2_driver/share/xsens_mti_ros2_driver/param/xsens_mti_node.yaml:ro
 
+      - ../sensors/launch_lasers:/ws/install/sick_scan_xd/share/sick_scan_xd/launch:ro
+
 
       - ../sensors/config_realsense/realsense_front.yaml:/etc/floribot/realsense/realsense_front.yaml:ro
       - ../sensors/config_realsense/realsense_front.yaml:/etc/floribot/object_detection/realsense_front.yaml:ro

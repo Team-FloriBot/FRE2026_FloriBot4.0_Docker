@@ -37,9 +37,11 @@ NAVIGATION_PID=$!
 #ros2 launch task4 task4.launch.py &
 #TASK4_PID=$!
 
+<<<<<<< HEAD
 #echo "Starte Path Tracking Controller..."
 #ros2 launch path_tracking_controller path_tracking_controller.launch.py &
 #PATH_TRACKING_PID=$!
+=======
 
 wait -n \
     "$AUDIO_PID" \

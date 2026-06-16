@@ -26,7 +26,7 @@
 
     grid_resolution: 0.10
     min_points_per_cell: 1
-    base_ground_threshold: 0.08
+    base_ground_threshold: 0.06
     distance_threshold_coeff: 0.01
     negative_outlier_threshold: 0.20
     min_valid_neighbors: 2

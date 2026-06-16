@@ -19,30 +19,30 @@ maize_navigator:
     hist_roi_depth: 3.0
     hist_roi_width: 25.0
     hist_bin_size: 0.05
-    hist_peak_min_points: 25
-    map_row_occupancy_threshold: 35
+    hist_peak_min_points: 15
+    map_row_occupancy_threshold: 20
     start_fixed_initial_peaks_enabled: true
     start_fixed_initial_half_width: 0.375
 
     # Rechteck-Marching-Reihenerkennung:
     # Die initiale linke/rechte Reihe kommt einmalig aus Histogrammpeaks.
     # Danach werden beide Reihen bei jedem Kartenupdate von dieser Initialgeraden neu berechnet.
-    row_segment_point_count: 5
+    row_segment_point_count: 7
     row_segment_point_spacing: 0.30
     row_rectangle_width: 0.5
     row_point_window_length: 0.30
     # Reihenende: zaehlt Punkte ab Feld 3 bis zum letzten Segment der Suchlinie.
     # Bei 5 Segmenten entspricht das Feldern 3-5, bei 7 Segmenten Feldern 3-7.
-    row_end_min_points_fields_3_to_5: 15
+    row_end_min_points_fields_3_to_5: 8
     row_max_march_steps: 120
-    row_min_fit_points: 25
-    row_fit_max_angle_to_previous_deg: 3.0
+    row_min_fit_points: 10
+    row_fit_max_angle_to_previous_deg: 1.0
     # Erste Rechtecke bleiben nah an der Initialrichtung, damit sparse RANSAC-Fits
     # den Reihenstart nicht schraeg wegziehen.
     row_initial_fit_warmup_steps: 3
     row_initial_fit_max_angle_to_initial_deg: 5.0
     # Maximaler seitlicher Sprung des korrigierten Punkt-3 pro Marching-Schritt.
-    row_max_lateral_correction: 0.05
+    row_max_lateral_correction: 0.02
     # Linkes/rechtes Rechteckpaar soll parallel bleiben und etwa Reihenabstand halten.
     # 1.0 bedeutet: Richtung auf gemeinsame Richtung, Abstand auf expected_row_width.
     row_pair_direction_blend: 1.0
@@ -53,17 +53,18 @@ maize_navigator:
 
     # Lokale LaserScan-Feinfuehrung innerhalb der Reihe.
     # Karte bleibt Prior und Fallback; Reihenende und Vorgewende bleiben kartenbasiert.
-    laser_follow_enabled: false
+    laser_follow_enabled: true
+    laser_follow_mode: "only"
     laser_scan_timeout: 0.50
     laser_roi_x_min: 0.1
     laser_roi_x_max: 1.7
     laser_roi_length: 1.55
-    laser_roi_width: 0.6
+    laser_roi_width: 0.5
     laser_roi_center_offset_limit: 0.2
     laser_ransac_iterations: 80
     laser_ransac_distance: 0.08
-    laser_min_inliers: 5
-    laser_min_visible_length: 0.40
+    laser_min_inliers: 15
+    laser_min_visible_length: 0.10
     laser_max_abs_line_slope: 0.90
     laser_max_angle_to_map: 0.25
     laser_max_center_offset: 0.40
@@ -75,31 +76,31 @@ maize_navigator:
     laser_line_filter_alpha: 0.20
     laser_target_max_lateral_step: 0.05
 
-    follow_speed: 0.4
-    slow_speed: 0.1
-    pure_pursuit_gain: 1.4
-    curve_speed_reduction_gain: 1.0
+    follow_speed: 0.55
+    slow_speed: 0.2
+    pure_pursuit_gain: 1.5
+    curve_speed_reduction_gain: 1.4
     min_follow_turn_radius: 0.37
     linear_acceleration_limit: 0.3
     linear_deceleration_limit: 0.40
     target_filter_alpha: 0.20
     # Ausfahr- und Einfahrziel liegen so weit ausserhalb der Pflanzenenden.
-    row_end_goal_outward_distance: 0.15
+    row_end_goal_outward_distance: 0.45
     # Sicherheitsabstand der Wende-Querlinie hinter dem aeussersten relevanten Peak.
     row_exit_extension_distance: 0.40
 
-    follow_max_angular_speed: 0.8
-    angular_rate_limit: 2.4
+    follow_max_angular_speed: 1.5
+    angular_rate_limit: 2.5
     angular_command_filter_alpha: 0.2
 
-    lookahead_distance: 1.5
-    turn_lookahead_distance: 0.8
+    lookahead_distance: 1.0
+    turn_lookahead_distance: 0.6
     lookahead_curvature_gain: 2.0
     lookahead_curvature_sample_count: 7
     lookahead_curvature_back_distance: 1.0
     lookahead_lateral_error_gain: 2.0
     lookahead_filter_alpha: 0.25
-    lookahead_speed_reduction_gain: 2.0
+    lookahead_speed_reduction_gain: 1.5
 
     # Stopps an getrackten Objekten in den aktuell benachbarten Pflanzenreihen.
     object_stop_enabled: true

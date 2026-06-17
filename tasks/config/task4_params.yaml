@@ -35,6 +35,7 @@ task4_brain:
     tracker_active_topic: "/tracker/active"
     tracker_reset_service: "/tracker/reset"
     detector_model_path: "/models/yolo26n_soilspot-seg.pt"
+    detector_confidence: 0.25
 
     # ROS-Schnittstellen
     plan_topic: "/plan"
@@ -45,4 +46,5 @@ task4_brain:
     aim_target_topic: "/target_point"
     aim_target_frame: "pan_tilt_link_footprint"
     aim_target_interval_sec: 5.0
-    tf_timeout_sec: 0.5
+    tf_timeout_sec: 5.0
+    tf_lookup_offset_sec: 0.0

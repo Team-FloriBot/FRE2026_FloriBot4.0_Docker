@@ -27,7 +27,8 @@ services:
     restart: unless-stopped
 
   floribot-base-sim:
-    profiles: ["sim"]
+    #profiles: ["sim"]
+    profiles: []
     build:
       context: ..
       dockerfile: base/Dockerfile
@@ -301,27 +302,21 @@ services:
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}
       DISPLAY: ${DISPLAY}
       QT_X11_NO_MITSHM: 1
-
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: compute,graphics,utility
-
       GZ_SIM_SYSTEM_PLUGIN_PATH: /opt/ros/jazzy/lib
-      GZ_SIM_RESOURCE_PATH: /ws/src/floribot_gz_description:/ws/src/floribot_gz_description/meshes
-
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - ../gazebo/worlds:/ws/worlds:ro
-
+      GZ_SIM_RESOURCE_PATH: /ws/src/floribot_gz_description:/ws/src/floribot_gz_description/meshes:/ws/src/virtual_maize_field/models:/ws/install/virtual_maize_field/share/virtual_maize_field/models
     command:
       - bash
       - -lc
       - |
-          source /ws/install/setup.bash
-
-          ros2 launch ros_gz_sim gz_sim.launch.py \
-            gz_args:="/ws/worlds/maize_field.sdf -r" &
-
-          exec ros2 launch floribot_gz_description spawn_robot.launch.py
+          # 1. Welt generieren
+          ros2 run virtual_maize_field generate_world fre22_task_navigation_mini
+          # 2. Gazebo + Spawner über die Launch-Datei starten
+          exec ros2 launch floribot_gz_bringup maize_world_with_floribot.launch.py
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./Floribot.urdf.xacro:/ws/src/robot_description/src/urdf/Floribot.urdf.xacro:ro
     restart: unless-stopped
 
   floribot-gazebo-bridge:
@@ -364,7 +359,7 @@ services:
     restart: unless-stopped
 
   floribot-mapping:
-    profiles: ["sim", "stage", "robot"]
+    profiles: ["stage", "robot"]
     build:
       context: ..
       dockerfile: mapping/Dockerfile
@@ -384,7 +379,7 @@ services:
       - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
 
   floribot-tasks:
-    profiles: ["sim", "stage", "laptop"]
+    profiles: ["stage", "laptop"]
     build:
       context: ..
       dockerfile: tasks/Dockerfile

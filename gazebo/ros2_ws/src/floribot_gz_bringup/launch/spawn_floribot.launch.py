@@ -10,7 +10,7 @@ def generate_launch_description():
     robot_urdf = Command([
         "xacro ",
         "/ws/src/robot_description/src/urdf/Floribot.urdf.xacro",
-    ])
+    ], on_stderr='warn')
 
     spawn_robot = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(get_spawner_launch_file()),

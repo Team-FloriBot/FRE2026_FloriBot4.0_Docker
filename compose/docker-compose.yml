@@ -317,6 +317,7 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ./Floribot.urdf.xacro:/ws/src/robot_description/src/urdf/Floribot.urdf.xacro:ro
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
     restart: unless-stopped
 
   floribot-gazebo-bridge:
@@ -339,6 +340,7 @@ services:
       GZ_SIM_RESOURCE_PATH: /ws/src/floribot_gz_description:/ws/src/floribot_gz_description/meshes
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./${CYCLONEDDS_CONFIG}_cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
     command:
       - bash
       - -lc

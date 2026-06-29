@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain id="any">
+    
+    <General>
+      <Interfaces>
+        <!-- Zwingt CycloneDDS auf das lokale Loopback-Interface -->
+        <NetworkInterface name="lo"/>
+      </Interfaces>
+      <!-- Multicast auf Localhost aktivieren für automatische Discovery -->
+      <AllowMulticast>true</AllowMulticast>
+    </General>
+    
+    <Discovery>
+      <!-- ParticipantIndex auf auto belassen, um Konflikte bei mehreren Nodes zu vermeiden -->
+      <ParticipantIndex>auto</ParticipantIndex>
+    </Discovery>
+
+  </Domain>
+</CycloneDDS>

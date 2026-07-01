@@ -49,9 +49,9 @@
         <!--   5: RANGE_FILTER_TO_NAN        set range to NAN, if range is not within [range_min, range_max]        -->
         <!-- Note: Range filter applies only to Pointcloud messages, not to LaserScan messages.                     -->
         <!-- Using range_filter_handling 4 or 5 requires handling of FLT_MAX and NAN values in an application.      -->
-        <param name="range_min" type="double" value="0.0"/>
-        <param name="range_max" type="double" value="100.0"/>
-        <param name="range_filter_handling" type="int" value="0"/>
+        <param name="range_min" type="double" value="0.2"/>
+        <param name="range_max" type="double" value="6.0"/>
+        <param name="range_filter_handling" type="int" value="5"/>
         
         <param name="intensity" type="bool" value="True"/>
         <param name="hostname" type="string" value="$(arg hostname)"/>
